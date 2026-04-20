@@ -1,6 +1,6 @@
 from sqlmodel import SQLModel
 from typing import Optional
-from .categoria import CategoriaRead
+from app.Modules.Categoria.Schema.categoriaSchema import CategoriaRead
 
 
 class ProductoCreate(SQLModel):

@@ -1,5 +1,8 @@
 from sqlmodel import SQLModel, Field, Relationship
-from typing import Optional, List
+from typing import Optional, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.Modules.Producto.Model.productoIngrediente import ProductoIngrediente
 
 
 class Categoria(SQLModel, table=True):

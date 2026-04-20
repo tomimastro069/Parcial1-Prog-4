@@ -1,9 +1,9 @@
 from sqlmodel import Session, select
 from fastapi import HTTPException, status
 
-from app.models.producto import Producto
-from app.schemas.producto import ProductoCreate, ProductoUpdate
-from app.uow import UnitOfWork
+from app.Modules.Producto.Model.producto import Producto
+from app.Modules.Producto.Schema.productoSchema import ProductoCreate, ProductoUpdate
+from app.Core.unit_of_work import UnitOfWork
 
 
 def get_all(session: Session, offset: int = 0, limit: int = 10) -> list[Producto]:
@@ -25,7 +25,7 @@ def create(session: Session, data: ProductoCreate) -> Producto:
     p = Producto.model_validate(data)
     session.add(p)
     uow.commit()
-    uow.refresh(p)
+    session.refresh(p)
     return p
 
 
@@ -36,7 +36,7 @@ def update(session: Session, producto_id: int, data: ProductoUpdate) -> Producto
         setattr(p, key, val)
     session.add(p)
     uow.commit()
-    uow.refresh(p)
+    session.refresh(p)
     return p
 
 

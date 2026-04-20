@@ -1,9 +1,9 @@
 from sqlmodel import Session, select
 from fastapi import HTTPException, status
 
-from app.models.ingrediente import Ingrediente
-from app.schemas.ingrediente import IngredienteCreate, IngredienteUpdate
-from app.uow import UnitOfWork
+from app.Modules.Ingrediente.Model.ingrediente import Ingrediente
+from app.Modules.Ingrediente.Schema.ingredienteSchema import IngredienteCreate, IngredienteUpdate
+from app.Core.unit_of_work import UnitOfWork
 
 
 def get_all(session: Session, offset: int = 0, limit: int = 10) -> list[Ingrediente]:
@@ -25,7 +25,7 @@ def create(session: Session, data: IngredienteCreate) -> Ingrediente:
     ing = Ingrediente.model_validate(data)
     session.add(ing)
     uow.commit()
-    uow.refresh(ing)
+    session.refresh(ing)
     return ing
 
 
@@ -36,7 +36,7 @@ def update(session: Session, ing_id: int, data: IngredienteUpdate) -> Ingredient
         setattr(ing, key, val)
     session.add(ing)
     uow.commit()
-    uow.refresh(ing)
+    session.refresh(ing)
     return ing
 
 

@@ -1,9 +1,9 @@
 from sqlmodel import Session, select
 from fastapi import HTTPException, status
 
-from app.models.categoria import Categoria
-from app.schemas.categoria import CategoriaCreate, CategoriaUpdate
-from app.uow import UnitOfWork
+from app.Modules.Categoria.Model.categoria import Categoria
+from app.Modules.Categoria.Schema.categoriaSchema import CategoriaCreate, CategoriaUpdate
+from app.Core.unit_of_work import UnitOfWork
 
 
 def get_all(session: Session, offset: int = 0, limit: int = 10) -> list[Categoria]:
@@ -25,7 +25,7 @@ def create(session: Session, data: CategoriaCreate) -> Categoria:
     cat = Categoria.model_validate(data)
     session.add(cat)
     uow.commit()
-    uow.refresh(cat)
+    session.refresh(cat)
     return cat
 
 
@@ -36,7 +36,7 @@ def update(session: Session, categoria_id: int, data: CategoriaUpdate) -> Catego
         setattr(cat, key, val)
     session.add(cat)
     uow.commit()
-    uow.refresh(cat)
+    session.refresh(cat)
     return cat
 
 

@@ -2,11 +2,11 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlmodel import Session
 from typing import Annotated
 
-from app.database import get_session
-from app.schemas.categoria import CategoriaCreate, CategoriaRead, CategoriaUpdate
-from app.services import categoria_service
+from app.Core.database import get_session
+from app.Modules.Categoria.Schema.categoriaSchema import CategoriaCreate, CategoriaRead, CategoriaUpdate
+from app.Modules.Categoria.Service import categoriaService as categoria_service
 
-router = APIRouter(prefix="/categorias", tags=["Categorías"])
+router = APIRouter()
 
 
 @router.get("/", response_model=list[CategoriaRead])

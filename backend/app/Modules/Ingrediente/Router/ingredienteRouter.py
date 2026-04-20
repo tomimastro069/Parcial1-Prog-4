@@ -2,11 +2,11 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlmodel import Session
 from typing import Annotated
 
-from app.database import get_session
-from app.schemas.ingrediente import IngredienteCreate, IngredienteRead, IngredienteUpdate
-from app.services import ingrediente_service
+from app.Core.database import get_session
+from app.Modules.Ingrediente.Schema.ingredienteSchema import IngredienteCreate, IngredienteRead, IngredienteUpdate
+from app.Modules.Ingrediente.Service import ingredienteService as ingrediente_service
 
-router = APIRouter(prefix="/ingredientes", tags=["Ingredientes"])
+router = APIRouter()
 
 
 @router.get("/", response_model=list[IngredienteRead])
