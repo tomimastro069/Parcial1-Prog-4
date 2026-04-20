@@ -22,6 +22,12 @@ def get_by_id(session: Session, categoria_id: int) -> Categoria:
 
 def create(session: Session, data: CategoriaCreate) -> Categoria:
     uow = UnitOfWork(session)
+    existing = session.exec(select(Categoria).where(Categoria.nombre == data.nombre)).first()
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Una categoría con el mismo nombre ya existe",
+        )
     cat = Categoria.model_validate(data)
     session.add(cat)
     uow.commit()
