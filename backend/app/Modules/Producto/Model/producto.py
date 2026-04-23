@@ -2,8 +2,8 @@ from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from app.Modules.Categoria.Model.categoria import Categoria
     from app.Modules.Producto.Model.productoIngrediente import ProductoIngrediente
+    from app.Modules.Producto.Model.productoCategoria import ProductoCategoria
 
 
 class Producto(SQLModel, table=True):
@@ -12,11 +12,14 @@ class Producto(SQLModel, table=True):
     precio: float = Field(gt=0, description="Precio debe ser mayor a 0")
     descripcion: Optional[str] = Field(default=None, max_length=500)
 
-    # FK directa para relación 1:N con Categoria
-    categoria_id: Optional[int] = Field(default=None, foreign_key="categoria.id")
-    categoria: Optional["Categoria"] = Relationship(back_populates="productos")
-
     # Relación N:N con Ingrediente a través de ProductoIngrediente
     producto_ingredientes: List["ProductoIngrediente"] = Relationship(
-        back_populates="producto"
+        back_populates="producto",
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"},
+    )
+
+    # Relación N:N con Categoria a través de ProductoCategoria
+    producto_categorias: List["ProductoCategoria"] = Relationship(
+        back_populates="producto",
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"},
     )
