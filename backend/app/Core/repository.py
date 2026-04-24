@@ -30,14 +30,14 @@ class BaseRepository(Generic[T]):
         """Alias de compatibilidad para get()."""
         return self.get(id)
     
-    def list(self, offset: int = 0, limit: int = 100) -> list[T]:
+    def get_list(self, offset: int = 0, limit: int = 100) -> list[T]:
         """Obtiene objetos paginados."""
         statement = select(self.model).offset(offset).limit(limit)
         return self.session.exec(statement).all()
 
     def get_all(self) -> list[T]:
-        """Alias de compatibilidad para list()."""
-        return self.list()
+        """Alias de compatibilidad para get_list()."""
+        return self.get_list()
 
     def first_by(self, **filters: Any) -> Optional[T]:
         """Obtiene el primer registro que cumpla filtros exactos."""
