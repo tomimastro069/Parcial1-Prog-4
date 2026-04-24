@@ -1,5 +1,8 @@
+from contextlib import asynccontextmanager
+
 import fastapi
 import uvicorn
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.Core.database import create_db_and_tables
 from app.Modules.Categoria.Router.categoriaRouter import router as categoria_router
@@ -13,12 +16,21 @@ from app.Modules.Producto.Model.productoIngrediente import ProductoIngrediente  
 from app.Modules.Producto.Model.productoCategoria import ProductoCategoria  # noqa: F401
 from app.Modules.Ingrediente.Model.ingrediente import Ingrediente  # noqa: F401
 
-app = fastapi.FastAPI()
-
-
-@app.on_event("startup")
-def on_startup():
+@asynccontextmanager
+async def lifespan(_: fastapi.FastAPI):
     create_db_and_tables()
+    yield
+
+
+app = fastapi.FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")

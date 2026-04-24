@@ -1,10 +1,11 @@
 from sqlmodel import SQLModel
-from typing import Optional
+from pydantic import Field
+from typing import Annotated, Optional
 
 
 class IngredienteCreate(SQLModel):
-    nombre: str
-    unidad: str
+    nombre: Annotated[str, Field(min_length=2, max_length=100)]
+    unidad: Annotated[str, Field(min_length=1, max_length=50)]
 
 
 class IngredienteRead(SQLModel):
@@ -14,5 +15,5 @@ class IngredienteRead(SQLModel):
 
 
 class IngredienteUpdate(SQLModel):
-    nombre: Optional[str] = None
-    unidad: Optional[str] = None
+    nombre: Annotated[Optional[str], Field(min_length=2, max_length=100)] = None
+    unidad: Annotated[Optional[str], Field(min_length=1, max_length=50)] = None

@@ -1,10 +1,11 @@
 from sqlmodel import SQLModel
-from typing import Optional
+from pydantic import Field
+from typing import Annotated, Optional
 
 
 class CategoriaCreate(SQLModel):
-    nombre: str
-    descripcion: Optional[str] = None
+    nombre: Annotated[str, Field(min_length=2, max_length=100)]
+    descripcion: Annotated[Optional[str], Field(max_length=255)] = None
 
 
 class CategoriaRead(SQLModel):
@@ -14,5 +15,5 @@ class CategoriaRead(SQLModel):
 
 
 class CategoriaUpdate(SQLModel):
-    nombre: Optional[str] = None
-    descripcion: Optional[str] = None
+    nombre: Annotated[Optional[str], Field(min_length=2, max_length=100)] = None
+    descripcion: Annotated[Optional[str], Field(max_length=255)] = None

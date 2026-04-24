@@ -1,5 +1,6 @@
 from sqlmodel import SQLModel
-from typing import Optional, List
+from pydantic import Field
+from typing import Annotated, Optional, List
 
 
 # ── Schemas anidados para datos relacionados ───────────────────────────────────
@@ -28,9 +29,9 @@ class ProductoIngredienteInput(SQLModel):
 # ── Schemas principales ────────────────────────────────────────────────────────
 
 class ProductoCreate(SQLModel):
-    nombre: str
-    precio: float
-    descripcion: Optional[str] = None
+    nombre: Annotated[str, Field(min_length=2, max_length=100)]
+    precio: Annotated[float, Field(gt=0)]
+    descripcion: Annotated[Optional[str], Field(max_length=500)] = None
     categoria_ids: List[int] = []
     ingredientes: List[ProductoIngredienteInput] = []
 
@@ -45,8 +46,8 @@ class ProductoRead(SQLModel):
 
 
 class ProductoUpdate(SQLModel):
-    nombre: Optional[str] = None
-    precio: Optional[float] = None
-    descripcion: Optional[str] = None
+    nombre: Annotated[Optional[str], Field(min_length=2, max_length=100)] = None
+    precio: Annotated[Optional[float], Field(gt=0)] = None
+    descripcion: Annotated[Optional[str], Field(max_length=500)] = None
     categoria_ids: Optional[List[int]] = None
     ingredientes: Optional[List[ProductoIngredienteInput]] = None

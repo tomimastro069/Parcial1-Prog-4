@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Path, Query, status
 from sqlmodel import Session
 from typing import Annotated
 
@@ -19,7 +19,10 @@ def listar_categorias(
 
 
 @router.get("/{categoria_id}", response_model=CategoriaRead)
-def obtener_categoria(categoria_id: int, session: Session = Depends(get_session)):
+def obtener_categoria(
+    categoria_id: Annotated[int, Path(gt=0)],
+    session: Session = Depends(get_session),
+):
     return categoria_service.get_by_id(session, categoria_id)
 
 
@@ -30,11 +33,16 @@ def crear_categoria(data: CategoriaCreate, session: Session = Depends(get_sessio
 
 @router.patch("/{categoria_id}", response_model=CategoriaRead)
 def editar_categoria(
-    categoria_id: int, data: CategoriaUpdate, session: Session = Depends(get_session)
+    categoria_id: Annotated[int, Path(gt=0)],
+    data: CategoriaUpdate,
+    session: Session = Depends(get_session),
 ):
     return categoria_service.update(session, categoria_id, data)
 
 
 @router.delete("/{categoria_id}", status_code=status.HTTP_204_NO_CONTENT)
-def eliminar_categoria(categoria_id: int, session: Session = Depends(get_session)):
+def eliminar_categoria(
+    categoria_id: Annotated[int, Path(gt=0)],
+    session: Session = Depends(get_session),
+):
     categoria_service.delete(session, categoria_id)

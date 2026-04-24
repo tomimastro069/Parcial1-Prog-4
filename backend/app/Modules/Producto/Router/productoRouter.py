@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Path, Query, status
 from sqlmodel import Session
 from typing import Annotated
 
@@ -19,7 +19,10 @@ def listar_productos(
 
 
 @router.get("/{producto_id}", response_model=ProductoRead)
-def obtener_producto(producto_id: int, session: Session = Depends(get_session)):
+def obtener_producto(
+    producto_id: Annotated[int, Path(gt=0)],
+    session: Session = Depends(get_session),
+):
     return producto_service.get_by_id(session, producto_id)
 
 
@@ -30,11 +33,16 @@ def crear_producto(data: ProductoCreate, session: Session = Depends(get_session)
 
 @router.patch("/{producto_id}", response_model=ProductoRead)
 def editar_producto(
-    producto_id: int, data: ProductoUpdate, session: Session = Depends(get_session)
+    producto_id: Annotated[int, Path(gt=0)],
+    data: ProductoUpdate,
+    session: Session = Depends(get_session),
 ):
     return producto_service.update(session, producto_id, data)
 
 
 @router.delete("/{producto_id}", status_code=status.HTTP_204_NO_CONTENT)
-def eliminar_producto(producto_id: int, session: Session = Depends(get_session)):
+def eliminar_producto(
+    producto_id: Annotated[int, Path(gt=0)],
+    session: Session = Depends(get_session),
+):
     producto_service.delete(session, producto_id)
