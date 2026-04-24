@@ -76,7 +76,7 @@ class UnitOfWork:
     def __exit__(self, exc_type, exc, tb):
         if exc_type:
             self.rollback()
-        self.close()
+        # No cerramos la sesión aquí porque la maneja FastAPI con Depends(get_session)
 
     def commit(self) -> None:
         """Confirma la transacción."""
