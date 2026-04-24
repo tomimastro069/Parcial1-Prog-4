@@ -8,7 +8,7 @@ from app.Core.unit_of_work import UnitOfWork
 
 def get_all(session: Session, offset: int = 0, limit: int = 10) -> list[Categoria]:
     with UnitOfWork(session) as uow:
-        return uow.categorias.list(offset=offset, limit=limit)
+        return uow.categorias.get_list(offset=offset, limit=limit)
 
 
 def get_by_id(session: Session, categoria_id: int) -> Categoria:

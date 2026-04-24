@@ -8,7 +8,7 @@ from app.Core.unit_of_work import UnitOfWork
 
 def get_all(session: Session, offset: int = 0, limit: int = 10) -> list[Ingrediente]:
     with UnitOfWork(session) as uow:
-        return uow.ingredientes.list(offset=offset, limit=limit)
+        return uow.ingredientes.get_list(offset=offset, limit=limit)
 
 
 def get_by_id(session: Session, ing_id: int) -> Ingrediente:

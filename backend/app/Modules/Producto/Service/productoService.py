@@ -50,7 +50,7 @@ def _build_read(p: Producto, session: Session) -> ProductoRead:
 
 def get_all(session: Session, offset: int = 0, limit: int = 10) -> list[ProductoRead]:
     with UnitOfWork(session) as uow:
-        productos = uow.productos.list(offset=offset, limit=limit)
+        productos = uow.productos.get_list(offset=offset, limit=limit)
         return [_build_read(p, session) for p in productos]
 
 
