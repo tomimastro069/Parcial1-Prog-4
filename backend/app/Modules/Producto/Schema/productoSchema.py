@@ -19,8 +19,6 @@ class IngredienteEnProducto(SQLModel):
     cantidad: float
 
 
-# ── Input para asociar ingredientes al crear/actualizar un producto ────────────
-
 class ProductoIngredienteInput(SQLModel):
     ingrediente_id: int
     cantidad: float

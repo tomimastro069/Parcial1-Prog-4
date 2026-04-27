@@ -10,17 +10,16 @@ from app.Modules.Producto.Model.productoIngrediente import ProductoIngrediente
 
 
 class CategoriaRepository(BaseRepository[Categoria]):
-    """Repositorio específico para Categoría."""
+    
     pass
 
 
 class IngredienteRepository(BaseRepository[Ingrediente]):
-    """Repositorio específico para Ingrediente."""
+    
     pass
 
 
 class ProductoRepository(BaseRepository[Producto]):
-    """Repositorio específico para Producto."""
 
     def list_categorias_rel(self, producto_id: int) -> list[ProductoCategoria]:
         statement = select(ProductoCategoria).where(ProductoCategoria.producto_id == producto_id)
@@ -79,13 +78,13 @@ class UnitOfWork:
         # No cerramos la sesión aquí porque la maneja FastAPI con Depends(get_session)
 
     def commit(self) -> None:
-        """Confirma la transacción."""
+        
         self.session.commit()
 
     def rollback(self) -> None:
-        """Revierte la transacción."""
+        
         self.session.rollback()
 
     def close(self) -> None:
-        """Cierra la sesión."""
+        
         self.session.close()

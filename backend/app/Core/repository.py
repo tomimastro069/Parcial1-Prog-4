@@ -5,6 +5,7 @@ T = TypeVar("T")
 
 
 class BaseRepository(Generic[T]):
+    
     """Clase base genérica para todos los repositorios."""
     
     def __init__(self, session: Session, model: type[T]):
