@@ -108,7 +108,7 @@ def create(session: Session, data: ProductoCreate) -> ProductoRead:
             )
             p.producto_ingredientes.append(rel)
 
-        uow.commit()
+
         session.refresh(p)
     return _build_read(p, session)
 
@@ -152,7 +152,7 @@ def update(session: Session, producto_id: int, data: ProductoUpdate) -> Producto
                 )
                 p.producto_ingredientes.append(rel)
 
-        uow.commit()
+       
         session.refresh(p)
     return _build_read(p, session)
 
@@ -166,5 +166,4 @@ def delete(session: Session, producto_id: int) -> None:
                 detail=f"Producto con id {producto_id} no encontrado",
             )
         # El cascade "all, delete-orphan" en el modelo borra las junction tables
-        uow.productos.delete(producto_id)
-        uow.commit()
+        uow.productos.delete(producto_id) #cambiar a borrado logico

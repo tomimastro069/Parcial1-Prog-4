@@ -34,6 +34,7 @@ class ProductoRepository(BaseRepository[Producto]):
         rel = ProductoCategoria(producto_id=producto_id, categoria_id=categoria_id)
         self.session.add(rel)
         self.session.flush()
+        self.session.refresh(rel)
         return rel
 
     def add_ingrediente_rel(
