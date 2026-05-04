@@ -152,5 +152,9 @@ def delete(session: Session, producto_id: int) -> None:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Producto con id {producto_id} no encontrado",
             )
+        # Borrado físico de tablas intermedias
+        uow.productos.clear_categorias_rel(producto_id)
+        uow.productos.clear_ingredientes_rel(producto_id)
+        # Borrado lógico del producto
         p.is_active = False
         session.flush()
