@@ -9,7 +9,7 @@ from app.Modules.Producto.Schema.productoSchema import (
     CategoriaEnProducto,
     IngredienteEnProducto,
 )
-from app.Core.unit_of_work import UnitOfWork
+from app.Core.UnitOfWork.unit_of_work import UnitOfWork
 
 
 def _build_read(p: Producto, uow: UnitOfWork) -> ProductoRead:

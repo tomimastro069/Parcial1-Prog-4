@@ -3,7 +3,7 @@ from fastapi import HTTPException, status
 
 from app.Modules.Ingrediente.Model.ingrediente import Ingrediente
 from app.Modules.Ingrediente.Schema.ingredienteSchema import IngredienteCreate, IngredienteUpdate
-from app.Core.unit_of_work import UnitOfWork
+from app.Core.UnitOfWork.unit_of_work import UnitOfWork
 
 
 def get_all(session: Session, offset: int = 0, limit: int = 10) -> list[Ingrediente]:

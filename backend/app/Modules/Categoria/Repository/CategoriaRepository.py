@@ -1,6 +1,6 @@
 from sqlmodel import Session
 from app.Modules.Categoria.Model.categoria import Categoria
-from app.Core.BaseRepository import BaseRepository
+from app.Core.UnitOfWork.BaseRepository import BaseRepository
 
 
 

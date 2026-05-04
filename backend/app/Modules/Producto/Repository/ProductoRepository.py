@@ -2,7 +2,7 @@ from sqlmodel import Session, select
 from app.Modules.Producto.Model.producto import Producto
 from app.Modules.Producto.Model.productoCategoria import ProductoCategoria
 from app.Modules.Producto.Model.productoIngrediente import ProductoIngrediente
-from app.Core.BaseRepository import BaseRepository
+from app.Core.UnitOfWork.BaseRepository import BaseRepository
 
 
 class ProductoRepository(BaseRepository[Producto]):
