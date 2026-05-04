@@ -65,9 +65,9 @@ def get_by_id(session: Session, producto_id: int) -> ProductoRead:
         return _build_read(p, session)
 
 
-def _validar_categorias(uow: UnitOfWork, categoria_ids: list[int]) -> None:
+def _validar_categorias(uow: UnitOfWork, categorias: list[int]) -> None:
     """Valida que todas las categorías existan."""
-    for cat_id in categoria_ids:
+    for cat_id in categorias:
         if not uow.categorias.get(cat_id):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -87,7 +87,7 @@ def _validar_ingredientes(uow: UnitOfWork, ingredientes: list) -> None:
 
 def create(session: Session, data: ProductoCreate) -> ProductoRead:
     with UnitOfWork(session) as uow:
-        _validar_categorias(uow, data.categoria_ids)
+        _validar_categorias(uow, data.categorias)
         _validar_ingredientes(uow, data.ingredientes)
 
         # Crear el producto base
@@ -95,18 +95,20 @@ def create(session: Session, data: ProductoCreate) -> ProductoRead:
         uow.productos.add(p)
 
         # Crear relaciones N:N con Categorías
-        for cat_id in data.categoria_ids:
-            uow.productos.add_categoria_rel(producto_id=p.id, categoria_id=cat_id)
+        for cat_id in data.categorias:
+            rel = uow.productos.add_categoria_rel(producto_id=p.id, categoria_id=cat_id)
+            p.producto_categorias.append(rel)
 
         # Crear relaciones N:N con Ingredientes
         for ing_input in data.ingredientes:
-            uow.productos.add_ingrediente_rel(
+            rel = uow.productos.add_ingrediente_rel(
                 producto_id=p.id,
                 ingrediente_id=ing_input.ingrediente_id,
                 cantidad=ing_input.cantidad,
             )
+            p.producto_ingredientes.append(rel)
 
-        uow.commit()
+
         session.refresh(p)
     return _build_read(p, session)
 
@@ -127,26 +129,30 @@ def update(session: Session, producto_id: int, data: ProductoUpdate) -> Producto
         uow.productos.add(p)
 
         # Sincronizar categorías si se enviaron
-        if data.categoria_ids is not None:
-            _validar_categorias(uow, data.categoria_ids)
+        if data.categorias is not None:
+            _validar_categorias(uow, data.categorias)
             uow.productos.clear_categorias_rel(producto_id)
+            p.producto_categorias = [] # Limpiar en memoria también
             # Agregar las nuevas
-            for cat_id in data.categoria_ids:
-                uow.productos.add_categoria_rel(producto_id=producto_id, categoria_id=cat_id)
+            for cat_id in data.categorias:
+                rel = uow.productos.add_categoria_rel(producto_id=producto_id, categoria_id=cat_id)
+                p.producto_categorias.append(rel)
 
         # Sincronizar ingredientes si se enviaron
         if data.ingredientes is not None:
             _validar_ingredientes(uow, data.ingredientes)
             uow.productos.clear_ingredientes_rel(producto_id)
+            p.producto_ingredientes = [] # Limpiar en memoria
             # Agregar los nuevos
             for ing_input in data.ingredientes:
-                uow.productos.add_ingrediente_rel(
+                rel = uow.productos.add_ingrediente_rel(
                     producto_id=producto_id,
                     ingrediente_id=ing_input.ingrediente_id,
                     cantidad=ing_input.cantidad,
                 )
+                p.producto_ingredientes.append(rel)
 
-        uow.commit()
+       
         session.refresh(p)
     return _build_read(p, session)
 
@@ -160,5 +166,4 @@ def delete(session: Session, producto_id: int) -> None:
                 detail=f"Producto con id {producto_id} no encontrado",
             )
         # El cascade "all, delete-orphan" en el modelo borra las junction tables
-        uow.productos.delete(producto_id)
-        uow.commit()
+        uow.productos.delete(producto_id) #cambiar a borrado logico

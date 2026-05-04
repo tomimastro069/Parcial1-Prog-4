@@ -13,7 +13,7 @@ class BaseRepository(Generic[T]):
         self.model = model
     
     def add(self, obj: T) -> T:
-        """Agrega un objeto a la sesión y hace flush."""
+       
         self.session.add(obj)
         self.session.flush()
         return obj
@@ -23,12 +23,12 @@ class BaseRepository(Generic[T]):
         return self.add(obj)
     
     def get(self, id: int) -> Optional[T]:
-        """Obtiene un objeto por ID."""
+  
         statement = select(self.model).where(self.model.id == id)
         return self.session.exec(statement).first()
 
     def get_by_id(self, id: int) -> Optional[T]:
-        """Alias de compatibilidad para get()."""
+       
         return self.get(id)
     
     def get_list(self, offset: int = 0, limit: int = 100) -> list[T]:
@@ -67,7 +67,7 @@ class BaseRepository(Generic[T]):
         return None
     
     def delete(self, id: int) -> bool:
-        """Elimina un objeto."""
+
         obj = self.get(id)
         if obj:
             self.session.delete(obj)
