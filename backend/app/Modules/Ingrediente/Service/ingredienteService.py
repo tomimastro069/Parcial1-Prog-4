@@ -53,5 +53,8 @@ def delete(session: Session, ing_id: int) -> None:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Ingrediente con id {ing_id} no encontrado",
             )
+        # Borrado físico de tablas intermedias
+        uow.ingredientes.clear_productos_rel(ing_id)
+        # Borrado lógico del producto
         ing.is_active = False
         session.flush()
