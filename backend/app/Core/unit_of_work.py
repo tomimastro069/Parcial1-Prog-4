@@ -17,8 +17,11 @@ class UnitOfWork:
         return self
 
     def __exit__(self, exc_type, exc, tb):
-        if exc_type:
+        if exc_type is not None:
             self.rollback()
+        else:
+            self.commit()
+        self.close()
 
     def commit(self) -> None:
         self.session.commit()
