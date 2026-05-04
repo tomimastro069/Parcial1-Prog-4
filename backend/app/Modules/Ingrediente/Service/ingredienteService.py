@@ -8,13 +8,13 @@ from app.Core.unit_of_work import UnitOfWork
 
 def get_all(session: Session, offset: int = 0, limit: int = 10) -> list[Ingrediente]:
     with UnitOfWork(session) as uow:
-        return uow.ingredientes.get_list(offset=offset, limit=limit)
+        return uow.ingredientes.filter_by(is_active=True, offset=offset, limit=limit)
 
 
 def get_by_id(session: Session, ing_id: int) -> Ingrediente:
     with UnitOfWork(session) as uow:
         ing = uow.ingredientes.get(ing_id)
-        if not ing:
+        if not ing or not ing.is_active:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Ingrediente con id {ing_id} no encontrado",
@@ -26,34 +26,32 @@ def create(session: Session, data: IngredienteCreate) -> Ingrediente:
     with UnitOfWork(session) as uow:
         ing = Ingrediente.model_validate(data)
         uow.ingredientes.add(ing)
-        uow.commit()
-        session.refresh(ing)
-        return ing
+        session.refresh(ing)  # adentro del with
+        return ing             #  adentro del with
 
 
 def update(session: Session, ing_id: int, data: IngredienteUpdate) -> Ingrediente:
     with UnitOfWork(session) as uow:
         ing = uow.ingredientes.get(ing_id)
-        if not ing:
+        if not ing or not ing.is_active:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Ingrediente con id {ing_id} no encontrado",
             )
         for key, val in data.model_dump(exclude_unset=True).items():
             setattr(ing, key, val)
-        uow.ingredientes.add(ing)
-        uow.commit()
-        session.refresh(ing)
-        return ing
+        # eliminado uow.ingredientes.add(ing), solo setattr es suficiente
+        session.refresh(ing)  # adentro del with
+        return ing             # adentro del with
 
 
 def delete(session: Session, ing_id: int) -> None:
     with UnitOfWork(session) as uow:
         ing = uow.ingredientes.get(ing_id)
-        if not ing:
+        if not ing or not ing.is_active:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Ingrediente con id {ing_id} no encontrado",
             )
-        uow.ingredientes.delete(ing_id)
-        uow.commit()
+        ing.is_active = False
+        session.flush()

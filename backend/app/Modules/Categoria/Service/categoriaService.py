@@ -8,13 +8,13 @@ from app.Core.unit_of_work import UnitOfWork
 
 def get_all(session: Session, offset: int = 0, limit: int = 10) -> list[Categoria]:
     with UnitOfWork(session) as uow:
-        return uow.categorias.get_list(offset=offset, limit=limit)
+        return uow.categorias.filter_by(is_active=True, offset=offset, limit=limit)
 
 
 def get_by_id(session: Session, categoria_id: int) -> Categoria:
     with UnitOfWork(session) as uow:
         cat = uow.categorias.get(categoria_id)
-        if not cat:
+        if not cat or not cat.is_active:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Categoría con id {categoria_id} no encontrada",
@@ -32,34 +32,34 @@ def create(session: Session, data: CategoriaCreate) -> Categoria:
             )
         cat = Categoria.model_validate(data)
         uow.categorias.add(cat)
-        uow.commit()
-        session.refresh(cat)
-        return cat
+        session.refresh(cat)  # adentro del with
+        return cat             # adentro del with
 
 
 def update(session: Session, categoria_id: int, data: CategoriaUpdate) -> Categoria:
     with UnitOfWork(session) as uow:
         cat = uow.categorias.get(categoria_id)
-        if not cat:
+        if not cat or not cat.is_active:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Categoría con id {categoria_id} no encontrada",
             )
         for key, val in data.model_dump(exclude_unset=True).items():
             setattr(cat, key, val)
-        uow.categorias.add(cat)
-        uow.commit()
-        session.refresh(cat)
-        return cat
+        # eliminado uow.categorias.add(cat), solo setattr es suficiente
+        session.refresh(cat)  # adentro del with
+        return cat             # adentro del with
 
 
 def delete(session: Session, categoria_id: int) -> None:
     with UnitOfWork(session) as uow:
         cat = uow.categorias.get(categoria_id)
-        if not cat:
+        if not cat or not cat.is_active:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Categoría con id {categoria_id} no encontrada",
             )
-        uow.categorias.delete(categoria_id)
-        uow.commit()
+        cat.is_active = False
+        session.flush()
+        
+        

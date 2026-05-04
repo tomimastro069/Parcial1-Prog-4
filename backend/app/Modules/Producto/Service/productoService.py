@@ -12,63 +12,58 @@ from app.Modules.Producto.Schema.productoSchema import (
 from app.Core.unit_of_work import UnitOfWork
 
 
-def _build_read(p: Producto, session: Session) -> ProductoRead:
+def _build_read(p: Producto, uow: UnitOfWork) -> ProductoRead:
     """Construye el schema de lectura con datos de categorías e ingredientes."""
-    with UnitOfWork(session) as uow:
-        # Categorías relacionadas
-        pcs = uow.productos.list_categorias_rel(p.id)
-        categorias = []
-        for pc in pcs:
-            cat = uow.categorias.get(pc.categoria_id)
-            if cat:
-                categorias.append(CategoriaEnProducto(id=cat.id, nombre=cat.nombre))
+    pcs = uow.productos.list_categorias_rel(p.id)
+    categorias = [
+        CategoriaEnProducto(id=cat.id, nombre=cat.nombre)
+        for pc in pcs
+        if (cat := uow.categorias.get(pc.categoria_id))
+    ]
 
-        # Ingredientes relacionados
-        pis = uow.productos.list_ingredientes_rel(p.id)
-        ingredientes = []
-        for pi in pis:
-            ing = uow.ingredientes.get(pi.ingrediente_id)
-            if ing:
-                ingredientes.append(
-                    IngredienteEnProducto(
-                        id=ing.id,
-                        nombre=ing.nombre,
-                        unidad=ing.unidad,
-                        cantidad=pi.cantidad,
-                    )
-                )
-
-        return ProductoRead(
-            id=p.id,
-            nombre=p.nombre,
-            precio=p.precio,
-            descripcion=p.descripcion,
-            categorias=categorias,
-            ingredientes=ingredientes,
+    pis = uow.productos.list_ingredientes_rel(p.id)
+    ingredientes = [
+        IngredienteEnProducto(
+            id=ing.id,
+            nombre=ing.nombre,
+            unidad=ing.unidad,
+            cantidad=pi.cantidad,
         )
+        for pi in pis
+        if (ing := uow.ingredientes.get(pi.ingrediente_id))
+    ]
+
+    return ProductoRead(
+        id=p.id,
+        nombre=p.nombre,
+        precio=p.precio,
+        descripcion=p.descripcion,
+        categorias=categorias,
+        ingredientes=ingredientes,
+    )
 
 
 def get_all(session: Session, offset: int = 0, limit: int = 10) -> list[ProductoRead]:
     with UnitOfWork(session) as uow:
-        productos = uow.productos.get_list(offset=offset, limit=limit)
-        return [_build_read(p, session) for p in productos]
+        productos = uow.productos.filter_by(is_active=True, offset=offset, limit=limit)
+        return [_build_read(p, uow) for p in productos]
 
 
 def get_by_id(session: Session, producto_id: int) -> ProductoRead:
     with UnitOfWork(session) as uow:
         p = uow.productos.get(producto_id)
-        if not p:
+        if not p or not p.is_active:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Producto con id {producto_id} no encontrado",
             )
-        return _build_read(p, session)
+        return _build_read(p, uow)
 
 
 def _validar_categorias(uow: UnitOfWork, categorias: list[int]) -> None:
-    """Valida que todas las categorías existan."""
     for cat_id in categorias:
-        if not uow.categorias.get(cat_id):
+        cat = uow.categorias.get(cat_id)
+        if not cat or not cat.is_active:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Categoría con id {cat_id} no encontrada",
@@ -76,9 +71,9 @@ def _validar_categorias(uow: UnitOfWork, categorias: list[int]) -> None:
 
 
 def _validar_ingredientes(uow: UnitOfWork, ingredientes: list) -> None:
-    """Valida que todos los ingredientes existan."""
     for ing_input in ingredientes:
-        if not uow.ingredientes.get(ing_input.ingrediente_id):
+        ing = uow.ingredientes.get(ing_input.ingrediente_id)
+        if not ing or not ing.is_active:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Ingrediente con id {ing_input.ingrediente_id} no encontrado",
@@ -90,16 +85,13 @@ def create(session: Session, data: ProductoCreate) -> ProductoRead:
         _validar_categorias(uow, data.categorias)
         _validar_ingredientes(uow, data.ingredientes)
 
-        # Crear el producto base
         p = Producto(nombre=data.nombre, precio=data.precio, descripcion=data.descripcion)
         uow.productos.add(p)
 
-        # Crear relaciones N:N con Categorías
         for cat_id in data.categorias:
             rel = uow.productos.add_categoria_rel(producto_id=p.id, categoria_id=cat_id)
             p.producto_categorias.append(rel)
 
-        # Crear relaciones N:N con Ingredientes
         for ing_input in data.ingredientes:
             rel = uow.productos.add_ingrediente_rel(
                 producto_id=p.id,
@@ -108,32 +100,29 @@ def create(session: Session, data: ProductoCreate) -> ProductoRead:
             )
             p.producto_ingredientes.append(rel)
 
-
         session.refresh(p)
-    return _build_read(p, session)
+        return _build_read(p, uow)
 
 
 def update(session: Session, producto_id: int, data: ProductoUpdate) -> ProductoRead:
     with UnitOfWork(session) as uow:
         p = uow.productos.get(producto_id)
-        if not p:
+        if not p or not p.is_active:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Producto con id {producto_id} no encontrado",
             )
 
-        # Actualizar campos básicos del producto
-        campos_base = data.model_dump(exclude_unset=True, exclude={"categoria_ids", "ingredientes"})
+        # Actualizar campos básicos
+        campos_base = data.model_dump(exclude_unset=True, exclude={"categorias", "ingredientes"})
         for key, val in campos_base.items():
             setattr(p, key, val)
-        uow.productos.add(p)
 
         # Sincronizar categorías si se enviaron
         if data.categorias is not None:
             _validar_categorias(uow, data.categorias)
             uow.productos.clear_categorias_rel(producto_id)
-            p.producto_categorias = [] # Limpiar en memoria también
-            # Agregar las nuevas
+            p.producto_categorias = []
             for cat_id in data.categorias:
                 rel = uow.productos.add_categoria_rel(producto_id=producto_id, categoria_id=cat_id)
                 p.producto_categorias.append(rel)
@@ -142,8 +131,7 @@ def update(session: Session, producto_id: int, data: ProductoUpdate) -> Producto
         if data.ingredientes is not None:
             _validar_ingredientes(uow, data.ingredientes)
             uow.productos.clear_ingredientes_rel(producto_id)
-            p.producto_ingredientes = [] # Limpiar en memoria
-            # Agregar los nuevos
+            p.producto_ingredientes = []
             for ing_input in data.ingredientes:
                 rel = uow.productos.add_ingrediente_rel(
                     producto_id=producto_id,
@@ -152,18 +140,17 @@ def update(session: Session, producto_id: int, data: ProductoUpdate) -> Producto
                 )
                 p.producto_ingredientes.append(rel)
 
-       
         session.refresh(p)
-    return _build_read(p, session)
+        return _build_read(p, uow)
 
 
 def delete(session: Session, producto_id: int) -> None:
     with UnitOfWork(session) as uow:
         p = uow.productos.get(producto_id)
-        if not p:
+        if not p or not p.is_active:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Producto con id {producto_id} no encontrado",
             )
-        # El cascade "all, delete-orphan" en el modelo borra las junction tables
-        uow.productos.delete(producto_id) #cambiar a borrado logico
+        p.is_active = False
+        session.flush()

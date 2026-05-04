@@ -11,6 +11,7 @@ class Producto(SQLModel, table=True):
     nombre: str = Field(min_length=2, max_length=150)
     precio: float = Field(gt=0, description="Precio debe ser mayor a 0")
     descripcion: Optional[str] = Field(default=None, max_length=500)
+    is_active: bool = Field(default=True)  # borrado lógico
 
     # Relación N:N con Ingrediente a través de ProductoIngrediente
     producto_ingredientes: List["ProductoIngrediente"] = Relationship(
