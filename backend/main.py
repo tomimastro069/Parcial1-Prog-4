@@ -18,6 +18,7 @@ from app.Modules.Producto.Model.productoCategoria import ProductoCategoria  # no
 from app.Modules.Ingrediente.Model.ingrediente import Ingrediente  # noqa: F401
 from app.Modules.Usuarios.usuario import Usuario  # noqa: F401
 from app.Modules.Auth.Model.refreshToken import RefreshToken  # noqa: F401
+from app.Modules.Auditoria.Model.auditoria import Auditoria  # noqa: F401
 
 @asynccontextmanager
 async def lifespan(_: fastapi.FastAPI):

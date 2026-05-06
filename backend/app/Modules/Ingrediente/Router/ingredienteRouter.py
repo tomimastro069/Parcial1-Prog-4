@@ -1,57 +1,61 @@
 from fastapi import APIRouter, Depends, Path, Query, status
-from sqlmodel import Session
 from typing import Annotated
 
-from app.Core.database import get_session
 from app.Modules.Ingrediente.Schema.ingredienteSchema import IngredienteCreate, IngredienteRead, IngredienteUpdate
-from app.Modules.Ingrediente.Service import ingredienteService as ingrediente_service
-from app.Core.Dependencies.dependencies import role_required
-from app.Modules.Usuarios.usuario import UserRole
+from app.Modules.Ingrediente.Service.ingredienteService import IngredienteService
+from app.Core.Dependencies.dependencies import role_required, get_uow
+from app.Modules.Usuarios.usuario import UserRole, Usuario
 
 router = APIRouter()
 
 
 @router.get("/", response_model=list[IngredienteRead])
 def listar_ingredientes(
-    session: Session = Depends(get_session),
+    uow=Depends(get_uow),
     offset: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=100)] = 10,
 ):
-    return ingrediente_service.get_all(session, offset, limit)
+    service = IngredienteService(uow)
+    return service.get_all(offset, limit)
 
 
 @router.get("/{ing_id}", response_model=IngredienteRead)
 def obtener_ingrediente(
     ing_id: Annotated[int, Path(gt=0)],
-    session: Session = Depends(get_session),
+    uow=Depends(get_uow),
 ):
-    return ingrediente_service.get_by_id(session, ing_id)
+    service = IngredienteService(uow)
+    return service.get_by_id(ing_id)
 
 
 @router.post("/", 
              response_model=IngredienteRead, 
-             status_code=status.HTTP_201_CREATED,
-             dependencies=[Depends(role_required([UserRole.ADMIN, UserRole.STOCK]))])
-def crear_ingrediente(data: IngredienteCreate, session: Session = Depends(get_session)):
-    return ingrediente_service.create(session, data)
+             status_code=status.HTTP_201_CREATED)
+def crear_ingrediente(
+    data: IngredienteCreate, 
+    uow=Depends(get_uow),
+    current_user: Usuario = Depends(role_required([UserRole.ADMIN, UserRole.STOCK]))
+):
+    service = IngredienteService(uow)
+    return service.create(data, current_user.id)
 
 
-@router.patch("/{ing_id}", 
-              response_model=IngredienteRead,
-              dependencies=[Depends(role_required([UserRole.ADMIN, UserRole.STOCK]))])
+@router.patch("/{ing_id}", response_model=IngredienteRead)
 def editar_ingrediente(
     ing_id: Annotated[int, Path(gt=0)],
     data: IngredienteUpdate,
-    session: Session = Depends(get_session),
+    uow=Depends(get_uow),
+    current_user: Usuario = Depends(role_required([UserRole.ADMIN, UserRole.STOCK]))
 ):
-    return ingrediente_service.update(session, ing_id, data)
+    service = IngredienteService(uow)
+    return service.update(ing_id, data, current_user.id)
 
 
-@router.delete("/{ing_id}", 
-               status_code=status.HTTP_204_NO_CONTENT,
-               dependencies=[Depends(role_required([UserRole.ADMIN]))])
+@router.delete("/{ing_id}", status_code=status.HTTP_204_NO_CONTENT)
 def eliminar_ingrediente(
     ing_id: Annotated[int, Path(gt=0)],
-    session: Session = Depends(get_session),
+    uow=Depends(get_uow),
+    current_user: Usuario = Depends(role_required([UserRole.ADMIN]))
 ):
-    ingrediente_service.delete(session, ing_id)
+    service = IngredienteService(uow)
+    service.delete(ing_id, current_user.id)

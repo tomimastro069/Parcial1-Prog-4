@@ -4,6 +4,7 @@ from app.Modules.Ingrediente.Repository.IngredienteRepository import Ingrediente
 from app.Modules.Producto.Repository.ProductoRepository import ProductoRepository
 from app.Modules.Usuarios.Repository.UsuarioRepository import UsuarioRepository
 from app.Modules.Auth.Repository.authRepository import AuthRepository
+from app.Modules.Auditoria.Repository.auditoriaRepository import AuditoriaRepository
 
 
 class UnitOfWork:
@@ -16,6 +17,7 @@ class UnitOfWork:
         self.productos = ProductoRepository(session)
         self.usuarios = UsuarioRepository(session)
         self.auth = AuthRepository(session)
+        self.auditoria = AuditoriaRepository(session)
 
     def __enter__(self):
         return self

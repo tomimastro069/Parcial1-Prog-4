@@ -1,57 +1,62 @@
 from fastapi import APIRouter, Depends, Path, Query, status
-from sqlmodel import Session
 from typing import Annotated
 
 from app.Core.database import get_session
 from app.Modules.Producto.Schema.productoSchema import ProductoCreate, ProductoRead, ProductoUpdate
-from app.Modules.Producto.Service import productoService as producto_service
-from app.Core.Dependencies.dependencies import role_required
-from app.Modules.Usuarios.usuario import UserRole
+from app.Modules.Producto.Service.productoService import ProductoService
+from app.Core.Dependencies.dependencies import role_required, get_uow
+from app.Modules.Usuarios.usuario import UserRole, Usuario
 
 router = APIRouter()
 
 
 @router.get("/", response_model=list[ProductoRead])
 def listar_productos(
-    session: Session = Depends(get_session),
+    uow=Depends(get_uow),
     offset: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=100)] = 10,
 ):
-    return producto_service.get_all(session, offset, limit)
+    service = ProductoService(uow)
+    return service.get_all(offset, limit)
 
 
 @router.get("/{producto_id}", response_model=ProductoRead)
 def obtener_producto(
     producto_id: Annotated[int, Path(gt=0)],
-    session: Session = Depends(get_session),
+    uow=Depends(get_uow),
 ):
-    return producto_service.get_by_id(session, producto_id)
+    service = ProductoService(uow)
+    return service.get_by_id(producto_id)
 
 
 @router.post("/", 
              response_model=ProductoRead, 
-             status_code=status.HTTP_201_CREATED,
-             dependencies=[Depends(role_required([UserRole.ADMIN, UserRole.STOCK]))])
-def crear_producto(data: ProductoCreate, session: Session = Depends(get_session)):
-    return producto_service.create(session, data)
+             status_code=status.HTTP_201_CREATED)
+def crear_producto(
+    data: ProductoCreate, 
+    uow=Depends(get_uow),
+    current_user: Usuario = Depends(role_required([UserRole.ADMIN, UserRole.STOCK]))
+):
+    service = ProductoService(uow)
+    return service.create(data, current_user.id)
 
 
-@router.patch("/{producto_id}", 
-              response_model=ProductoRead,
-              dependencies=[Depends(role_required([UserRole.ADMIN, UserRole.STOCK]))])
+@router.patch("/{producto_id}", response_model=ProductoRead)
 def editar_producto(
     producto_id: Annotated[int, Path(gt=0)],
     data: ProductoUpdate,
-    session: Session = Depends(get_session),
+    uow=Depends(get_uow),
+    current_user: Usuario = Depends(role_required([UserRole.ADMIN, UserRole.STOCK]))
 ):
-    return producto_service.update(session, producto_id, data)
+    service = ProductoService(uow)
+    return service.update(producto_id, data, current_user.id)
 
 
-@router.delete("/{producto_id}", 
-               status_code=status.HTTP_204_NO_CONTENT,
-               dependencies=[Depends(role_required([UserRole.ADMIN]))])
+@router.delete("/{producto_id}", status_code=status.HTTP_204_NO_CONTENT)
 def eliminar_producto(
     producto_id: Annotated[int, Path(gt=0)],
-    session: Session = Depends(get_session),
+    uow=Depends(get_uow),
+    current_user: Usuario = Depends(role_required([UserRole.ADMIN]))
 ):
-    producto_service.delete(session, producto_id)
+    service = ProductoService(uow)
+    service.delete(producto_id, current_user.id)

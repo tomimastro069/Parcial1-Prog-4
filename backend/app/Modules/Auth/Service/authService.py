@@ -6,6 +6,7 @@ from app.Core.Config.Config import settings
 from app.Modules.Auth.Schema.authSchema import LoginRequest, RegisterRequest, TokenResponse
 from app.Modules.Usuarios.usuario import Usuario
 from app.Modules.Auth.Model.refreshToken import RefreshToken
+from app.Modules.Auditoria.Model.auditoria import Auditoria
 
 class AuthService:
     def __init__(self, uow):
@@ -34,6 +35,15 @@ class AuthService:
 
             # 4. Guardamos
             self.uow.usuarios.add(new_user)
+
+            # 5. AUDITORÍA: Registro de usuario
+            self.uow.auditoria.add(Auditoria(
+                user_id=new_user.id,
+                accion="USUARIO_REGISTRO",
+                modulo="AUTH",
+                descripcion=f"Nuevo usuario registrado: {new_user.email}",
+                metadata_info={"email": new_user.email, "rol": new_user.rol.value}
+            ))
             
             return {"message": "Usuario registrado con éxito"}
 
@@ -44,6 +54,13 @@ class AuthService:
             
             # 2. Validamos existencia y contraseña
             if not user or not verify_password(data.password, user.password_hash):
+                # AUDITORÍA: Intento fallido
+                self.uow.auditoria.add(Auditoria(
+                    user_id=user.id if user else None,
+                    accion="LOGIN_FALLIDO",
+                    modulo="AUTH",
+                    descripcion=f"Intento de login fallido para: {data.email}"
+                ))
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Credenciales inválidas",
@@ -56,14 +73,22 @@ class AuthService:
                     detail="Usuario inactivo"
                 )
 
-            # 3. Generamos el Token de Acceso
+            # 3. AUDITORÍA: Login exitoso
+            self.uow.auditoria.add(Auditoria(
+                user_id=user.id,
+                accion="LOGIN_EXITOSO",
+                modulo="AUTH",
+                descripcion=f"Inicio de sesión exitoso: {user.email}"
+            ))
+
+            # 4. Generamos el Token de Acceso
             access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
             access_token = create_access_token(
                 data={"sub": user.email, "rol": user.rol.value},
                 expires_delta=access_token_expires
             )
 
-            # 4. Generamos y guardamos el Refresh Token
+            # 5. Generamos y guardamos el Refresh Token
             refresh_token_str = secrets.token_hex(32)
             refresh_expire = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
             
