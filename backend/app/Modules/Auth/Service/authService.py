@@ -1,9 +1,11 @@
-from datetime import timedelta
+import secrets
+from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException, status
 from app.Core.Security.jwt import get_password_hash, verify_password, create_access_token
 from app.Core.Config.Config import settings
 from app.Modules.Auth.Schema.authSchema import LoginRequest, RegisterRequest, TokenResponse
 from app.Modules.Usuarios.usuario import Usuario
+from app.Modules.Auth.Model.refreshToken import RefreshToken
 
 class AuthService:
     def __init__(self, uow):
@@ -61,8 +63,21 @@ class AuthService:
                 expires_delta=access_token_expires
             )
 
+            # 4. Generamos y guardamos el Refresh Token
+            refresh_token_str = secrets.token_hex(32)
+            refresh_expire = datetime.now(timezone.utc) + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+            
+            new_refresh_token = RefreshToken(
+                token=refresh_token_str,
+                user_id=user.id,
+                expires_at=refresh_expire
+            )
+            
+            self.uow.auth.add(new_refresh_token)
+
             return TokenResponse(
                 access_token=access_token,
+                refresh_token=refresh_token_str,
                 user_email=user.email,
                 rol=user.rol.value
             )
