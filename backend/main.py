@@ -20,6 +20,10 @@ from app.Modules.Usuarios.usuario import Usuario  # noqa: F401
 from app.Modules.Auth.Model.refreshToken import RefreshToken  # noqa: F401
 from app.Modules.Auditoria.Model.auditoria import Auditoria  # noqa: F401
 
+from app.Core.Config.rate_limit import limiter
+from slowapi.errors import RateLimitExceeded
+from slowapi import _rate_limit_exceeded_handler
+
 @asynccontextmanager
 async def lifespan(_: fastapi.FastAPI):
     create_db_and_tables()
@@ -27,6 +31,8 @@ async def lifespan(_: fastapi.FastAPI):
 
 
 app = fastapi.FastAPI(lifespan=lifespan)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,

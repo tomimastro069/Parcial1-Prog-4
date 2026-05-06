@@ -1,4 +1,8 @@
+from fastapi import APIRouter, Depends, status, Request
+from app.Core.Dependencies.dependencies import get_uow
+from app.Modules.Auth.Service.authService import AuthService
 from app.Modules.Auth.Schema.authSchema import LoginRequest, RegisterRequest, TokenResponse, LogoutRequest, RefreshRequest
+from app.Core.Config.rate_limit import limiter
 
 router = APIRouter()
 
@@ -8,7 +12,8 @@ def register(data: RegisterRequest, uow=Depends(get_uow)):
     return service.register(data)
 
 @router.post("/login", response_model=TokenResponse)
-def login(data: LoginRequest, uow=Depends(get_uow)):
+@limiter.limit("5/minute")
+def login(request: Request, data: LoginRequest, uow=Depends(get_uow)):
     service = AuthService(uow)
     return service.login(data)
 
