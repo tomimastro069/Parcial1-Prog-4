@@ -2,6 +2,8 @@ from sqlmodel import Session
 from app.Modules.Categoria.Repository.CategoriaRepository import CategoriaRepository
 from app.Modules.Ingrediente.Repository.IngredienteRepository import IngredienteRepository
 from app.Modules.Producto.Repository.ProductoRepository import ProductoRepository
+from app.Modules.Usuarios.Repository.UsuarioRepository import UsuarioRepository
+from app.Modules.Auth.Repository.authRepository import AuthRepository
 
 
 class UnitOfWork:
@@ -12,6 +14,8 @@ class UnitOfWork:
         self.categorias = CategoriaRepository(session)    
         self.ingredientes = IngredienteRepository(session)
         self.productos = ProductoRepository(session)
+        self.usuarios = UsuarioRepository(session)
+        self.auth = AuthRepository(session)
 
     def __enter__(self):
         return self
