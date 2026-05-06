@@ -10,6 +10,7 @@ interface AuthState {
   isAuthenticated: boolean;
 
   login: (credentials: LoginRequest) => Promise<void>;
+  loginDemo: (rol: 'CLIENT' | 'ADMIN') => void;
   logout: () => Promise<void>;
   setUsuario: (u: UserResponse) => void;
   hasRole: (role: string) => boolean;
@@ -33,6 +34,23 @@ export const useAuthStore = create<AuthState>()(
         // Cargar datos del usuario tras login
         const usuario = await authApi.me();
         set({ usuario });
+      },
+
+      loginDemo: (rol) => {
+        const isAdmin = rol === 'ADMIN';
+        set({
+          accessToken: 'demo-token',
+          refreshToken: 'demo-refresh',
+          isAuthenticated: true,
+          usuario: {
+            id: 1,
+            nombre: isAdmin ? 'Admin' : 'Cliente',
+            apellido: 'Demo',
+            email: isAdmin ? 'admin@foodstore.com' : 'cliente@foodstore.com',
+            roles: isAdmin ? ['ADMIN'] : ['CLIENT'],
+            created_at: new Date().toISOString(),
+          },
+        });
       },
 
       logout: async () => {
