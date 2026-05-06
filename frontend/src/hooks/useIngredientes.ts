@@ -1,76 +1,51 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ingredientesApi } from '../api/ingredientes';
-import type { IngredienteCreate, IngredienteUpdate, PaginationParams } from '../types';
 import toast from 'react-hot-toast';
+import { ingredientesApi } from '../api/ingredientesApi';
+import type { IngredienteCreate, IngredienteUpdate } from '../types';
 
-const QUERY_KEY = 'ingredientes';
+const QK = 'ingredientes';
 
-export function useIngredientes(params?: PaginationParams) {
+export function useIngredientes() {
   return useQuery({
-    queryKey: [QUERY_KEY, params],
-    queryFn: () => ingredientesApi.getAll(params),
-    staleTime: 1000 * 30,
-  });
-}
-
-export function useIngrediente(id: number) {
-  return useQuery({
-    queryKey: [QUERY_KEY, id],
-    queryFn: () => ingredientesApi.getById(id),
-    enabled: !!id,
+    queryKey: [QK],
+    queryFn: () => ingredientesApi.list(),
+    staleTime: 1000 * 60,
   });
 }
 
 export function useCreateIngrediente() {
-  const queryClient = useQueryClient();
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: IngredienteCreate) => ingredientesApi.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
-      toast.success('Ingrediente creado exitosamente');
+      qc.invalidateQueries({ queryKey: [QK] });
+      toast.success('Ingrediente creado');
     },
-    onError: (error: unknown) => {
-      const message = getErrorMessage(error);
-      toast.error(`Error al crear ingrediente: ${message}`);
-    },
+    onError: () => toast.error('Error al crear ingrediente'),
   });
 }
 
 export function useUpdateIngrediente() {
-  const queryClient = useQueryClient();
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: IngredienteUpdate }) =>
       ingredientesApi.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
-      toast.success('Ingrediente actualizado exitosamente');
+      qc.invalidateQueries({ queryKey: [QK] });
+      toast.success('Ingrediente actualizado');
     },
-    onError: (error: unknown) => {
-      const message = getErrorMessage(error);
-      toast.error(`Error al actualizar ingrediente: ${message}`);
-    },
+    onError: () => toast.error('Error al actualizar ingrediente'),
   });
 }
 
 export function useDeleteIngrediente() {
-  const queryClient = useQueryClient();
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => ingredientesApi.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
-      toast.success('Ingrediente eliminado exitosamente');
+      qc.invalidateQueries({ queryKey: [QK] });
+      toast.success('Ingrediente eliminado');
     },
-    onError: (error: unknown) => {
-      const message = getErrorMessage(error);
-      toast.error(`Error al eliminar ingrediente: ${message}`);
-    },
+    onError: () => toast.error('Error al eliminar ingrediente'),
   });
-}
-
-function getErrorMessage(error: unknown): string {
-  if (typeof error === 'object' && error !== null && 'response' in error) {
-    const axiosError = error as { response?: { data?: { detail?: string } } };
-    return axiosError.response?.data?.detail || 'Error desconocido';
-  }
-  return 'Error de conexión';
 }

@@ -1,82 +1,130 @@
-// ─── Categoría ──────────────────────────────────────────────────────────────
+// ─── Auth ────────────────────────────────────────────────────────────────────
+
+export interface UserResponse {
+  id: number;
+  nombre: string;
+  apellido: string;
+  email: string;
+  roles: string[];
+  created_at: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  nombre: string;
+  apellido: string;
+  email: string;
+  password: string;
+}
+
+export interface TokenResponse {
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+  expires_in: number;
+}
+
+// ─── Categoría ───────────────────────────────────────────────────────────────
 
 export interface Categoria {
   id: number;
   nombre: string;
   descripcion: string | null;
+  parent_id?: number | null;
 }
 
 export interface CategoriaCreate {
   nombre: string;
   descripcion?: string | null;
+  parent_id?: number | null;
 }
 
 export interface CategoriaUpdate {
   nombre?: string;
   descripcion?: string | null;
+  parent_id?: number | null;
 }
 
-// ─── Ingrediente ────────────────────────────────────────────────────────────
+// ─── Ingrediente ─────────────────────────────────────────────────────────────
 
 export interface Ingrediente {
   id: number;
   nombre: string;
-  unidad: string;
+  descripcion: string | null;
+  es_alergeno: boolean;
 }
 
 export interface IngredienteCreate {
   nombre: string;
-  unidad: string;
+  descripcion?: string | null;
+  es_alergeno?: boolean;
 }
 
 export interface IngredienteUpdate {
   nombre?: string;
-  unidad?: string;
+  descripcion?: string | null;
+  es_alergeno?: boolean;
 }
 
-// ─── Producto ───────────────────────────────────────────────────────────────
+// ─── Producto ────────────────────────────────────────────────────────────────
+
+export interface ProductoIngredienteRead {
+  ingrediente: Ingrediente;
+  es_removible: boolean;
+}
 
 export interface Producto {
   id: number;
   nombre: string;
-  precio: number;
   descripcion: string | null;
-  categoria_id: number | null;
-  categoria: Categoria | null;
+  precio_base: number;
+  stock_cantidad: number;
+  disponible: boolean;
+  imagen_url: string | null;
+  categorias?: Categoria[];
 }
 
-export interface ProductoCreate {
+export interface ProductoDetail extends Producto {
+  ingredientes: ProductoIngredienteRead[];
+}
+
+// ─── Carrito ─────────────────────────────────────────────────────────────────
+
+export interface CartItem {
+  producto_id: number;
   nombre: string;
   precio: number;
-  descripcion?: string | null;
-  categoria_id?: number | null;
-}
-
-export interface ProductoUpdate {
-  nombre?: string;
-  precio?: number;
-  descripcion?: string | null;
-  categoria_id?: number | null;
-}
-
-// ─── ProductoIngrediente (tabla intermedia N:N) ─────────────────────────────
-
-export interface ProductoIngrediente {
-  producto_id: number;
-  ingrediente_id: number;
   cantidad: number;
-  ingrediente?: Ingrediente;
+  imagen_url?: string | null;
+  personalizacion?: number[];
 }
 
-// ─── Paginación ─────────────────────────────────────────────────────────────
+// ─── Paginación ──────────────────────────────────────────────────────────────
 
-export interface PaginationParams {
-  offset?: number;
-  limit?: number;
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  size: number;
+  pages: number;
 }
 
-// ─── API Error ──────────────────────────────────────────────────────────────
+// ─── UI ──────────────────────────────────────────────────────────────────────
+
+export interface ConfirmModalData {
+  open: boolean;
+  title: string;
+  message: string;
+  onConfirm: () => void;
+}
+
+// ─── Error API ───────────────────────────────────────────────────────────────
 
 export interface ApiError {
   detail: string;
+  code?: string;
 }

@@ -1,76 +1,32 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { productosApi } from '../api/productos';
-import type { ProductoCreate, ProductoUpdate, PaginationParams } from '../types';
-import toast from 'react-hot-toast';
+import { productosApi, type ProductosParams } from '../api/productosApi';
 
-const QUERY_KEY = 'productos';
-
-export function useProductos(params?: PaginationParams) {
+export function useProductos(params: ProductosParams = {}) {
   return useQuery({
-    queryKey: [QUERY_KEY, params],
-    queryFn: () => productosApi.getAll(params),
-    staleTime: 1000 * 30,
+    queryKey: ['productos', params],
+    queryFn: () => productosApi.list(params),
+    staleTime: 1000 * 60,
+    placeholderData: (prev) => prev,
   });
 }
 
 export function useProducto(id: number) {
   return useQuery({
-    queryKey: [QUERY_KEY, id],
+    queryKey: ['productos', id],
     queryFn: () => productosApi.getById(id),
     enabled: !!id,
+    staleTime: 1000 * 60,
   });
 }
 
-export function useCreateProducto() {
-  const queryClient = useQueryClient();
+export function useToggleDisponibilidad() {
+  const qc = useQueryClient();
+
   return useMutation({
-    mutationFn: (data: ProductoCreate) => productosApi.create(data),
+    mutationFn: ({ id, disponible }: { id: number; disponible: boolean }) =>
+      productosApi.toggleDisponibilidad(id, disponible),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
-      toast.success('Producto creado exitosamente');
-    },
-    onError: (error: unknown) => {
-      const message = getErrorMessage(error);
-      toast.error(`Error al crear producto: ${message}`);
+      qc.invalidateQueries({ queryKey: ['productos'] });
     },
   });
-}
-
-export function useUpdateProducto() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: ProductoUpdate }) =>
-      productosApi.update(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
-      toast.success('Producto actualizado exitosamente');
-    },
-    onError: (error: unknown) => {
-      const message = getErrorMessage(error);
-      toast.error(`Error al actualizar producto: ${message}`);
-    },
-  });
-}
-
-export function useDeleteProducto() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (id: number) => productosApi.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
-      toast.success('Producto eliminado exitosamente');
-    },
-    onError: (error: unknown) => {
-      const message = getErrorMessage(error);
-      toast.error(`Error al eliminar producto: ${message}`);
-    },
-  });
-}
-
-function getErrorMessage(error: unknown): string {
-  if (typeof error === 'object' && error !== null && 'response' in error) {
-    const axiosError = error as { response?: { data?: { detail?: string } } };
-    return axiosError.response?.data?.detail || 'Error desconocido';
-  }
-  return 'Error de conexión';
 }

@@ -1,0 +1,180 @@
+import { useState, useEffect, useCallback } from 'react';
+import { MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
+import { ProductoCard } from './ProductoCard';
+import { ProductCardSkeleton } from '../../components/Skeleton';
+import { useProductos } from '../../hooks/useProductos';
+import { useCategorias } from '../../hooks/useCategorias';
+
+const PAGE_SIZE = 12;
+
+export function CatalogoGrid() {
+  const [page, setPage] = useState(1);
+  const [searchInput, setSearchInput] = useState('');
+  const [search, setSearch] = useState('');
+  const [categoriaId, setCategoriaId] = useState<number | null>(null);
+
+  // Debounce de 300ms sobre la búsqueda
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearch(searchInput);
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  const { data, isLoading, isError, refetch } = useProductos({
+    page,
+    size: PAGE_SIZE,
+    search: search || undefined,
+    categoria_id: categoriaId ?? undefined,
+  });
+
+  const { data: categorias } = useCategorias();
+
+  const handleCategoriaChange = useCallback((id: number | null) => {
+    setCategoriaId(id);
+    setPage(1);
+  }, []);
+
+  const productos = data?.items ?? [];
+  const totalPages = data?.pages ?? 1;
+
+  return (
+    <div className="space-y-6">
+      {/* Barra de búsqueda y filtros */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="search"
+            placeholder="Buscar productos..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-gray-300 text-sm focus:border-[#2E75B6] focus:ring-2 focus:ring-[#2E75B6]/20 focus:outline-none"
+          />
+        </div>
+
+        {/* Filtro por categoría */}
+        {categorias && categorias.length > 0 && (
+          <div className="relative flex-shrink-0">
+            <FunnelIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <select
+              value={categoriaId ?? ''}
+              onChange={(e) =>
+                handleCategoriaChange(e.target.value ? Number(e.target.value) : null)
+              }
+              className="pl-9 pr-8 py-2.5 rounded-lg border border-gray-300 text-sm focus:border-[#2E75B6] focus:ring-2 focus:ring-[#2E75B6]/20 focus:outline-none bg-white appearance-none cursor-pointer"
+            >
+              <option value="">Todas las categorías</option>
+              {categorias.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+      </div>
+
+      {/* Error state */}
+      {isError && (
+        <div className="text-center py-12">
+          <p className="text-gray-500 mb-3">Error al cargar los productos.</p>
+          <button
+            onClick={() => refetch()}
+            className="text-sm text-[#2E75B6] hover:underline"
+          >
+            Reintentar
+          </button>
+        </div>
+      )}
+
+      {/* Grid */}
+      {isLoading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {Array.from({ length: PAGE_SIZE }).map((_, i) => (
+            <ProductCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : productos.length === 0 ? (
+        /* Empty state */
+        <div className="text-center py-16">
+          <svg
+            className="mx-auto w-16 h-16 text-gray-300 mb-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1}
+              d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <h3 className="text-gray-700 font-medium mb-1">No encontramos productos</h3>
+          <p className="text-sm text-gray-500">
+            {search
+              ? `No hay resultados para "${search}"`
+              : 'No hay productos disponibles en esta categoría'}
+          </p>
+          {(search || categoriaId) && (
+            <button
+              onClick={() => {
+                setSearchInput('');
+                setCategoriaId(null);
+              }}
+              className="mt-3 text-sm text-[#2E75B6] hover:underline"
+            >
+              Limpiar filtros
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {productos.map((p) => (
+            <ProductoCard key={p.id} producto={p} />
+          ))}
+        </div>
+      )}
+
+      {/* Paginación */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-1 pt-2">
+          <button
+            disabled={page === 1}
+            onClick={() => setPage((p) => p - 1)}
+            className="px-3 py-1.5 rounded-lg text-sm border border-gray-300 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            ‹
+          </button>
+
+          {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+            const pageNum = i + 1;
+            return (
+              <button
+                key={pageNum}
+                onClick={() => setPage(pageNum)}
+                className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${
+                  page === pageNum
+                    ? 'bg-[#2E75B6] border-[#2E75B6] text-white'
+                    : 'border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                {pageNum}
+              </button>
+            );
+          })}
+
+          <button
+            disabled={page === totalPages}
+            onClick={() => setPage((p) => p + 1)}
+            className="px-3 py-1.5 rounded-lg text-sm border border-gray-300 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            ›
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}

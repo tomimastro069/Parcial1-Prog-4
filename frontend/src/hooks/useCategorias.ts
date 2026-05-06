@@ -1,80 +1,58 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { categoriasApi } from '../api/categorias';
-import type { CategoriaCreate, CategoriaUpdate, PaginationParams } from '../types';
 import toast from 'react-hot-toast';
+import { categoriasApi } from '../api/categoriasApi';
+import type { CategoriaCreate, CategoriaUpdate } from '../types';
 
-const QUERY_KEY = 'categorias';
+const QK = 'categorias';
 
-export function useCategorias(params?: PaginationParams) {
+export function useCategorias() {
   return useQuery({
-    queryKey: [QUERY_KEY, params],
-    queryFn: () => categoriasApi.getAll(params),
-    staleTime: 1000 * 30, // 30 seconds
-  });
-}
-
-export function useCategoria(id: number) {
-  return useQuery({
-    queryKey: [QUERY_KEY, id],
-    queryFn: () => categoriasApi.getById(id),
-    enabled: !!id,
+    queryKey: [QK],
+    queryFn: () => categoriasApi.list(),
+    staleTime: 1000 * 60 * 5,
   });
 }
 
 export function useCreateCategoria() {
-  const queryClient = useQueryClient();
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: CategoriaCreate) => categoriasApi.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
-      toast.success('Categoría creada exitosamente');
+      qc.invalidateQueries({ queryKey: [QK] });
+      toast.success('Categoría creada');
     },
-    onError: (error: unknown) => {
-      const message = getErrorMessage(error);
-      toast.error(`Error al crear categoría: ${message}`);
-    },
+    onError: () => toast.error('Error al crear categoría'),
   });
 }
 
 export function useUpdateCategoria() {
-  const queryClient = useQueryClient();
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: CategoriaUpdate }) =>
       categoriasApi.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
-      toast.success('Categoría actualizada exitosamente');
+      qc.invalidateQueries({ queryKey: [QK] });
+      toast.success('Categoría actualizada');
     },
-    onError: (error: unknown) => {
-      const message = getErrorMessage(error);
-      toast.error(`Error al actualizar categoría: ${message}`);
-    },
+    onError: () => toast.error('Error al actualizar categoría'),
   });
 }
 
 export function useDeleteCategoria() {
-  const queryClient = useQueryClient();
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: number) => categoriasApi.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEY] });
-      toast.success('Categoría eliminada exitosamente');
+      qc.invalidateQueries({ queryKey: [QK] });
+      toast.success('Categoría eliminada');
     },
-    onError: (error: unknown) => {
-      const message = getErrorMessage(error);
-      toast.error(`Error al eliminar categoría: ${message}`);
+    onError: (err: unknown) => {
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status === 409) {
+        toast.error('No se puede eliminar: tiene productos asociados.');
+      } else {
+        toast.error('Error al eliminar categoría');
+      }
     },
   });
-}
-
-function getErrorMessage(error: unknown): string {
-  if (
-    typeof error === 'object' &&
-    error !== null &&
-    'response' in error
-  ) {
-    const axiosError = error as { response?: { data?: { detail?: string } } };
-    return axiosError.response?.data?.detail || 'Error desconocido';
-  }
-  return 'Error de conexión';
 }
