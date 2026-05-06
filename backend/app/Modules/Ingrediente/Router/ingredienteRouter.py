@@ -5,6 +5,8 @@ from typing import Annotated
 from app.Core.database import get_session
 from app.Modules.Ingrediente.Schema.ingredienteSchema import IngredienteCreate, IngredienteRead, IngredienteUpdate
 from app.Modules.Ingrediente.Service import ingredienteService as ingrediente_service
+from app.Core.Dependencies.dependencies import role_required
+from app.Modules.Usuarios.usuario import UserRole
 
 router = APIRouter()
 
@@ -26,12 +28,17 @@ def obtener_ingrediente(
     return ingrediente_service.get_by_id(session, ing_id)
 
 
-@router.post("/", response_model=IngredienteRead, status_code=status.HTTP_201_CREATED)
+@router.post("/", 
+             response_model=IngredienteRead, 
+             status_code=status.HTTP_201_CREATED,
+             dependencies=[Depends(role_required([UserRole.ADMIN, UserRole.STOCK]))])
 def crear_ingrediente(data: IngredienteCreate, session: Session = Depends(get_session)):
     return ingrediente_service.create(session, data)
 
 
-@router.patch("/{ing_id}", response_model=IngredienteRead)
+@router.patch("/{ing_id}", 
+              response_model=IngredienteRead,
+              dependencies=[Depends(role_required([UserRole.ADMIN, UserRole.STOCK]))])
 def editar_ingrediente(
     ing_id: Annotated[int, Path(gt=0)],
     data: IngredienteUpdate,
@@ -40,7 +47,9 @@ def editar_ingrediente(
     return ingrediente_service.update(session, ing_id, data)
 
 
-@router.delete("/{ing_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{ing_id}", 
+               status_code=status.HTTP_204_NO_CONTENT,
+               dependencies=[Depends(role_required([UserRole.ADMIN]))])
 def eliminar_ingrediente(
     ing_id: Annotated[int, Path(gt=0)],
     session: Session = Depends(get_session),

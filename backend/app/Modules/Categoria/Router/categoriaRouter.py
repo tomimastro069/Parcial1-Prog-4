@@ -5,6 +5,8 @@ from typing import Annotated
 from app.Core.database import get_session
 from app.Modules.Categoria.Schema.categoriaSchema import CategoriaCreate, CategoriaRead, CategoriaUpdate
 from app.Modules.Categoria.Service import categoriaService as categoria_service
+from app.Core.Dependencies.dependencies import role_required
+from app.Modules.Usuarios.usuario import UserRole
 
 router = APIRouter()
 
@@ -26,12 +28,17 @@ def obtener_categoria(
     return categoria_service.get_by_id(session, categoria_id)
 
 
-@router.post("/", response_model=CategoriaRead, status_code=status.HTTP_201_CREATED)
+@router.post("/", 
+             response_model=CategoriaRead, 
+             status_code=status.HTTP_201_CREATED,
+             dependencies=[Depends(role_required([UserRole.ADMIN]))])
 def crear_categoria(data: CategoriaCreate, session: Session = Depends(get_session)):
     return categoria_service.create(session, data)
 
 
-@router.patch("/{categoria_id}", response_model=CategoriaRead)
+@router.patch("/{categoria_id}", 
+              response_model=CategoriaRead,
+              dependencies=[Depends(role_required([UserRole.ADMIN]))])
 def editar_categoria(
     categoria_id: Annotated[int, Path(gt=0)],
     data: CategoriaUpdate,
@@ -40,7 +47,9 @@ def editar_categoria(
     return categoria_service.update(session, categoria_id, data)
 
 
-@router.delete("/{categoria_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{categoria_id}", 
+               status_code=status.HTTP_204_NO_CONTENT,
+               dependencies=[Depends(role_required([UserRole.ADMIN]))])
 def eliminar_categoria(
     categoria_id: Annotated[int, Path(gt=0)],
     session: Session = Depends(get_session),

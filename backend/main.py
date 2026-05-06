@@ -8,6 +8,7 @@ from app.Core.database import create_db_and_tables
 from app.Modules.Categoria.Router.categoriaRouter import router as categoria_router
 from app.Modules.Producto.Router.productoRouter import router as producto_router
 from app.Modules.Ingrediente.Router.ingredienteRouter import router as ingrediente_router
+from app.Modules.Auth.Router.authRouter import router as auth_router
 
 # Importar modelos para que SQLModel los registre en metadata
 from app.Modules.Categoria.Model.categoria import Categoria  # noqa: F401
@@ -15,6 +16,8 @@ from app.Modules.Producto.Model.producto import Producto  # noqa: F401
 from app.Modules.Producto.Model.productoIngrediente import ProductoIngrediente  # noqa: F401
 from app.Modules.Producto.Model.productoCategoria import ProductoCategoria  # noqa: F401
 from app.Modules.Ingrediente.Model.ingrediente import Ingrediente  # noqa: F401
+from app.Modules.Usuarios.usuario import Usuario  # noqa: F401
+from app.Modules.Auth.Model.refreshToken import RefreshToken  # noqa: F401
 
 @asynccontextmanager
 async def lifespan(_: fastapi.FastAPI):
@@ -40,7 +43,7 @@ def read_root():
 app.include_router(categoria_router, prefix="/categoria", tags=["categoria"])
 app.include_router(producto_router, prefix="/producto", tags=["producto"])
 app.include_router(ingrediente_router, prefix="/ingrediente", tags=["ingrediente"])
-
+app.include_router(auth_router, prefix="/auth", tags=["auth"])
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True, reload_excludes=[".venv"])
