@@ -16,3 +16,9 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
     user_email: str
     rol: str
+
+class LogoutRequest(BaseModel):
+    refresh_token: str
+
+class RefreshRequest(BaseModel):
+    refresh_token: str
