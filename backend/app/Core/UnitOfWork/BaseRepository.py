@@ -57,7 +57,9 @@ class BaseRepository(Generic[T]):
         statement = select(self.model)
         for field, value in filters.items():
             statement = statement.where(getattr(self.model, field) == value)
-        return list(self.session.exec(statement).offset(offset).limit(limit).all())
+        
+        statement = statement.offset(offset).limit(limit)
+        return list(self.session.exec(statement).all())
 
     def first_by(self, **filters: Any) -> Optional[T]:
         """Retorna el primer registro que cumpla los filtros."""

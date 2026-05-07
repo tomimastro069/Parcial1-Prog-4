@@ -65,7 +65,13 @@ export const useAuthStore = create<AuthState>()(
 
       setUsuario: (usuario) => set({ usuario }),
 
-      hasRole: (role) => get().usuario?.roles.includes(role) ?? false,
+      hasRole: (role) => {
+        const u = get().usuario as (typeof get extends () => infer S ? S : never)['usuario'] & { rol?: string };
+        if (!u) return false;
+        const roles = (u.roles && u.roles.length > 0) ? u.roles : (u.rol ? [u.rol] : []);
+        return roles.includes(role);
+      },
+
     }),
     {
       name: 'foodstore-auth',
@@ -74,6 +80,7 @@ export const useAuthStore = create<AuthState>()(
         accessToken: state.accessToken,
         refreshToken: state.refreshToken,
         isAuthenticated: state.isAuthenticated,
+        usuario: state.usuario,
       }),
     }
   )

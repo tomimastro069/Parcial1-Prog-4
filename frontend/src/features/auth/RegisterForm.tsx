@@ -14,10 +14,10 @@ export function RegisterForm() {
       password: '',
       confirmarPassword: '',
     },
-    onSubmit: async ({ value }) => {
+    onSubmit: ({ value }) => {
       const { confirmarPassword: _, ...data } = value;
       void _;
-      await register.mutateAsync(data);
+      register.mutate(data);
     },
   });
 
@@ -84,8 +84,8 @@ export function RegisterForm() {
             !value
               ? 'Requerido'
               : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
-              ? 'Email inválido'
-              : undefined,
+                ? 'Email inválido'
+                : undefined,
         }}
       >
         {(field) => (

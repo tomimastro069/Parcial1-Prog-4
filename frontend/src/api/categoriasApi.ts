@@ -12,7 +12,7 @@ export const categoriasApi = {
     axiosClient.post<Categoria>('/api/v1/categorias', data).then((r) => r.data),
 
   update: (id: number, data: CategoriaUpdate) =>
-    axiosClient.put<Categoria>(`/api/v1/categorias/${id}`, data).then((r) => r.data),
+    axiosClient.patch<Categoria>(`/api/v1/categorias/${id}`, data).then((r) => r.data),
 
   delete: (id: number) =>
     axiosClient.delete(`/api/v1/categorias/${id}`),

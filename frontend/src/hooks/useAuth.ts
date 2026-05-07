@@ -41,10 +41,11 @@ export function useRegister() {
     onError: (err: unknown) => {
       const msg =
         (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
-      if (msg?.includes('409') || msg?.toLowerCase().includes('exist')) {
-        toast.error('El email ya está registrado.');
+      
+      if (msg?.toLowerCase().includes('ya está registrado') || msg?.includes('400')) {
+        toast.error('Este email ya tiene una cuenta asociada.');
       } else {
-        toast.error('Error al registrarse. Intentá de nuevo.');
+        toast.error('Error al registrarse. Revisá los datos e intentá de nuevo.');
       }
     },
   });
