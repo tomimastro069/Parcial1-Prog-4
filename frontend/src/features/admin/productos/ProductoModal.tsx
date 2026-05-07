@@ -16,7 +16,7 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
   const crear = useCreateProducto();
   const actualizar = useUpdateProducto();
   const { data: categorias } = useCategorias();
-  const { data: ingredientes } = useIngredientes();
+  const { data: ingredientes, isLoading: loadingIngredientes } = useIngredientes();
 
   const [nombre, setNombre] = useState('');
   const [precio, setPrecio] = useState('');
@@ -173,41 +173,53 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
         )}
 
         {/* Ingredientes */}
-        {ingredientes && ingredientes.length > 0 && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Ingredientes</label>
-            <div className="max-h-40 overflow-y-auto space-y-1.5 border border-gray-200 rounded-lg p-2">
-              {ingredientes.map((ing) => {
-                const sel = ingredientesSeleccionados.find((i) => i.ingrediente_id === ing.id);
-                return (
-                  <div key={ing.id} className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => toggleIngrediente(ing.id)}
-                      className={`flex-1 text-left px-2 py-1 rounded text-xs font-medium border transition-colors ${
-                        sel
-                          ? 'bg-[#2E75B6]/10 text-[#2E75B6] border-[#2E75B6]/30'
-                          : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      {ing.nombre}
-                    </button>
-                    {sel && (
-                      <input
-                        type="number"
-                        min="0.1"
-                        step="0.1"
-                        value={sel.cantidad}
-                        onChange={(e) => setCantidad(ing.id, parseFloat(e.target.value) || 1)}
-                        className="w-16 rounded border border-gray-300 px-2 py-1 text-xs focus:border-[#2E75B6] focus:outline-none"
-                      />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">Ingredientes</label>
+          <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-2">
+            {loadingIngredientes ? (
+              <p className="text-xs text-gray-400 py-2 text-center">Cargando ingredientes...</p>
+            ) : !ingredientes || ingredientes.length === 0 ? (
+              <p className="text-xs text-gray-400 py-2 text-center">
+                No hay ingredientes disponibles. Crealos desde la pestaña Ingredientes.
+              </p>
+            ) : (
+              <div className="space-y-1.5">
+                {ingredientes.map((ing) => {
+                  const sel = ingredientesSeleccionados.find((i) => i.ingrediente_id === ing.id);
+                  return (
+                    <div key={ing.id} className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => toggleIngrediente(ing.id)}
+                        className={`flex-1 text-left px-2 py-1.5 rounded text-xs font-medium border transition-colors ${
+                          sel
+                            ? 'bg-[#2E75B6]/10 text-[#2E75B6] border-[#2E75B6]/30'
+                            : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        {ing.nombre}
+                        {ing.unidad && <span className="text-gray-400 ml-1">({ing.unidad})</span>}
+                      </button>
+                      {sel && (
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs text-gray-400">Cant.</span>
+                          <input
+                            type="number"
+                            min="0.1"
+                            step="0.1"
+                            value={sel.cantidad}
+                            onChange={(e) => setCantidad(ing.id, parseFloat(e.target.value) || 1)}
+                            className="w-16 rounded border border-gray-300 px-2 py-1 text-xs focus:border-[#2E75B6] focus:outline-none"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
-        )}
+        </div>
 
         <div className="flex justify-end gap-3 pt-2">
           <Button variant="secondary" type="button" onClick={onClose}>

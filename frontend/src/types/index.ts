@@ -54,6 +54,7 @@ export interface CategoriaUpdate {
 export interface Ingrediente {
   id: number;
   nombre: string;
+  unidad?: string;
   descripcion: string | null;
   es_alergeno: boolean;
 }
