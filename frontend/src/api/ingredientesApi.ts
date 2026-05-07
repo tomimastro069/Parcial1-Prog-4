@@ -1,10 +1,10 @@
 import axiosClient from './axiosClient';
-import type { Ingrediente, IngredienteCreate, IngredienteUpdate } from '../types';
+import type { Ingrediente, IngredienteCreate, IngredienteUpdate, PaginatedResponse } from '../types';
 
 export const ingredientesApi = {
-  list: (offset = 0, limit = 100) =>
+  list: (params: { page?: number; size?: number } = {}) =>
     axiosClient
-      .get<Ingrediente[]>('/api/v1/ingredientes', { params: { offset, limit } })
+      .get<PaginatedResponse<Ingrediente>>('/api/v1/ingredientes', { params })
       .then((r) => r.data),
 
   getById: (id: number) =>

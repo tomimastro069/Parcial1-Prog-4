@@ -18,7 +18,7 @@ export function ProductoCard({ producto }: ProductoCardProps) {
     addItem({
       producto_id: producto.id,
       nombre: producto.nombre,
-      precio: producto.precio_base,
+      precio: producto.precio,
       cantidad: 1,
       imagen_url: producto.imagen_url,
     });
@@ -45,7 +45,7 @@ export function ProductoCard({ producto }: ProductoCardProps) {
           )}
 
           {/* Badge sin stock */}
-          {!producto.disponible && (
+          {!producto.is_active && (
             <div className="absolute inset-0 bg-gray-900/40 flex items-center justify-center">
               <Badge variant="sinstock" className="text-sm px-3 py-1">
                 Sin stock
@@ -68,11 +68,11 @@ export function ProductoCard({ producto }: ProductoCardProps) {
 
         <div className="flex items-center justify-between mt-3">
           <span className="text-lg font-bold text-[#1F3864]">
-            ${producto.precio_base.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+            ${producto.precio.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
           </span>
           <Button
             size="sm"
-            disabled={!producto.disponible}
+            disabled={!producto.is_active}
             onClick={handleAgregar}
             className="gap-1"
           >

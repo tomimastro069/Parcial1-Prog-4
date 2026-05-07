@@ -6,10 +6,20 @@ import { TableRowSkeleton } from '../../../components/Skeleton';
 import { IngredienteModal } from './IngredienteModal';
 import { useIngredientes, useDeleteIngrediente } from '../../../hooks/useIngredientes';
 import { useUIStore } from '../../../store/uiStore';
+import { Pagination } from '../../../components/Pagination';
 import type { Ingrediente } from '../../../types';
 
+const PAGE_SIZE = 10;
+
 export function IngredientesTable() {
-  const { data: ingredientes, isLoading, isError } = useIngredientes();
+  const [page, setPage] = useState(1);
+  const { data, isLoading, isError } = useIngredientes({ page, size: PAGE_SIZE });
+
+  // Acceso defensivo
+  const responseData = data as any;
+  const ingredientes: Ingrediente[] = responseData?.items || [];
+  const totalPages = responseData?.pages || 0;
+
   const eliminar = useDeleteIngrediente();
   const openConfirm = useUIStore((s) => s.openConfirmModal);
 
@@ -111,6 +121,16 @@ export function IngredientesTable() {
         {!isLoading && ingredientes?.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500 text-sm">No hay ingredientes. Creá el primero.</p>
+          </div>
+        )}
+
+        {!isLoading && !isError && totalPages > 1 && (
+          <div className="mt-6 flex justify-center">
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
           </div>
         )}
       </div>

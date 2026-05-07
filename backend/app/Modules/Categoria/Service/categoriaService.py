@@ -1,16 +1,31 @@
 from fastapi import HTTPException, status
 from app.Modules.Categoria.Model.categoria import Categoria
-from app.Modules.Categoria.Schema.categoriaSchema import CategoriaCreate, CategoriaUpdate
+from app.Modules.Categoria.Schema.categoriaSchema import CategoriaCreate, CategoriaUpdate, CategoriaRead
 from app.Core.UnitOfWork.unit_of_work import UnitOfWork
+from app.Core.Schema.pagination import PaginatedResponse
 from app.Modules.Auditoria.Model.auditoria import Auditoria
 
 class CategoriaService:
     def __init__(self, uow: UnitOfWork):
         self.uow = uow
 
-    def get_all(self, offset: int = 0, limit: int = 10) -> list[Categoria]:
+    def get_all(self, page: int = 1, size: int = 10) -> PaginatedResponse[CategoriaRead]:
         with self.uow:
-            return self.uow.categorias.filter_by(is_active=True, offset=offset, limit=limit)
+            page = max(1, page)
+            offset = max(0, (page - 1) * size)
+            categorias_db = self.uow.categorias.get_list(offset=offset, limit=size)
+            total = self.uow.categorias.count()
+            
+            items = [CategoriaRead.model_validate(c) for c in categorias_db]
+            pages = (total + size - 1) // size
+            
+            return PaginatedResponse(
+                items=items,
+                total=total,
+                page=page,
+                size=size,
+                pages=pages
+            )
 
     def get_by_id(self, categoria_id: int) -> Categoria:
         with self.uow:

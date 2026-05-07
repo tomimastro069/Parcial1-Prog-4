@@ -9,6 +9,7 @@ from app.Modules.Producto.Schema.productoSchema import (
 )
 from app.Core.UnitOfWork.unit_of_work import UnitOfWork
 from app.Modules.Auditoria.Model.auditoria import Auditoria
+from app.Core.Schema.pagination import PaginatedResponse
 
 class ProductoService:
     def __init__(self, uow: UnitOfWork):
@@ -45,22 +46,23 @@ class ProductoService:
             ingredientes=ingredientes,
         )
 
-    def get_all(self, page: int = 1, size: int = 10) -> dict:
+    def get_all(self, page: int = 1, size: int = 10) -> PaginatedResponse[ProductoRead]:
         with self.uow:
-            offset = (page - 1) * size
+            page = max(1, page)
+            offset = max(0, (page - 1) * size)
             productos = self.uow.productos.filter_by(is_active=True, offset=offset, limit=size)
             total = self.uow.productos.count_by(is_active=True)
             
             items = [self._build_read(p) for p in productos]
             pages = (total + size - 1) // size
             
-            return {
-                "items": items,
-                "total": total,
-                "page": page,
-                "size": size,
-                "pages": pages
-            }
+            return PaginatedResponse(
+                items=items,
+                total=total,
+                page=page,
+                size=size,
+                pages=pages
+            )
 
     def get_by_id(self, producto_id: int) -> ProductoRead:
         with self.uow:
