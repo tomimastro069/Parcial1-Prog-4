@@ -40,14 +40,27 @@ class ProductoService:
             nombre=p.nombre,
             precio=p.precio,
             descripcion=p.descripcion,
+            is_active=p.is_active,
             categorias=categorias,
             ingredientes=ingredientes,
         )
 
-    def get_all(self, offset: int = 0, limit: int = 10) -> list[ProductoRead]:
+    def get_all(self, page: int = 1, size: int = 10) -> dict:
         with self.uow:
-            productos = self.uow.productos.filter_by(is_active=True, offset=offset, limit=limit)
-            return [self._build_read(p) for p in productos]
+            offset = (page - 1) * size
+            productos = self.uow.productos.filter_by(is_active=True, offset=offset, limit=size)
+            total = self.uow.productos.count_by(is_active=True)
+            
+            items = [self._build_read(p) for p in productos]
+            pages = (total + size - 1) // size
+            
+            return {
+                "items": items,
+                "total": total,
+                "page": page,
+                "size": size,
+                "pages": pages
+            }
 
     def get_by_id(self, producto_id: int) -> ProductoRead:
         with self.uow:
