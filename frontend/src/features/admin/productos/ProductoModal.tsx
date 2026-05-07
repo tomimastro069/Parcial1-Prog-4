@@ -28,7 +28,7 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
   useEffect(() => {
     if (editando) {
       setNombre(editando.nombre);
-      setPrecio(String(editando.precio));
+      setPrecio(String(editando.precio_base));
       setDescripcion(editando.descripcion ?? '');
       setCategoriasSeleccionadas(editando.categorias.map((c) => c.id));
       setIngredientesSeleccionados(

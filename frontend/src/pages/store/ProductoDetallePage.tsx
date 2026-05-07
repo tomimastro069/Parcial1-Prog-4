@@ -52,7 +52,7 @@ export default function ProductoDetallePage() {
     );
   }
 
-  const alergenosDelProducto = producto.ingredientes?.filter((pi) => pi.ingrediente.es_alergeno) ?? [];
+  const alergenosDelProducto = producto.ingredientes?.filter((ing) => ing.es_alergeno) ?? [];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -106,9 +106,9 @@ export default function ProductoDetallePage() {
                     ⚠️ Contiene alérgenos
                   </p>
                   <div className="flex flex-wrap gap-1.5">
-                    {alergenosDelProducto.map((pi) => (
-                      <Badge key={pi.ingrediente.id} variant="alergeno">
-                        {pi.ingrediente.nombre}
+                    {alergenosDelProducto.map((ing) => (
+                      <Badge key={ing.id} variant="alergeno">
+                        {ing.nombre}
                       </Badge>
                     ))}
                   </div>
@@ -120,17 +120,17 @@ export default function ProductoDetallePage() {
                 <div className="mt-5">
                   <p className="text-sm font-medium text-gray-700 mb-2">Ingredientes</p>
                   <div className="flex flex-wrap gap-1.5">
-                    {producto.ingredientes.map((pi) => (
+                    {producto.ingredientes.map((ing) => (
                       <span
-                        key={pi.ingrediente.id}
+                        key={ing.id}
                         className={`inline-flex items-center gap-1 text-xs rounded-full px-2.5 py-1 ${
-                          pi.ingrediente.es_alergeno
+                          ing.es_alergeno
                             ? 'bg-orange-50 text-orange-700 border border-orange-200'
                             : 'bg-gray-100 text-gray-600'
                         }`}
                       >
-                        {pi.ingrediente.nombre}
-                        {pi.ingrediente.es_alergeno && ' ⚠️'}
+                        {ing.nombre}
+                        {ing.es_alergeno && ' ⚠️'}
                       </span>
                     ))}
                   </div>

@@ -17,6 +17,8 @@ class IngredienteEnProducto(SQLModel):
     nombre: str
     unidad: str
     cantidad: float
+    es_alergeno: bool = False
+    descripcion: Optional[str] = None
 
 
 class ProductoIngredienteInput(SQLModel):
@@ -37,8 +39,10 @@ class ProductoCreate(SQLModel):
 class ProductoRead(SQLModel):
     id: int
     nombre: str
-    precio: float
+    precio_base: float
     descripcion: Optional[str] = None
+    imagen_url: Optional[str] = None
+    disponible: bool = True
     categorias: List[CategoriaEnProducto] = []
     ingredientes: List[IngredienteEnProducto] = []
 

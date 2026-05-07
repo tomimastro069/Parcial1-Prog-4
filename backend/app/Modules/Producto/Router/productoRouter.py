@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Path, Query, status
-from typing import Annotated
+from typing import Annotated, Optional
 
 from app.Core.database import get_session
 from app.Modules.Producto.Schema.productoSchema import ProductoCreate, ProductoRead, ProductoUpdate
@@ -10,14 +10,16 @@ from app.Modules.Usuarios.usuario import UserRole, Usuario
 router = APIRouter()
 
 
-@router.get("/", response_model=list[ProductoRead])
+@router.get("/")
 def listar_productos(
     uow=Depends(get_uow),
-    offset: Annotated[int, Query(ge=0)] = 0,
-    limit: Annotated[int, Query(ge=1, le=100)] = 10,
+    page: Annotated[int, Query(ge=1)] = 1,
+    size: Annotated[int, Query(ge=1, le=100)] = 12,
+    search: Annotated[Optional[str], Query()] = None,
+    categoria_id: Annotated[Optional[int], Query()] = None,
 ):
     service = ProductoService(uow)
-    return service.get_all(offset, limit)
+    return service.get_all_paginated(page, size, search, categoria_id)
 
 
 @router.get("/{producto_id}", response_model=ProductoRead)

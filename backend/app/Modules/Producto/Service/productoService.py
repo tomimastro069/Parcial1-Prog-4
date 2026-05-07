@@ -1,5 +1,8 @@
+import math
+from sqlmodel import select, func
 from fastapi import HTTPException, status
 from app.Modules.Producto.Model.producto import Producto
+from app.Modules.Producto.Model.productoCategoria import ProductoCategoria
 from app.Modules.Producto.Schema.productoSchema import (
     ProductoCreate,
     ProductoUpdate,
@@ -30,6 +33,8 @@ class ProductoService:
                 nombre=ing.nombre,
                 unidad=ing.unidad,
                 cantidad=pi.cantidad,
+                es_alergeno=ing.es_alergeno,
+                descripcion=ing.descripcion,
             )
             for pi in pis
             if (ing := self.uow.ingredientes.get(pi.ingrediente_id))
@@ -38,8 +43,10 @@ class ProductoService:
         return ProductoRead(
             id=p.id,
             nombre=p.nombre,
-            precio=p.precio,
+            precio_base=p.precio,
             descripcion=p.descripcion,
+            imagen_url=None,
+            disponible=p.is_active,
             categorias=categorias,
             ingredientes=ingredientes,
         )
@@ -48,6 +55,41 @@ class ProductoService:
         with self.uow:
             productos = self.uow.productos.filter_by(is_active=True, offset=offset, limit=limit)
             return [self._build_read(p) for p in productos]
+
+    def get_all_paginated(
+        self,
+        page: int = 1,
+        size: int = 12,
+        search: str | None = None,
+        categoria_id: int | None = None,
+    ) -> dict:
+        with self.uow:
+            query = select(Producto).where(Producto.is_active == True)
+            count_query = select(func.count(Producto.id)).where(Producto.is_active == True)
+
+            if search:
+                query = query.where(Producto.nombre.ilike(f"%{search}%"))
+                count_query = count_query.where(Producto.nombre.ilike(f"%{search}%"))
+
+            if categoria_id:
+                query = query.join(
+                    ProductoCategoria, Producto.id == ProductoCategoria.producto_id
+                ).where(ProductoCategoria.categoria_id == categoria_id)
+                count_query = count_query.join(
+                    ProductoCategoria, Producto.id == ProductoCategoria.producto_id
+                ).where(ProductoCategoria.categoria_id == categoria_id)
+
+            total = self.uow.session.exec(count_query).one()
+            offset = (page - 1) * size
+            productos = self.uow.session.exec(query.offset(offset).limit(size)).all()
+
+            return {
+                "items": [self._build_read(p) for p in productos],
+                "total": total,
+                "page": page,
+                "size": size,
+                "pages": max(1, math.ceil(total / size)),
+            }
 
     def get_by_id(self, producto_id: int) -> ProductoRead:
         with self.uow:

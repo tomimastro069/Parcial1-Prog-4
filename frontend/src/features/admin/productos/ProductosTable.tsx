@@ -70,7 +70,7 @@ export function ProductosTable() {
                         {p.descripcion ?? <span className="text-gray-300">—</span>}
                       </td>
                       <td className="px-4 py-3 text-gray-700 font-medium">
-                        ${p.precio.toFixed(2)}
+                        ${p.precio_base.toFixed(2)}
                       </td>
                       <td className="px-4 py-3 hidden lg:table-cell">
                         {p.categorias.length > 0 ? (

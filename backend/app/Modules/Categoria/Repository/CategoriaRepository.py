@@ -1,5 +1,6 @@
-from sqlmodel import Session
+from sqlmodel import Session, select
 from app.Modules.Categoria.Model.categoria import Categoria
+from app.Modules.Producto.Model.productoCategoria import ProductoCategoria
 from app.Core.UnitOfWork.BaseRepository import BaseRepository
 
 
