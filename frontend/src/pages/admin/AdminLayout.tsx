@@ -3,6 +3,7 @@ import {
   HomeIcon,
   TagIcon,
   BeakerIcon,
+  ShoppingBagIcon,
   Bars3Icon,
   XMarkIcon,
   ArrowRightOnRectangleIcon,
@@ -13,6 +14,7 @@ import { ConfirmModal } from '../../components/ConfirmModal';
 
 const navItems = [
   { to: '/admin/dashboard', label: 'Dashboard', icon: HomeIcon, end: true },
+  { to: '/admin/productos', label: 'Productos', icon: ShoppingBagIcon },
   { to: '/admin/categorias', label: 'Categorías', icon: TagIcon },
   { to: '/admin/ingredientes', label: 'Ingredientes', icon: BeakerIcon },
 ];
