@@ -90,10 +90,10 @@ export interface ProductoIngredienteInput {
 export interface ProductoRead {
   id: number;
   nombre: string;
-  precio_base: number;
+  precio: number;
   descripcion: string | null;
   imagen_url: string | null;
-  disponible: boolean;
+  is_active: boolean;
   categorias: { id: number; nombre: string }[];
   ingredientes: ProductoIngredienteRead[];
 }

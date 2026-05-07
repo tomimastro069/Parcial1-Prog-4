@@ -2,13 +2,21 @@ import { useState } from 'react';
 import { PencilIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { Button } from '../../../components/Button';
 import { TableRowSkeleton } from '../../../components/Skeleton';
+import { Pagination } from '../../../components/Pagination';
 import { ProductoModal } from './ProductoModal';
 import { useProductosAdmin, useDeleteProducto } from '../../../hooks/useProductos';
 import { useUIStore } from '../../../store/uiStore';
 import type { ProductoRead } from '../../../types';
 
+const PAGE_SIZE = 10;
+
 export function ProductosTable() {
-  const { data: productos, isLoading, isError } = useProductosAdmin();
+  const [page, setPage] = useState(1);
+  const { data, isLoading, isError } = useProductosAdmin({ page, size: PAGE_SIZE });
+
+  const productos: ProductoRead[] = (data as any)?.items ?? [];
+  const totalPages: number = (data as any)?.pages ?? 0;
+
   const eliminar = useDeleteProducto();
   const openConfirm = useUIStore((s) => s.openConfirmModal);
 
@@ -70,7 +78,7 @@ export function ProductosTable() {
                         {p.descripcion ?? <span className="text-gray-300">—</span>}
                       </td>
                       <td className="px-4 py-3 text-gray-700 font-medium">
-                        ${p.precio_base.toFixed(2)}
+                        ${p.precio.toFixed(2)}
                       </td>
                       <td className="px-4 py-3 hidden lg:table-cell">
                         {p.categorias.length > 0 ? (
@@ -115,6 +123,16 @@ export function ProductosTable() {
         {!isLoading && productos?.length === 0 && (
           <div className="text-center py-12">
             <p className="text-gray-500 text-sm">No hay productos. Creá el primero.</p>
+          </div>
+        )}
+
+        {!isLoading && !isError && totalPages > 1 && (
+          <div className="mt-6 flex justify-center">
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
           </div>
         )}
       </div>

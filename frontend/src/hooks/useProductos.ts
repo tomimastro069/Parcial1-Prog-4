@@ -33,11 +33,12 @@ export function useToggleDisponibilidad() {
   });
 }
 
-export function useProductosAdmin() {
+export function useProductosAdmin(params: { page?: number; size?: number } = {}) {
   return useQuery({
-    queryKey: ['productos-admin'],
-    queryFn: () => productosApi.listAdmin(),
+    queryKey: ['productos-admin', params],
+    queryFn: () => productosApi.listAdmin(params),
     staleTime: 1000 * 60,
+    placeholderData: (prev) => prev,
   });
 }
 
@@ -46,7 +47,7 @@ export function useCreateProducto() {
   return useMutation({
     mutationFn: (data: ProductoCreate) => productosApi.create(data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['productos-admin'] });
+      qc.invalidateQueries({ queryKey: ['productos-admin'], exact: false });
       toast.success('Producto creado');
     },
     onError: () => toast.error('Error al crear producto'),
@@ -59,7 +60,7 @@ export function useUpdateProducto() {
     mutationFn: ({ id, data }: { id: number; data: ProductoUpdate }) =>
       productosApi.update(id, data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['productos-admin'] });
+      qc.invalidateQueries({ queryKey: ['productos-admin'], exact: false });
       toast.success('Producto actualizado');
     },
     onError: () => toast.error('Error al actualizar producto'),
@@ -71,7 +72,7 @@ export function useDeleteProducto() {
   return useMutation({
     mutationFn: (id: number) => productosApi.delete(id),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['productos-admin'] });
+      qc.invalidateQueries({ queryKey: ['productos-admin'], exact: false });
       toast.success('Producto eliminado');
     },
     onError: () => toast.error('Error al eliminar producto'),

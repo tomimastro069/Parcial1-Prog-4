@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, Path, Query, status
 from typing import Annotated, Optional
 
-from app.Core.database import get_session
 from app.Modules.Producto.Schema.productoSchema import ProductoCreate, ProductoRead, ProductoUpdate
 from app.Modules.Producto.Service.productoService import ProductoService
 from app.Core.Dependencies.dependencies import role_required, get_uow
@@ -20,7 +19,7 @@ def listar_productos(
     categoria_id: Annotated[int | None, Query()] = None,
 ):
     service = ProductoService(uow)
-    return service.get_all(page=page, size=size, search=search, categoria_id=categoria_id)
+    return service.get_all_paginated(page=page, size=size, search=search, categoria_id=categoria_id)
 
 
 @router.get("/{producto_id}", response_model=ProductoRead)

@@ -39,7 +39,7 @@ class ProductoCreate(SQLModel):
 class ProductoRead(SQLModel):
     id: int
     nombre: str
-    precio_base: float
+    precio: float
     descripcion: Optional[str] = None
     imagen_url: Optional[str] = None
     is_active: bool = True

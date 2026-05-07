@@ -15,8 +15,10 @@ interface Props {
 export function ProductoModal({ isOpen, onClose, editando }: Props) {
   const crear = useCreateProducto();
   const actualizar = useUpdateProducto();
-  const { data: categorias } = useCategorias();
-  const { data: ingredientes, isLoading: loadingIngredientes } = useIngredientes();
+  const { data: catData } = useCategorias({ size: 1000 });
+  const { data: ingData, isLoading: loadingIngredientes } = useIngredientes({ size: 1000 });
+  const categorias = (catData as any)?.items ?? [];
+  const ingredientes = (ingData as any)?.items ?? [];
 
   const [nombre, setNombre] = useState('');
   const [precio, setPrecio] = useState('');
@@ -28,7 +30,7 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
   useEffect(() => {
     if (editando) {
       setNombre(editando.nombre);
-      setPrecio(String(editando.precio_base));
+      setPrecio(String(editando.precio));
       setDescripcion(editando.descripcion ?? '');
       setCategoriasSeleccionadas(editando.categorias.map((c) => c.id));
       setIngredientesSeleccionados(
