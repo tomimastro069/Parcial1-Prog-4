@@ -28,6 +28,8 @@ class AuthService:
 
             # 3. Creamos el nuevo usuario
             new_user = Usuario(
+                nombre=data.nombre,
+                apellido=data.apellido,
                 email=data.email,
                 password_hash=hashed_pass,
                 rol=data.rol

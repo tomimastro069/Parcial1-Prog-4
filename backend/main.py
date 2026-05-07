@@ -9,6 +9,7 @@ from app.Modules.Categoria.Router.categoriaRouter import router as categoria_rou
 from app.Modules.Producto.Router.productoRouter import router as producto_router
 from app.Modules.Ingrediente.Router.ingredienteRouter import router as ingrediente_router
 from app.Modules.Auth.Router.authRouter import router as auth_router
+from seed import seed_admin
 
 # Importar modelos para que SQLModel los registre en metadata
 from app.Modules.Categoria.Model.categoria import Categoria  # noqa: F401
@@ -27,6 +28,7 @@ from slowapi import _rate_limit_exceeded_handler
 @asynccontextmanager
 async def lifespan(_: fastapi.FastAPI):
     create_db_and_tables()
+    seed_admin()
     yield
 
 
@@ -36,7 +38,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

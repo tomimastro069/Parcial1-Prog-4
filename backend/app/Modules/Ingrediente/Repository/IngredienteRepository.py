@@ -1,5 +1,6 @@
-from sqlmodel import Session
+from sqlmodel import Session, select
 from app.Modules.Ingrediente.Model.ingrediente import Ingrediente
+from app.Modules.Producto.Model.productoIngrediente import ProductoIngrediente
 from app.Core.UnitOfWork.BaseRepository import BaseRepository
 
 

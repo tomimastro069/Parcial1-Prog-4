@@ -27,7 +27,6 @@ class UnitOfWork:
             self.rollback()
         else:
             self.commit()
-        self.close()
 
     def commit(self) -> None:
         self.session.commit()
