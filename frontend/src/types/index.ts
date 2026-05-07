@@ -77,6 +77,36 @@ export interface ProductoIngredienteRead {
   es_removible: boolean;
 }
 
+export interface ProductoIngredienteInput {
+  ingrediente_id: number;
+  cantidad: number;
+}
+
+export interface ProductoRead {
+  id: number;
+  nombre: string;
+  precio: number;
+  descripcion: string | null;
+  categorias: { id: number; nombre: string }[];
+  ingredientes: { id: number; nombre: string; unidad: string; cantidad: number }[];
+}
+
+export interface ProductoCreate {
+  nombre: string;
+  precio: number;
+  descripcion?: string | null;
+  categorias?: number[];
+  ingredientes?: ProductoIngredienteInput[];
+}
+
+export interface ProductoUpdate {
+  nombre?: string;
+  precio?: number;
+  descripcion?: string | null;
+  categorias?: number[];
+  ingredientes?: ProductoIngredienteInput[];
+}
+
 export interface Producto {
   id: number;
   nombre: string;

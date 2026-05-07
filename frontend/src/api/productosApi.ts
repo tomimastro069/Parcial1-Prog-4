@@ -1,5 +1,5 @@
 import axiosClient from './axiosClient';
-import type { Producto, ProductoDetail, PaginatedResponse } from '../types';
+import type { Producto, ProductoDetail, ProductoRead, ProductoCreate, ProductoUpdate, PaginatedResponse } from '../types';
 
 export interface ProductosParams {
   page?: number;
@@ -22,4 +22,18 @@ export const productosApi = {
     axiosClient
       .patch<Producto>(`/api/v1/productos/${id}/disponibilidad`, { disponible })
       .then((r) => r.data),
+
+  listAdmin: (offset = 0, limit = 100) =>
+    axiosClient
+      .get<ProductoRead[]>('/api/v1/productos', { params: { offset, limit } })
+      .then((r) => r.data),
+
+  create: (data: ProductoCreate) =>
+    axiosClient.post<ProductoRead>('/api/v1/productos', data).then((r) => r.data),
+
+  update: (id: number, data: ProductoUpdate) =>
+    axiosClient.patch<ProductoRead>(`/api/v1/productos/${id}`, data).then((r) => r.data),
+
+  delete: (id: number) =>
+    axiosClient.delete(`/api/v1/productos/${id}`),
 };

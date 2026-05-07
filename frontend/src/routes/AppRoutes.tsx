@@ -8,6 +8,7 @@ import ProductoDetallePage from '../pages/store/ProductoDetallePage';
 import DashboardPage from '../pages/admin/DashboardPage';
 import IngredientesAdminPage from '../pages/admin/IngredientesAdminPage';
 import CategoriasAdminPage from '../pages/admin/CategoriasAdminPage';
+import ProductosAdminPage from '../pages/admin/ProductosAdminPage';
 
 export const router = createBrowserRouter([
   // ─── Rutas públicas ────────────────────────────────────────────────────────
@@ -33,6 +34,7 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <Navigate to="/admin/dashboard" replace /> },
           { path: 'dashboard', element: <DashboardPage /> },
+          { path: 'productos', element: <ProductosAdminPage /> },
           { path: 'ingredientes', element: <IngredientesAdminPage /> },
           { path: 'categorias', element: <CategoriasAdminPage /> },
         ],

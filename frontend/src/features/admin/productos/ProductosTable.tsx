@@ -1,0 +1,129 @@
+import { useState } from 'react';
+import { PencilIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { Button } from '../../../components/Button';
+import { TableRowSkeleton } from '../../../components/Skeleton';
+import { ProductoModal } from './ProductoModal';
+import { useProductosAdmin, useDeleteProducto } from '../../../hooks/useProductos';
+import { useUIStore } from '../../../store/uiStore';
+import type { ProductoRead } from '../../../types';
+
+export function ProductosTable() {
+  const { data: productos, isLoading, isError } = useProductosAdmin();
+  const eliminar = useDeleteProducto();
+  const openConfirm = useUIStore((s) => s.openConfirmModal);
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editando, setEditando] = useState<ProductoRead | null>(null);
+
+  const handleEditar = (p: ProductoRead) => {
+    setEditando(p);
+    setModalOpen(true);
+  };
+
+  const handleNuevo = () => {
+    setEditando(null);
+    setModalOpen(true);
+  };
+
+  const handleEliminar = (p: ProductoRead) => {
+    openConfirm(
+      'Eliminar producto',
+      `¿Estás seguro que querés eliminar "${p.nombre}"?`,
+      () => eliminar.mutate(p.id)
+    );
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-[#1F3864]">Productos</h1>
+          <p className="text-sm text-gray-500 mt-0.5">Gestión del catálogo de productos</p>
+        </div>
+        <Button onClick={handleNuevo} className="gap-2">
+          <PlusIcon className="w-4 h-4" />
+          Nuevo producto
+        </Button>
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        {isError ? (
+          <div className="text-center py-12 text-gray-500">Error al cargar los productos.</div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-200 bg-gray-50">
+                <th className="text-left px-4 py-3 font-semibold text-gray-700">Nombre</th>
+                <th className="text-left px-4 py-3 font-semibold text-gray-700 hidden md:table-cell">Descripción</th>
+                <th className="text-left px-4 py-3 font-semibold text-gray-700">Precio</th>
+                <th className="text-left px-4 py-3 font-semibold text-gray-700 hidden lg:table-cell">Categorías</th>
+                <th className="text-right px-4 py-3 font-semibold text-gray-700">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {isLoading
+                ? Array.from({ length: 5 }).map((_, i) => <TableRowSkeleton key={i} cols={5} />)
+                : productos?.map((p) => (
+                    <tr key={p.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3 font-medium text-gray-900">{p.nombre}</td>
+                      <td className="px-4 py-3 text-gray-500 hidden md:table-cell max-w-xs truncate">
+                        {p.descripcion ?? <span className="text-gray-300">—</span>}
+                      </td>
+                      <td className="px-4 py-3 text-gray-700 font-medium">
+                        ${p.precio.toFixed(2)}
+                      </td>
+                      <td className="px-4 py-3 hidden lg:table-cell">
+                        {p.categorias.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {p.categorias.map((c) => (
+                              <span
+                                key={c.id}
+                                className="px-2 py-0.5 bg-blue-50 text-[#2E75B6] text-xs rounded-full"
+                              >
+                                {c.nombre}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-gray-300 text-sm">—</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => handleEditar(p)}
+                            className="p-1.5 rounded-md text-gray-500 hover:text-[#2E75B6] hover:bg-blue-50 transition-colors"
+                            title="Editar"
+                          >
+                            <PencilIcon className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleEliminar(p)}
+                            className="p-1.5 rounded-md text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                            title="Eliminar"
+                          >
+                            <TrashIcon className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+            </tbody>
+          </table>
+        )}
+
+        {!isLoading && productos?.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-sm">No hay productos. Creá el primero.</p>
+          </div>
+        )}
+      </div>
+
+      <ProductoModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        editando={editando}
+      />
+    </div>
+  );
+}
