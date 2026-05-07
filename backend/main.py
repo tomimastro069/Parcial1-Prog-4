@@ -47,10 +47,10 @@ app.add_middleware(
 def read_root():
     return {"message": "Main.py activo"}
 
-app.include_router(categoria_router, prefix="/categoria", tags=["categoria"])
-app.include_router(producto_router, prefix="/producto", tags=["producto"])
-app.include_router(ingrediente_router, prefix="/ingrediente", tags=["ingrediente"])
-app.include_router(auth_router, prefix="/auth", tags=["auth"])
+app.include_router(categoria_router, prefix="/api/v1/categorias", tags=["categorias"])
+app.include_router(producto_router, prefix="/api/v1/productos", tags=["productos"])
+app.include_router(ingrediente_router, prefix="/api/v1/ingredientes", tags=["ingredientes"])
+app.include_router(auth_router, prefix="/api/v1/auth", tags=["auth"])
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True, reload_excludes=[".venv"])

@@ -5,4 +5,5 @@ psycopg[binary]
 python-dotenv==1.0.1
 python-jose[cryptography]
 passlib[bcrypt]
+bcrypt==4.0.1
 slowapi

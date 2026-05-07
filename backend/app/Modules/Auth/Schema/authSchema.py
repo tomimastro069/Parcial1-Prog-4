@@ -22,3 +22,9 @@ class LogoutRequest(BaseModel):
 
 class RefreshRequest(BaseModel):
     refresh_token: str
+
+class UserProfile(BaseModel):
+    id: int
+    email: str
+    rol: str
+    is_active: bool

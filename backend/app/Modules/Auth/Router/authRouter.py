@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, status, Request
-from app.Core.Dependencies.dependencies import get_uow
+from app.Core.Dependencies.dependencies import get_uow, get_current_user
 from app.Modules.Auth.Service.authService import AuthService
-from app.Modules.Auth.Schema.authSchema import LoginRequest, RegisterRequest, TokenResponse, LogoutRequest, RefreshRequest
+from app.Modules.Auth.Schema.authSchema import LoginRequest, RegisterRequest, TokenResponse, LogoutRequest, RefreshRequest, UserProfile
+from app.Modules.Usuarios.usuario import Usuario
 from app.Core.Config.rate_limit import limiter
 
 router = APIRouter()
@@ -26,3 +27,7 @@ def logout(data: LogoutRequest, uow=Depends(get_uow)):
 def refresh(data: RefreshRequest, uow=Depends(get_uow)):
     service = AuthService(uow)
     return service.refresh_session(data.refresh_token)
+
+@router.get("/me", response_model=UserProfile)
+def me(current_user: Usuario = Depends(get_current_user)):
+    return current_user
