@@ -46,12 +46,18 @@ class ProductoService:
             ingredientes=ingredientes,
         )
 
-    def get_all(self, page: int = 1, size: int = 10) -> PaginatedResponse[ProductoRead]:
+    def get_all(self, page: int = 1, size: int = 10, search: str | None = None, categoria_id: int | None = None) -> PaginatedResponse[ProductoRead]:
         with self.uow:
             page = max(1, page)
             offset = max(0, (page - 1) * size)
-            productos = self.uow.productos.filter_by(is_active=True, offset=offset, limit=size)
-            total = self.uow.productos.count_by(is_active=True)
+            
+            productos, total = self.uow.productos.search(
+                is_active=True,
+                search=search,
+                categoria_id=categoria_id,
+                offset=offset,
+                limit=size
+            )
             
             items = [self._build_read(p) for p in productos]
             pages = (total + size - 1) // size

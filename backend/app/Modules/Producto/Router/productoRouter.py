@@ -16,9 +16,11 @@ def listar_productos(
     uow=Depends(get_uow),
     page: Annotated[int, Query(ge=1)] = 1,
     size: Annotated[int, Query(ge=1, le=100)] = 10,
+    search: Annotated[str | None, Query()] = None,
+    categoria_id: Annotated[int | None, Query()] = None,
 ):
     service = ProductoService(uow)
-    return service.get_all(page, size)
+    return service.get_all(page=page, size=size, search=search, categoria_id=categoria_id)
 
 
 @router.get("/{producto_id}", response_model=ProductoRead)
