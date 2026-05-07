@@ -23,7 +23,7 @@ export default function ProductoDetallePage() {
     addItem({
       producto_id: producto.id,
       nombre: producto.nombre,
-      precio: producto.precio_base,
+      precio: producto.precio,
       cantidad,
       imagen_url: producto.imagen_url,
     });
@@ -86,7 +86,7 @@ export default function ProductoDetallePage() {
             <div className="flex-1 p-6 md:p-8">
               <div className="flex items-start justify-between gap-4">
                 <h1 className="text-2xl font-bold text-[#1F3864]">{producto.nombre}</h1>
-                {!producto.disponible && (
+                {!producto.is_active && (
                   <Badge variant="sinstock">Sin stock</Badge>
                 )}
               </div>
@@ -96,7 +96,7 @@ export default function ProductoDetallePage() {
               )}
 
               <div className="mt-4 text-3xl font-bold text-[#2E75B6]">
-                ${producto.precio_base.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                ${producto.precio.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
               </div>
 
               {/* Alérgenos */}
@@ -157,13 +157,13 @@ export default function ProductoDetallePage() {
 
                 <Button
                   onClick={handleAgregar}
-                  disabled={!producto.disponible}
+                  disabled={!producto.is_active}
                   size="lg"
                   className="flex-1 gap-2"
                 >
                   <ShoppingCartIcon className="w-5 h-5" />
                   Agregar al carrito · $
-                  {(producto.precio_base * cantidad).toLocaleString('es-AR')}
+                  {(producto.precio * cantidad).toLocaleString('es-AR')}
                 </Button>
               </div>
             </div>

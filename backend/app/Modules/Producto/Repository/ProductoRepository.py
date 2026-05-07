@@ -1,4 +1,4 @@
-from sqlmodel import Session, select
+from sqlmodel import Session, select, func
 from app.Modules.Producto.Model.producto import Producto
 from app.Modules.Producto.Model.productoCategoria import ProductoCategoria
 from app.Modules.Producto.Model.productoIngrediente import ProductoIngrediente
@@ -41,3 +41,16 @@ class ProductoRepository(BaseRepository[Producto]):
         for rel in self.list_ingredientes_rel(producto_id):
             self.session.delete(rel)
         self.session.flush()
+
+    def search(self, is_active: bool, search: str | None, categoria_id: int | None, offset: int, limit: int) -> tuple[list[Producto], int]:
+        statement = select(Producto).where(Producto.is_active == is_active)
+        
+        if search:
+            statement = statement.where(Producto.nombre.ilike(f"%{search}%"))
+            
+        if categoria_id:
+            statement = statement.join(ProductoCategoria).where(ProductoCategoria.categoria_id == categoria_id)
+            
+        total = self.session.exec(select(func.count()).select_from(statement.subquery())).one()
+        productos = self.session.exec(statement.offset(offset).limit(limit)).all()
+        return list(productos), total

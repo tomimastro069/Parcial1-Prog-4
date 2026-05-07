@@ -5,10 +5,24 @@ import { TableRowSkeleton } from '../../../components/Skeleton';
 import { CategoriaModal } from './CategoriaModal';
 import { useCategorias, useDeleteCategoria } from '../../../hooks/useCategorias';
 import { useUIStore } from '../../../store/uiStore';
+import { Pagination } from '../../../components/Pagination';
 import type { Categoria } from '../../../types';
 
+const PAGE_SIZE = 10;
+
 export function CategoriasTable() {
-  const { data: categorias, isLoading, isError } = useCategorias();
+  const [page, setPage] = useState(1);
+  const { data, isLoading, isError } = useCategorias({ page, size: PAGE_SIZE });
+  
+  // Acceso defensivo
+  const responseData = data as any;
+  const categorias: Categoria[] = responseData?.items || [];
+  const totalPages = responseData?.pages || 0;
+
+  // Traemos todas las categorías sin paginar para el select y los nombres de padre
+  const { data: allCatData } = useCategorias({ size: 1000 });
+  const allCategorias: Categoria[] = (allCatData as any)?.items || [];
+
   const eliminar = useDeleteCategoria();
   const openConfirm = useUIStore((s) => s.openConfirmModal);
 
@@ -34,8 +48,8 @@ export function CategoriasTable() {
   };
 
   const getNombrePadre = (parentId: number | null | undefined) => {
-    if (!parentId || !categorias) return null;
-    return categorias.find((c) => c.id === parentId)?.nombre ?? null;
+    if (!parentId || allCategorias.length === 0) return null;
+    return allCategorias.find((c) => c.id === parentId)?.nombre ?? null;
   };
 
   return (
@@ -121,13 +135,23 @@ export function CategoriasTable() {
             <p className="text-gray-500 text-sm">No hay categorías. Creá la primera.</p>
           </div>
         )}
+
+        {!isLoading && !isError && totalPages > 1 && (
+          <div className="mt-6 flex justify-center">
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
+          </div>
+        )}
       </div>
 
       <CategoriaModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         editando={editando}
-        categorias={categorias ?? []}
+        categorias={allCategorias}
       />
     </div>
   );

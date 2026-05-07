@@ -155,11 +155,10 @@ export function CatalogoGrid() {
               <button
                 key={pageNum}
                 onClick={() => setPage(pageNum)}
-                className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${
-                  page === pageNum
-                    ? 'bg-[#2E75B6] border-[#2E75B6] text-white'
-                    : 'border-gray-300 hover:bg-gray-50'
-                }`}
+                className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${page === pageNum
+                  ? 'bg-[#2E75B6] border-[#2E75B6] text-white'
+                  : 'border-gray-300 hover:bg-gray-50'
+                  }`}
               >
                 {pageNum}
               </button>

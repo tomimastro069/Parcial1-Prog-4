@@ -42,7 +42,7 @@ class ProductoRead(SQLModel):
     precio_base: float
     descripcion: Optional[str] = None
     imagen_url: Optional[str] = None
-    disponible: bool = True
+    is_active: bool = True
     categorias: List[CategoriaEnProducto] = []
     ingredientes: List[IngredienteEnProducto] = []
 
@@ -53,3 +53,10 @@ class ProductoUpdate(SQLModel):
     descripcion: Annotated[Optional[str], Field(max_length=500)] = None
     categorias: Optional[List[int]] = None
     ingredientes: Optional[List[ProductoIngredienteInput]] = None
+
+
+from app.Core.Schema.pagination import PaginatedResponse
+
+
+class PaginatedProductoResponse(PaginatedResponse[ProductoRead]):
+    pass

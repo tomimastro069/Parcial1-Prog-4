@@ -1,9 +1,10 @@
 import axiosClient from './axiosClient';
-import type { Categoria, CategoriaCreate, CategoriaUpdate } from '../types';
+import type { Categoria, CategoriaCreate, CategoriaUpdate, PaginatedResponse } from '../types';
 
 export const categoriasApi = {
-  list: () =>
-    axiosClient.get<Categoria[]>('/api/v1/categorias').then((r) => r.data),
+  list: (params: { page?: number; size?: number } = {}) =>
+    axiosClient.get<PaginatedResponse<Categoria>>('/api/v1/categorias', { params }).then((r) => r.data),
+
 
   getById: (id: number) =>
     axiosClient.get<Categoria>(`/api/v1/categorias/${id}`).then((r) => r.data),

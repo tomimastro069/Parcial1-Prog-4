@@ -5,10 +5,10 @@ import type { CategoriaCreate, CategoriaUpdate } from '../types';
 
 const QK = 'categorias';
 
-export function useCategorias() {
+export function useCategorias(params: { page?: number; size?: number } = {}) {
   return useQuery({
-    queryKey: [QK],
-    queryFn: () => categoriasApi.list(),
+    queryKey: [QK, params],
+    queryFn: () => categoriasApi.list(params),
     staleTime: 1000 * 60 * 5,
   });
 }

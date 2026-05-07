@@ -12,6 +12,7 @@ from app.Modules.Producto.Schema.productoSchema import (
 )
 from app.Core.UnitOfWork.unit_of_work import UnitOfWork
 from app.Modules.Auditoria.Model.auditoria import Auditoria
+from app.Core.Schema.pagination import PaginatedResponse
 
 class ProductoService:
     def __init__(self, uow: UnitOfWork):
@@ -46,15 +47,34 @@ class ProductoService:
             precio_base=p.precio,
             descripcion=p.descripcion,
             imagen_url=None,
-            disponible=p.is_active,
+            is_active=p.is_active,
             categorias=categorias,
             ingredientes=ingredientes,
         )
 
-    def get_all(self, offset: int = 0, limit: int = 10) -> list[ProductoRead]:
+    def get_all(self, page: int = 1, size: int = 10, search: str | None = None, categoria_id: int | None = None) -> PaginatedResponse[ProductoRead]:
         with self.uow:
-            productos = self.uow.productos.filter_by(is_active=True, offset=offset, limit=limit)
-            return [self._build_read(p) for p in productos]
+            page = max(1, page)
+            offset = max(0, (page - 1) * size)
+            
+            productos, total = self.uow.productos.search(
+                is_active=True,
+                search=search,
+                categoria_id=categoria_id,
+                offset=offset,
+                limit=size
+            )
+            
+            items = [self._build_read(p) for p in productos]
+            pages = (total + size - 1) // size
+            
+            return PaginatedResponse(
+                items=items,
+                total=total,
+                page=page,
+                size=size,
+                pages=pages
+            )
 
     def get_all_paginated(
         self,

@@ -118,10 +118,9 @@ export interface Producto {
   id: number;
   nombre: string;
   descripcion: string | null;
-  precio_base: number;
-  stock_cantidad: number;
-  disponible: boolean;
-  imagen_url: string | null;
+  precio: number;
+  is_active: boolean;
+  imagen_url?: string | null;
   categorias?: Categoria[];
 }
 

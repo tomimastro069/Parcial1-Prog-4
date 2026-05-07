@@ -5,18 +5,19 @@ from app.Modules.Categoria.Schema.categoriaSchema import CategoriaCreate, Catego
 from app.Modules.Categoria.Service.categoriaService import CategoriaService
 from app.Core.Dependencies.dependencies import role_required, get_uow
 from app.Modules.Usuarios.usuario import UserRole, Usuario
+from app.Core.Schema.pagination import PaginatedResponse
 
 router = APIRouter()
 
 
-@router.get("/", response_model=list[CategoriaRead])
+@router.get("/", response_model=PaginatedResponse[CategoriaRead])
 def listar_categorias(
     uow=Depends(get_uow),
-    offset: Annotated[int, Query(ge=0, description="Desde qué registro")] = 0,
-    limit: Annotated[int, Query(ge=1, le=100, description="Cuántos traer")] = 10,
+    page: Annotated[int, Query(ge=1)] = 1,
+    size: Annotated[int, Query(ge=1, le=1000)] = 10,
 ):
     service = CategoriaService(uow)
-    return service.get_all(offset, limit)
+    return service.get_all(page, size)
 
 
 @router.get("/{categoria_id}", response_model=CategoriaRead)

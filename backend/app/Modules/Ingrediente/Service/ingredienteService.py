@@ -1,16 +1,31 @@
 from fastapi import HTTPException, status
 from app.Modules.Ingrediente.Model.ingrediente import Ingrediente
-from app.Modules.Ingrediente.Schema.ingredienteSchema import IngredienteCreate, IngredienteUpdate
+from app.Modules.Ingrediente.Schema.ingredienteSchema import IngredienteCreate, IngredienteUpdate, IngredienteRead
 from app.Core.UnitOfWork.unit_of_work import UnitOfWork
+from app.Core.Schema.pagination import PaginatedResponse
 from app.Modules.Auditoria.Model.auditoria import Auditoria
 
 class IngredienteService:
     def __init__(self, uow: UnitOfWork):
         self.uow = uow
 
-    def get_all(self, offset: int = 0, limit: int = 10) -> list[Ingrediente]:
+    def get_all(self, page: int = 1, size: int = 10) -> PaginatedResponse[IngredienteRead]:
         with self.uow:
-            return self.uow.ingredientes.filter_by(is_active=True, offset=offset, limit=limit)
+            page = max(1, page)
+            offset = max(0, (page - 1) * size)
+            ings_db = self.uow.ingredientes.get_list(offset=offset, limit=size)
+            total = self.uow.ingredientes.count()
+            
+            items = [IngredienteRead.model_validate(c) for c in ings_db]
+            pages = (total + size - 1) // size
+            
+            return PaginatedResponse(
+                items=items,
+                total=total,
+                page=page,
+                size=size,
+                pages=pages
+            )
 
     def get_by_id(self, ing_id: int) -> Ingrediente:
         with self.uow:

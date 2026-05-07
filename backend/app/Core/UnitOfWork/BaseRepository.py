@@ -77,6 +77,13 @@ class BaseRepository(Generic[T]):
         statement = select(func.count()).select_from(self.model)
         return self.session.exec(statement).one()
 
+    def count_by(self, **filters: Any) -> int:
+        """Retorna el total de registros que cumplan los filtros."""
+        statement = select(func.count()).select_from(self.model)
+        for field, value in filters.items():
+            statement = statement.where(getattr(self.model, field) == value)
+        return self.session.exec(statement).one()
+
     # --- Hook para subclases ---
 
     def get_with_relations(self, id: int) -> Optional[T]:

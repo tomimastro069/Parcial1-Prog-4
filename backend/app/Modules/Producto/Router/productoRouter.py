@@ -6,20 +6,21 @@ from app.Modules.Producto.Schema.productoSchema import ProductoCreate, ProductoR
 from app.Modules.Producto.Service.productoService import ProductoService
 from app.Core.Dependencies.dependencies import role_required, get_uow
 from app.Modules.Usuarios.usuario import UserRole, Usuario
+from app.Core.Schema.pagination import PaginatedResponse
 
 router = APIRouter()
 
 
-@router.get("/")
+@router.get("", response_model=PaginatedResponse[ProductoRead])
 def listar_productos(
     uow=Depends(get_uow),
     page: Annotated[int, Query(ge=1)] = 1,
-    size: Annotated[int, Query(ge=1, le=100)] = 12,
-    search: Annotated[Optional[str], Query()] = None,
-    categoria_id: Annotated[Optional[int], Query()] = None,
+    size: Annotated[int, Query(ge=1, le=100)] = 10,
+    search: Annotated[str | None, Query()] = None,
+    categoria_id: Annotated[int | None, Query()] = None,
 ):
     service = ProductoService(uow)
-    return service.get_all_paginated(page, size, search, categoria_id)
+    return service.get_all(page=page, size=size, search=search, categoria_id=categoria_id)
 
 
 @router.get("/{producto_id}", response_model=ProductoRead)

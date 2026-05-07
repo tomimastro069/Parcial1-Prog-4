@@ -5,10 +5,10 @@ import type { IngredienteCreate, IngredienteUpdate } from '../types';
 
 const QK = 'ingredientes';
 
-export function useIngredientes() {
+export function useIngredientes(params: { page?: number; size?: number } = {}) {
   return useQuery({
-    queryKey: [QK],
-    queryFn: () => ingredientesApi.list(),
+    queryKey: [QK, params],
+    queryFn: () => ingredientesApi.list(params),
     staleTime: 1000 * 60,
   });
 }

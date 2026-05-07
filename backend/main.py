@@ -10,6 +10,7 @@ from app.Modules.Producto.Router.productoRouter import router as producto_router
 from app.Modules.Ingrediente.Router.ingredienteRouter import router as ingrediente_router
 from app.Modules.Auth.Router.authRouter import router as auth_router
 from seed import seed_admin
+from seed import seed_data
 
 # Importar modelos para que SQLModel los registre en metadata
 from app.Modules.Categoria.Model.categoria import Categoria  # noqa: F401
@@ -29,6 +30,7 @@ from slowapi import _rate_limit_exceeded_handler
 async def lifespan(_: fastapi.FastAPI):
     create_db_and_tables()
     seed_admin()
+    seed_data()
     yield
 
 
