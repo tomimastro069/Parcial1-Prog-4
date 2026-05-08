@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { PencilIcon, TrashIcon, PlusIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, TrashIcon, PlusIcon, ArrowPathIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import * as XLSX from 'xlsx';
 import { Badge } from '../../../components/Badge';
 import { Button } from '../../../components/Button';
 import { TableRowSkeleton } from '../../../components/Skeleton';
@@ -7,6 +8,7 @@ import { IngredienteModal } from './IngredienteModal';
 import { useIngredientes, useDeleteIngrediente, useActivarIngrediente } from '../../../hooks/useIngredientes';
 import { useUIStore } from '../../../store/uiStore';
 import { Pagination } from '../../../components/Pagination';
+import { ingredientesApi } from '../../../api/ingredientesApi';
 import type { Ingrediente } from '../../../types';
 
 const PAGE_SIZE = 10;
@@ -39,6 +41,35 @@ export function IngredientesTable() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editando, setEditando] = useState<Ingrediente | null>(null);
+  const [exportando, setExportando] = useState(false);
+
+  const handleExportar = async () => {
+    setExportando(true);
+    try {
+      const todos = await ingredientesApi.list({ page: 1, size: 1000 });
+      const items: Ingrediente[] = (todos as any)?.items ?? [];
+      if (items.length === 0) {
+        toast.error('No hay ingredientes para exportar');
+        return;
+      }
+      const filas = items.map((ing) => ({
+        Nombre: ing.nombre,
+        Descripción: ing.descripcion ?? '',
+        Alérgeno: ing.es_alergeno ? 'Sí' : 'No',
+        Estado: ing.is_active ? 'Activo' : 'Inactivo',
+      }));
+      const ws = XLSX.utils.json_to_sheet(filas);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Ingredientes');
+      XLSX.writeFile(wb, 'ingredientes.xlsx');
+      toast.success(`${items.length} ingredientes exportados`);
+    } catch (e) {
+      console.error('Error al exportar:', e);
+      toast.error('Error al exportar. Revisá la consola.');
+    } finally {
+      setExportando(false);
+    }
+  };
 
   const handleEditar = (ing: Ingrediente) => {
     setEditando(ing);
@@ -78,10 +109,20 @@ export function IngredientesTable() {
           <h1 className="text-2xl font-bold text-[#1F3864]">Ingredientes</h1>
           <p className="text-sm text-gray-500 mt-0.5">Gestión de ingredientes e información de alérgenos</p>
         </div>
-        <Button onClick={handleNuevo} className="gap-2">
-          <PlusIcon className="w-4 h-4" />
-          Nuevo ingrediente
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={handleExportar}
+            disabled={exportando}
+            className="gap-2 bg-green-600 hover:bg-green-700"
+          >
+            <ArrowDownTrayIcon className="w-4 h-4" />
+            {exportando ? 'Exportando...' : 'Exportar Excel'}
+          </Button>
+          <Button onClick={handleNuevo} className="gap-2">
+            <PlusIcon className="w-4 h-4" />
+            Nuevo ingrediente
+          </Button>
+        </div>
       </div>
 
       {/* Filtro de estado */}
