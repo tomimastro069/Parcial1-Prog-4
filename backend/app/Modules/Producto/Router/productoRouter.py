@@ -31,7 +31,7 @@ def obtener_producto(
     return service.get_by_id(producto_id)
 
 
-@router.post("/", 
+@router.post("", 
              response_model=ProductoRead, 
              status_code=status.HTTP_201_CREATED)
 def crear_producto(
