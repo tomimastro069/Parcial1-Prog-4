@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { PencilIcon, TrashIcon, PlusIcon, TagIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import { Button } from '../../../components/Button';
 import { TableRowSkeleton } from '../../../components/Skeleton';
@@ -19,7 +20,10 @@ const filtroToParam: Record<Filtro, boolean | null> = {
 };
 
 export function CategoriasTable() {
-  const [page, setPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Leer página de la URL
+  const page = parseInt(searchParams.get('page') || '1', 10);
   const [filtro, setFiltro] = useState<Filtro>('todos');
 
   const { data, isLoading, isError } = useCategorias({
@@ -70,7 +74,7 @@ export function CategoriasTable() {
 
   const handleFiltroChange = (nuevo: Filtro) => {
     setFiltro(nuevo);
-    setPage(1);
+    setSearchParams({ page: '1' });
   };
 
   const getNombrePadre = (parentId: number | null | undefined) => {
@@ -206,7 +210,7 @@ export function CategoriasTable() {
             <Pagination
               currentPage={page}
               totalPages={totalPages}
-              onPageChange={setPage}
+              onPageChange={(newPage) => setSearchParams({ page: String(newPage) })}
             />
           </div>
         )}
