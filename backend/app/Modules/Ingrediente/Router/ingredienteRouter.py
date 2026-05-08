@@ -15,9 +15,10 @@ def listar_ingredientes(
     uow=Depends(get_uow),
     page: Annotated[int, Query(ge=1)] = 1,
     size: Annotated[int, Query(ge=1, le=1000)] = 10,
+    is_active: Annotated[bool | None, Query()] = None,
 ):
     service = IngredienteService(uow)
-    return service.get_all(page, size)
+    return service.get_all(page, size, is_active=is_active)
 
 
 @router.get("/{ing_id}", response_model=IngredienteRead)
@@ -50,6 +51,16 @@ def editar_ingrediente(
 ):
     service = IngredienteService(uow)
     return service.update(ing_id, data, current_user.id)
+
+
+@router.patch("/{ing_id}/activar", response_model=IngredienteRead)
+def activar_ingrediente(
+    ing_id: Annotated[int, Path(gt=0)],
+    uow=Depends(get_uow),
+    current_user: Usuario = Depends(role_required([UserRole.ADMIN, UserRole.STOCK]))
+):
+    service = IngredienteService(uow)
+    return service.activar(ing_id, current_user.id)
 
 
 @router.delete("/{ing_id}", status_code=status.HTTP_204_NO_CONTENT)

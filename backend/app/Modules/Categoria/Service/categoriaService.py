@@ -9,16 +9,20 @@ class CategoriaService:
     def __init__(self, uow: UnitOfWork):
         self.uow = uow
 
-    def get_all(self, page: int = 1, size: int = 10) -> PaginatedResponse[CategoriaRead]:
+    def get_all(self, page: int = 1, size: int = 10, is_active: bool | None = None) -> PaginatedResponse[CategoriaRead]:
         with self.uow:
             page = max(1, page)
             offset = max(0, (page - 1) * size)
-            categorias_db = self.uow.categorias.get_list(offset=offset, limit=size)
-            total = self.uow.categorias.count()
-            
+            if is_active is not None:
+                categorias_db = self.uow.categorias.filter_by(offset=offset, limit=size, is_active=is_active)
+                total = self.uow.categorias.count_by(is_active=is_active)
+            else:
+                categorias_db = self.uow.categorias.get_list(offset=offset, limit=size)
+                total = self.uow.categorias.count()
+
             items = [CategoriaRead.model_validate(c) for c in categorias_db]
-            pages = (total + size - 1) // size
-            
+            pages = max(1, (total + size - 1) // size)
+
             return PaginatedResponse(
                 items=items,
                 total=total,
@@ -103,3 +107,21 @@ class CategoriaService:
 
             self.uow.categorias.clear_productos_rel(categoria_id)
             cat.is_active = False
+
+    def activar(self, categoria_id: int, user_id: int) -> Categoria:
+        with self.uow:
+            cat = self.uow.categorias.get(categoria_id)
+            if not cat:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Categoría con id {categoria_id} no encontrada",
+                )
+            cat.is_active = True
+            self.uow.auditoria.add(Auditoria(
+                user_id=user_id,
+                accion="CATEGORIA_ACTIVAR",
+                modulo="CATEGORIAS",
+                descripcion=f"Se reactivó la categoría: {cat.nombre}",
+                metadata_info={"id": cat.id}
+            ))
+            return cat

@@ -15,9 +15,10 @@ def listar_categorias(
     uow=Depends(get_uow),
     page: Annotated[int, Query(ge=1)] = 1,
     size: Annotated[int, Query(ge=1, le=1000)] = 10,
+    is_active: Annotated[bool | None, Query()] = None,
 ):
     service = CategoriaService(uow)
-    return service.get_all(page, size)
+    return service.get_all(page, size, is_active=is_active)
 
 
 @router.get("/{categoria_id}", response_model=CategoriaRead)
@@ -50,6 +51,16 @@ def editar_categoria(
 ):
     service = CategoriaService(uow)
     return service.update(categoria_id, data, current_user.id)
+
+
+@router.patch("/{categoria_id}/activar", response_model=CategoriaRead)
+def activar_categoria(
+    categoria_id: Annotated[int, Path(gt=0)],
+    uow=Depends(get_uow),
+    current_user: Usuario = Depends(role_required([UserRole.ADMIN]))
+):
+    service = CategoriaService(uow)
+    return service.activar(categoria_id, current_user.id)
 
 
 @router.delete("/{categoria_id}", status_code=status.HTTP_204_NO_CONTENT)

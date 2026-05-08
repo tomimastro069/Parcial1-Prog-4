@@ -5,11 +5,23 @@ import type { CategoriaCreate, CategoriaUpdate } from '../types';
 
 const QK = 'categorias';
 
-export function useCategorias(params: { page?: number; size?: number } = {}) {
+export function useCategorias(params: { page?: number; size?: number; is_active?: boolean | null } = {}) {
   return useQuery({
     queryKey: [QK, params],
     queryFn: () => categoriasApi.list(params),
     staleTime: 1000 * 60 * 5,
+  });
+}
+
+export function useActivarCategoria() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => categoriasApi.activar(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [QK] });
+      toast.success('Categoría reactivada');
+    },
+    onError: () => toast.error('Error al reactivar categoría'),
   });
 }
 

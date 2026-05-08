@@ -27,9 +27,11 @@ export function CatalogoGrid() {
     size: PAGE_SIZE,
     search: search || undefined,
     categoria_id: categoriaId ?? undefined,
+    is_active: true,
   });
 
-  const { data: categorias } = useCategorias();
+  const { data: categoriasData } = useCategorias({ is_active: true });
+  const categorias = (categoriasData as any)?.items ?? [];
 
   const handleCategoriaChange = useCallback((id: number | null) => {
     setCategoriaId(id);

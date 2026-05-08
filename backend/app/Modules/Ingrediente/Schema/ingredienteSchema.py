@@ -16,6 +16,7 @@ class IngredienteRead(SQLModel):
     unidad: str
     descripcion: Optional[str] = None
     es_alergeno: bool = False
+    is_active: bool = True
 
 
 class IngredienteUpdate(SQLModel):

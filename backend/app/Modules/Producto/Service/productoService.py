@@ -57,10 +57,15 @@ class ProductoService:
         size: int = 12,
         search: str | None = None,
         categoria_id: int | None = None,
+        is_active: bool | None = None,
     ) -> dict:
         with self.uow:
-            query = select(Producto).where(Producto.is_active == True)
-            count_query = select(func.count(Producto.id)).where(Producto.is_active == True)
+            if is_active is not None:
+                query = select(Producto).where(Producto.is_active == is_active)
+                count_query = select(func.count(Producto.id)).where(Producto.is_active == is_active)
+            else:
+                query = select(Producto)
+                count_query = select(func.count(Producto.id))
 
             if search:
                 query = query.where(Producto.nombre.ilike(f"%{search}%"))
@@ -213,3 +218,21 @@ class ProductoService:
             self.uow.productos.clear_categorias_rel(producto_id)
             self.uow.productos.clear_ingredientes_rel(producto_id)
             p.is_active = False
+
+    def activar(self, producto_id: int, user_id: int) -> ProductoRead:
+        with self.uow:
+            p = self.uow.productos.get(producto_id)
+            if not p:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Producto con id {producto_id} no encontrado",
+                )
+            p.is_active = True
+            self.uow.auditoria.add(Auditoria(
+                user_id=user_id,
+                accion="PRODUCTO_ACTIVAR",
+                modulo="PRODUCTOS",
+                descripcion=f"Se reactivó el producto: {p.nombre}",
+                metadata_info={"id": p.id}
+            ))
+            return self._build_read(p)

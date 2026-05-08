@@ -2,10 +2,13 @@ import axiosClient from './axiosClient';
 import type { Ingrediente, IngredienteCreate, IngredienteUpdate, PaginatedResponse } from '../types';
 
 export const ingredientesApi = {
-  list: (params: { page?: number; size?: number } = {}) =>
+  list: (params: { page?: number; size?: number; is_active?: boolean | null } = {}) =>
     axiosClient
       .get<PaginatedResponse<Ingrediente>>('/api/v1/ingredientes', { params })
       .then((r) => r.data),
+
+  activar: (id: number) =>
+    axiosClient.patch<Ingrediente>(`/api/v1/ingredientes/${id}/activar`).then((r) => r.data),
 
   getById: (id: number) =>
     axiosClient.get<Ingrediente>(`/api/v1/ingredientes/${id}`).then((r) => r.data),

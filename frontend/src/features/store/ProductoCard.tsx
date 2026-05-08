@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
 import { ShoppingCartIcon } from '@heroicons/react/24/outline';
+import toast from 'react-hot-toast';
 import { Badge } from '../../components/Badge';
 import { Button } from '../../components/Button';
 import { useCartStore } from '../../store/cartStore';
-import { useUIStore } from '../../store/uiStore';
 import type { Producto } from '../../types';
 
 interface ProductoCardProps {
@@ -12,7 +12,6 @@ interface ProductoCardProps {
 
 export function ProductoCard({ producto }: ProductoCardProps) {
   const addItem = useCartStore((s) => s.addItem);
-  const openCart = useUIStore((s) => s.openCart);
 
   const handleAgregar = () => {
     addItem({
@@ -22,7 +21,7 @@ export function ProductoCard({ producto }: ProductoCardProps) {
       cantidad: 1,
       imagen_url: producto.imagen_url,
     });
-    openCart();
+    toast.success(`${producto.nombre} agregado al carrito`);
   };
 
   return (

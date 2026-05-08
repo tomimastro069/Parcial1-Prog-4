@@ -1,23 +1,38 @@
 import { useState } from 'react';
-import { PencilIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, TrashIcon, PlusIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import { Button } from '../../../components/Button';
 import { TableRowSkeleton } from '../../../components/Skeleton';
 import { Pagination } from '../../../components/Pagination';
 import { ProductoModal } from './ProductoModal';
-import { useProductosAdmin, useDeleteProducto } from '../../../hooks/useProductos';
+import { useProductosAdmin, useDeleteProducto, useActivarProducto } from '../../../hooks/useProductos';
 import { useUIStore } from '../../../store/uiStore';
 import type { ProductoRead } from '../../../types';
 
 const PAGE_SIZE = 10;
 
+type Filtro = 'todos' | 'activos' | 'inactivos';
+
+const filtroToParam: Record<Filtro, boolean | null> = {
+  todos: null,
+  activos: true,
+  inactivos: false,
+};
+
 export function ProductosTable() {
   const [page, setPage] = useState(1);
-  const { data, isLoading, isError } = useProductosAdmin({ page, size: PAGE_SIZE });
+  const [filtro, setFiltro] = useState<Filtro>('todos');
+
+  const { data, isLoading, isError } = useProductosAdmin({
+    page,
+    size: PAGE_SIZE,
+    is_active: filtroToParam[filtro] ?? undefined,
+  });
 
   const productos: ProductoRead[] = (data as any)?.items ?? [];
   const totalPages: number = (data as any)?.pages ?? 0;
 
   const eliminar = useDeleteProducto();
+  const activar = useActivarProducto();
   const openConfirm = useUIStore((s) => s.openConfirmModal);
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -41,6 +56,19 @@ export function ProductosTable() {
     );
   };
 
+  const handleActivar = (p: ProductoRead) => {
+    openConfirm(
+      'Reactivar producto',
+      `¿Querés reactivar "${p.nombre}"?`,
+      () => activar.mutate(p.id)
+    );
+  };
+
+  const handleFiltroChange = (nuevo: Filtro) => {
+    setFiltro(nuevo);
+    setPage(1);
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -54,6 +82,23 @@ export function ProductosTable() {
         </Button>
       </div>
 
+      {/* Filtro de estado */}
+      <div className="flex gap-2 mb-4">
+        {(['todos', 'activos', 'inactivos'] as Filtro[]).map((f) => (
+          <button
+            key={f}
+            onClick={() => handleFiltroChange(f)}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              filtro === f
+                ? 'bg-[#1F3864] text-white'
+                : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            {f.charAt(0).toUpperCase() + f.slice(1)}
+          </button>
+        ))}
+      </div>
+
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         {isError ? (
           <div className="text-center py-12 text-gray-500">Error al cargar los productos.</div>
@@ -65,14 +110,15 @@ export function ProductosTable() {
                 <th className="text-left px-4 py-3 font-semibold text-gray-700 hidden md:table-cell">Descripción</th>
                 <th className="text-left px-4 py-3 font-semibold text-gray-700">Precio</th>
                 <th className="text-left px-4 py-3 font-semibold text-gray-700 hidden lg:table-cell">Categorías</th>
+                <th className="text-left px-4 py-3 font-semibold text-gray-700">Estado</th>
                 <th className="text-right px-4 py-3 font-semibold text-gray-700">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {isLoading
-                ? Array.from({ length: 5 }).map((_, i) => <TableRowSkeleton key={i} cols={5} />)
+                ? Array.from({ length: 5 }).map((_, i) => <TableRowSkeleton key={i} cols={6} />)
                 : productos?.map((p) => (
-                    <tr key={p.id} className="hover:bg-gray-50 transition-colors">
+                    <tr key={p.id} className={`hover:bg-gray-50 transition-colors ${!p.is_active ? 'opacity-60' : ''}`}>
                       <td className="px-4 py-3 font-medium text-gray-900">{p.nombre}</td>
                       <td className="px-4 py-3 text-gray-500 hidden md:table-cell max-w-xs truncate">
                         {p.descripcion ?? <span className="text-gray-300">—</span>}
@@ -97,21 +143,42 @@ export function ProductosTable() {
                         )}
                       </td>
                       <td className="px-4 py-3">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                          p.is_active
+                            ? 'bg-green-50 text-green-700'
+                            : 'bg-red-50 text-red-600'
+                        }`}>
+                          {p.is_active ? 'Activo' : 'Inactivo'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
                         <div className="flex justify-end gap-2">
-                          <button
-                            onClick={() => handleEditar(p)}
-                            className="p-1.5 rounded-md text-gray-500 hover:text-[#2E75B6] hover:bg-blue-50 transition-colors"
-                            title="Editar"
-                          >
-                            <PencilIcon className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleEliminar(p)}
-                            className="p-1.5 rounded-md text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
-                            title="Eliminar"
-                          >
-                            <TrashIcon className="w-4 h-4" />
-                          </button>
+                          {p.is_active ? (
+                            <>
+                              <button
+                                onClick={() => handleEditar(p)}
+                                className="p-1.5 rounded-md text-gray-500 hover:text-[#2E75B6] hover:bg-blue-50 transition-colors"
+                                title="Editar"
+                              >
+                                <PencilIcon className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleEliminar(p)}
+                                className="p-1.5 rounded-md text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                title="Eliminar"
+                              >
+                                <TrashIcon className="w-4 h-4" />
+                              </button>
+                            </>
+                          ) : (
+                            <button
+                              onClick={() => handleActivar(p)}
+                              className="p-1.5 rounded-md text-gray-500 hover:text-green-600 hover:bg-green-50 transition-colors"
+                              title="Reactivar"
+                            >
+                              <ArrowPathIcon className="w-4 h-4" />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -122,7 +189,7 @@ export function ProductosTable() {
 
         {!isLoading && productos?.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-sm">No hay productos. Creá el primero.</p>
+            <p className="text-gray-500 text-sm">No hay productos en este filtro.</p>
           </div>
         )}
 

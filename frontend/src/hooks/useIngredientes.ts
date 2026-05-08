@@ -5,11 +5,23 @@ import type { IngredienteCreate, IngredienteUpdate } from '../types';
 
 const QK = 'ingredientes';
 
-export function useIngredientes(params: { page?: number; size?: number } = {}) {
+export function useIngredientes(params: { page?: number; size?: number; is_active?: boolean | null } = {}) {
   return useQuery({
     queryKey: [QK, params],
     queryFn: () => ingredientesApi.list(params),
     staleTime: 1000 * 60,
+  });
+}
+
+export function useActivarIngrediente() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => ingredientesApi.activar(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [QK] });
+      toast.success('Ingrediente reactivado');
+    },
+    onError: () => toast.error('Error al reactivar ingrediente'),
   });
 }
 

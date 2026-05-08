@@ -33,12 +33,24 @@ export function useToggleDisponibilidad() {
   });
 }
 
-export function useProductosAdmin(params: { page?: number; size?: number } = {}) {
+export function useProductosAdmin(params: { page?: number; size?: number; is_active?: boolean | null } = {}) {
   return useQuery({
     queryKey: ['productos-admin', params],
     queryFn: () => productosApi.listAdmin(params),
     staleTime: 1000 * 60,
     placeholderData: (prev) => prev,
+  });
+}
+
+export function useActivarProducto() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => productosApi.activar(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['productos-admin'], exact: false });
+      toast.success('Producto reactivado');
+    },
+    onError: () => toast.error('Error al reactivar producto'),
   });
 }
 

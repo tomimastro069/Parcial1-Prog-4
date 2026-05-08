@@ -9,16 +9,20 @@ class IngredienteService:
     def __init__(self, uow: UnitOfWork):
         self.uow = uow
 
-    def get_all(self, page: int = 1, size: int = 10) -> PaginatedResponse[IngredienteRead]:
+    def get_all(self, page: int = 1, size: int = 10, is_active: bool | None = None) -> PaginatedResponse[IngredienteRead]:
         with self.uow:
             page = max(1, page)
             offset = max(0, (page - 1) * size)
-            ings_db = self.uow.ingredientes.get_list(offset=offset, limit=size)
-            total = self.uow.ingredientes.count()
-            
+            if is_active is not None:
+                ings_db = self.uow.ingredientes.filter_by(offset=offset, limit=size, is_active=is_active)
+                total = self.uow.ingredientes.count_by(is_active=is_active)
+            else:
+                ings_db = self.uow.ingredientes.get_list(offset=offset, limit=size)
+                total = self.uow.ingredientes.count()
+
             items = [IngredienteRead.model_validate(c) for c in ings_db]
-            pages = (total + size - 1) // size
-            
+            pages = max(1, (total + size - 1) // size)
+
             return PaginatedResponse(
                 items=items,
                 total=total,
@@ -97,3 +101,21 @@ class IngredienteService:
 
             self.uow.ingredientes.clear_productos_rel(ing_id)
             ing.is_active = False
+
+    def activar(self, ing_id: int, user_id: int) -> Ingrediente:
+        with self.uow:
+            ing = self.uow.ingredientes.get(ing_id)
+            if not ing:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Ingrediente con id {ing_id} no encontrado",
+                )
+            ing.is_active = True
+            self.uow.auditoria.add(Auditoria(
+                user_id=user_id,
+                accion="INGREDIENTE_ACTIVAR",
+                modulo="INGREDIENTES",
+                descripcion=f"Se reactivó el ingrediente: {ing.nombre}",
+                metadata_info={"id": ing.id}
+            ))
+            return ing

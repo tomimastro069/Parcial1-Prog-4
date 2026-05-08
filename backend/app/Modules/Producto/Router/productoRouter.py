@@ -17,9 +17,10 @@ def listar_productos(
     size: Annotated[int, Query(ge=1, le=100)] = 10,
     search: Annotated[str | None, Query()] = None,
     categoria_id: Annotated[int | None, Query()] = None,
+    is_active: Annotated[bool | None, Query()] = None,
 ):
     service = ProductoService(uow)
-    return service.get_all_paginated(page=page, size=size, search=search, categoria_id=categoria_id)
+    return service.get_all_paginated(page=page, size=size, search=search, categoria_id=categoria_id, is_active=is_active)
 
 
 @router.get("/{producto_id}", response_model=ProductoRead)
@@ -52,6 +53,16 @@ def editar_producto(
 ):
     service = ProductoService(uow)
     return service.update(producto_id, data, current_user.id)
+
+
+@router.patch("/{producto_id}/activar", response_model=ProductoRead)
+def activar_producto(
+    producto_id: Annotated[int, Path(gt=0)],
+    uow=Depends(get_uow),
+    current_user: Usuario = Depends(role_required([UserRole.ADMIN, UserRole.STOCK]))
+):
+    service = ProductoService(uow)
+    return service.activar(producto_id, current_user.id)
 
 
 @router.delete("/{producto_id}", status_code=status.HTTP_204_NO_CONTENT)

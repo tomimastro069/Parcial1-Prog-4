@@ -1,29 +1,42 @@
 import { useState } from 'react';
-import { PencilIcon, TrashIcon, PlusIcon, TagIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, TrashIcon, PlusIcon, TagIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import { Button } from '../../../components/Button';
 import { TableRowSkeleton } from '../../../components/Skeleton';
 import { CategoriaModal } from './CategoriaModal';
-import { useCategorias, useDeleteCategoria } from '../../../hooks/useCategorias';
+import { useCategorias, useDeleteCategoria, useActivarCategoria } from '../../../hooks/useCategorias';
 import { useUIStore } from '../../../store/uiStore';
 import { Pagination } from '../../../components/Pagination';
 import type { Categoria } from '../../../types';
 
 const PAGE_SIZE = 10;
 
+type Filtro = 'todos' | 'activos' | 'inactivos';
+
+const filtroToParam: Record<Filtro, boolean | null> = {
+  todos: null,
+  activos: true,
+  inactivos: false,
+};
+
 export function CategoriasTable() {
   const [page, setPage] = useState(1);
-  const { data, isLoading, isError } = useCategorias({ page, size: PAGE_SIZE });
-  
-  // Acceso defensivo
+  const [filtro, setFiltro] = useState<Filtro>('todos');
+
+  const { data, isLoading, isError } = useCategorias({
+    page,
+    size: PAGE_SIZE,
+    is_active: filtroToParam[filtro] ?? undefined,
+  });
+
   const responseData = data as any;
   const categorias: Categoria[] = responseData?.items || [];
   const totalPages = responseData?.pages || 0;
 
-  // Traemos todas las categorías sin paginar para el select y los nombres de padre
-  const { data: allCatData } = useCategorias({ size: 1000 });
+  const { data: allCatData } = useCategorias({ size: 1000, is_active: true });
   const allCategorias: Categoria[] = (allCatData as any)?.items || [];
 
   const eliminar = useDeleteCategoria();
+  const activar = useActivarCategoria();
   const openConfirm = useUIStore((s) => s.openConfirmModal);
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -47,6 +60,19 @@ export function CategoriasTable() {
     );
   };
 
+  const handleActivar = (cat: Categoria) => {
+    openConfirm(
+      'Reactivar categoría',
+      `¿Querés reactivar "${cat.nombre}"?`,
+      () => activar.mutate(cat.id)
+    );
+  };
+
+  const handleFiltroChange = (nuevo: Filtro) => {
+    setFiltro(nuevo);
+    setPage(1);
+  };
+
   const getNombrePadre = (parentId: number | null | undefined) => {
     if (!parentId || allCategorias.length === 0) return null;
     return allCategorias.find((c) => c.id === parentId)?.nombre ?? null;
@@ -65,6 +91,23 @@ export function CategoriasTable() {
         </Button>
       </div>
 
+      {/* Filtro de estado */}
+      <div className="flex gap-2 mb-4">
+        {(['todos', 'activos', 'inactivos'] as Filtro[]).map((f) => (
+          <button
+            key={f}
+            onClick={() => handleFiltroChange(f)}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              filtro === f
+                ? 'bg-[#1F3864] text-white'
+                : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            {f.charAt(0).toUpperCase() + f.slice(1)}
+          </button>
+        ))}
+      </div>
+
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         {isError ? (
           <div className="text-center py-12 text-gray-500">Error al cargar categorías.</div>
@@ -75,18 +118,19 @@ export function CategoriasTable() {
                 <th className="text-left px-4 py-3 font-semibold text-gray-700">Nombre</th>
                 <th className="text-left px-4 py-3 font-semibold text-gray-700 hidden md:table-cell">Descripción</th>
                 <th className="text-left px-4 py-3 font-semibold text-gray-700 hidden sm:table-cell">Categoría padre</th>
+                <th className="text-left px-4 py-3 font-semibold text-gray-700">Estado</th>
                 <th className="text-right px-4 py-3 font-semibold text-gray-700">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {isLoading
                 ? Array.from({ length: 4 }).map((_, i) => (
-                    <TableRowSkeleton key={i} cols={4} />
+                    <TableRowSkeleton key={i} cols={5} />
                   ))
                 : categorias?.map((cat) => {
                     const padre = getNombrePadre(cat.parent_id);
                     return (
-                      <tr key={cat.id} className="hover:bg-gray-50 transition-colors">
+                      <tr key={cat.id} className={`hover:bg-gray-50 transition-colors ${!cat.is_active ? 'opacity-60' : ''}`}>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
                             <TagIcon className="w-4 h-4 text-[#4472C4] flex-shrink-0" />
@@ -106,21 +150,42 @@ export function CategoriasTable() {
                           )}
                         </td>
                         <td className="px-4 py-3">
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                            cat.is_active
+                              ? 'bg-green-50 text-green-700'
+                              : 'bg-red-50 text-red-600'
+                          }`}>
+                            {cat.is_active ? 'Activa' : 'Inactiva'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
                           <div className="flex justify-end gap-2">
-                            <button
-                              onClick={() => handleEditar(cat)}
-                              className="p-1.5 rounded-md text-gray-500 hover:text-[#2E75B6] hover:bg-blue-50 transition-colors"
-                              title="Editar"
-                            >
-                              <PencilIcon className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleEliminar(cat)}
-                              className="p-1.5 rounded-md text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
-                              title="Eliminar"
-                            >
-                              <TrashIcon className="w-4 h-4" />
-                            </button>
+                            {cat.is_active ? (
+                              <>
+                                <button
+                                  onClick={() => handleEditar(cat)}
+                                  className="p-1.5 rounded-md text-gray-500 hover:text-[#2E75B6] hover:bg-blue-50 transition-colors"
+                                  title="Editar"
+                                >
+                                  <PencilIcon className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleEliminar(cat)}
+                                  className="p-1.5 rounded-md text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                  title="Eliminar"
+                                >
+                                  <TrashIcon className="w-4 h-4" />
+                                </button>
+                              </>
+                            ) : (
+                              <button
+                                onClick={() => handleActivar(cat)}
+                                className="p-1.5 rounded-md text-gray-500 hover:text-green-600 hover:bg-green-50 transition-colors"
+                                title="Reactivar"
+                              >
+                                <ArrowPathIcon className="w-4 h-4" />
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -132,7 +197,7 @@ export function CategoriasTable() {
 
         {!isLoading && categorias?.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-sm">No hay categorías. Creá la primera.</p>
+            <p className="text-gray-500 text-sm">No hay categorías en este filtro.</p>
           </div>
         )}
 

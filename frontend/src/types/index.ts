@@ -35,6 +35,7 @@ export interface Categoria {
   nombre: string;
   descripcion: string | null;
   parent_id?: number | null;
+  is_active: boolean;
 }
 
 export interface CategoriaCreate {
@@ -57,6 +58,7 @@ export interface Ingrediente {
   unidad?: string;
   descripcion: string | null;
   es_alergeno: boolean;
+  is_active: boolean;
 }
 
 export interface IngredienteCreate {
