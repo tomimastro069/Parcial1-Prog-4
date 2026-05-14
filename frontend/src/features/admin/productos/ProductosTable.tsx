@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { PencilIcon, TrashIcon, PlusIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import { Button } from '../../../components/Button';
 import { TableRowSkeleton } from '../../../components/Skeleton';
@@ -19,7 +20,10 @@ const filtroToParam: Record<Filtro, boolean | null> = {
 };
 
 export function ProductosTable() {
-  const [page, setPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Leer página de la URL
+  const page = parseInt(searchParams.get('page') || '1', 10);
   const [filtro, setFiltro] = useState<Filtro>('todos');
 
   const { data, isLoading, isError } = useProductosAdmin({
@@ -66,7 +70,7 @@ export function ProductosTable() {
 
   const handleFiltroChange = (nuevo: Filtro) => {
     setFiltro(nuevo);
-    setPage(1);
+    setSearchParams({ page: '1' });
   };
 
   return (
@@ -198,7 +202,7 @@ export function ProductosTable() {
             <Pagination
               currentPage={page}
               totalPages={totalPages}
-              onPageChange={setPage}
+              onPageChange={(newPage) => setSearchParams({ page: String(newPage) })}
             />
           </div>
         )}

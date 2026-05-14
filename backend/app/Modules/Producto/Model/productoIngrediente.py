@@ -11,5 +11,10 @@ class ProductoIngrediente(SQLModel, table=True):
     )
     cantidad: float = Field(gt=0, description="Cantidad del ingrediente en el producto")
 
+    unidad_medida_id: Optional[int] = Field(
+        default=None, foreign_key="unidadmedida.id", primary_key=True
+    )
+    es_removible: bool = Field(default=False)
+
     producto: Optional["Producto"] = Relationship(back_populates="producto_ingredientes")
     ingrediente: Optional["Ingrediente"] = Relationship(back_populates="producto_ingredientes")

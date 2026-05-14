@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import { ProductoCard } from './ProductoCard';
 import { ProductCardSkeleton } from '../../components/Skeleton';
@@ -8,7 +9,11 @@ import { useCategorias } from '../../hooks/useCategorias';
 const PAGE_SIZE = 12;
 
 export function CatalogoGrid() {
-  const [page, setPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Leer página de la URL
+  const page = parseInt(searchParams.get('page') || '1', 10);
+  
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [categoriaId, setCategoriaId] = useState<number | null>(null);
@@ -17,10 +22,10 @@ export function CatalogoGrid() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setSearch(searchInput);
-      setPage(1);
+      setSearchParams({ page: '1' });
     }, 300);
     return () => clearTimeout(timer);
-  }, [searchInput]);
+  }, [searchInput, setSearchParams]);
 
   const { data, isLoading, isError, refetch } = useProductos({
     page,
@@ -35,8 +40,8 @@ export function CatalogoGrid() {
 
   const handleCategoriaChange = useCallback((id: number | null) => {
     setCategoriaId(id);
-    setPage(1);
-  }, []);
+    setSearchParams({ page: '1' });
+  }, [setSearchParams]);
 
   const productos = data?.items ?? [];
   const totalPages = data?.pages ?? 1;
@@ -145,7 +150,7 @@ export function CatalogoGrid() {
         <div className="flex items-center justify-center gap-1 pt-2">
           <button
             disabled={page === 1}
-            onClick={() => setPage((p) => p - 1)}
+            onClick={() => setSearchParams({ page: String(page - 1) })}
             className="px-3 py-1.5 rounded-lg text-sm border border-gray-300 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             ‹
@@ -156,7 +161,7 @@ export function CatalogoGrid() {
             return (
               <button
                 key={pageNum}
-                onClick={() => setPage(pageNum)}
+                onClick={() => setSearchParams({ page: String(pageNum) })}
                 className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${page === pageNum
                   ? 'bg-[#2E75B6] border-[#2E75B6] text-white'
                   : 'border-gray-300 hover:bg-gray-50'
@@ -169,7 +174,7 @@ export function CatalogoGrid() {
 
           <button
             disabled={page === totalPages}
-            onClick={() => setPage((p) => p + 1)}
+            onClick={() => setSearchParams({ page: String(page + 1) })}
             className="px-3 py-1.5 rounded-lg text-sm border border-gray-300 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             ›
