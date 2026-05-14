@@ -1,8 +1,8 @@
 from typing import Optional, Any
 from sqlmodel import Session, select
 
-from app.Core.Repository.base_repository import BaseRepository
-from app.Modules.UnidadMedida.Model.unidadMedida import UnidadMedida
+from app.Core.UnitOfWork.BaseRepository import BaseRepository
+from app.Modules.UnidadMedida.unidadMedida import UnidadMedida
 
 
 class UnidadMedidaRepository(BaseRepository[UnidadMedida]):

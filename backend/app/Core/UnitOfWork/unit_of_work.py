@@ -1,10 +1,10 @@
 from sqlmodel import Session
-from app.Modules.Categoria.Repository.CategoriaRepository import CategoriaRepository
-from app.Modules.Ingrediente.Repository.IngredienteRepository import IngredienteRepository
-from app.Modules.Producto.Repository.ProductoRepository import ProductoRepository
-from app.Modules.Usuarios.Repository.UsuarioRepository import UsuarioRepository
-from app.Modules.Auth.Repository.authRepository import AuthRepository
-from app.Modules.Auditoria.Repository.auditoriaRepository import AuditoriaRepository
+from app.Modules.Categoria.CategoriaRepository import CategoriaRepository
+from app.Modules.Ingrediente.IngredienteRepository import IngredienteRepository
+from app.Modules.Producto.ProductoRepository import ProductoRepository
+from app.Modules.Usuarios.UsuarioRepository import UsuarioRepository
+from app.Modules.Auth.authRepository import AuthRepository
+from app.Modules.Auditoria.auditoriaRepository import AuditoriaRepository
 
 
 class UnitOfWork:

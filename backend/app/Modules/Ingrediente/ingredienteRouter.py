@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, Path, Query, status
 from typing import Annotated
 
-from app.Modules.Ingrediente.Schema.ingredienteSchema import IngredienteCreate, IngredienteRead, IngredienteUpdate
-from app.Modules.Ingrediente.Service.ingredienteService import IngredienteService
+from app.Modules.Ingrediente.ingredienteSchema import IngredienteCreate, IngredienteRead, IngredienteUpdate
+from app.Modules.Ingrediente.ingredienteService import IngredienteService
 from app.Core.Dependencies.dependencies import role_required, get_uow
 from app.Modules.Usuarios.usuario import UserRole, Usuario
 from app.Core.Schema.pagination import PaginatedResponse

@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, Path, Query, status
 from typing import Annotated
 
-from app.Modules.Categoria.Schema.categoriaSchema import CategoriaCreate, CategoriaRead, CategoriaUpdate
-from app.Modules.Categoria.Service.categoriaService import CategoriaService
+from app.Modules.Categoria.categoriaSchema import CategoriaCreate, CategoriaRead, CategoriaUpdate
+from app.Modules.Categoria.categoriaService import CategoriaService
 from app.Core.Dependencies.dependencies import role_required, get_uow
 from app.Modules.Usuarios.usuario import UserRole, Usuario
 from app.Core.Schema.pagination import PaginatedResponse

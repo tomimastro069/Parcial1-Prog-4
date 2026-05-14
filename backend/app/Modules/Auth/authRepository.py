@@ -1,5 +1,5 @@
 from sqlmodel import Session
-from app.Modules.Auth.Model.refreshToken import RefreshToken
+from app.Modules.Auth.refreshToken import RefreshToken
 from app.Core.UnitOfWork.BaseRepository import BaseRepository
 
 class AuthRepository(BaseRepository[RefreshToken]):

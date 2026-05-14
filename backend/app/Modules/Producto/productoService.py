@@ -3,7 +3,7 @@ from sqlmodel import select, func
 from fastapi import HTTPException, status
 from app.Modules.Producto.Model.producto import Producto
 from app.Modules.Producto.Model.productoCategoria import ProductoCategoria
-from app.Modules.Producto.Schema.productoSchema import (
+from app.Modules.Producto.productoSchema import (
     ProductoCreate,
     ProductoUpdate,
     ProductoRead,
@@ -11,7 +11,7 @@ from app.Modules.Producto.Schema.productoSchema import (
     IngredienteEnProducto,
 )
 from app.Core.UnitOfWork.unit_of_work import UnitOfWork
-from app.Modules.Auditoria.Model.auditoria import Auditoria
+from app.Modules.Auditoria.auditoria import Auditoria
 
 class ProductoService:
     def __init__(self, uow: UnitOfWork):

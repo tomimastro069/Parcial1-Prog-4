@@ -3,10 +3,10 @@ from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException, status
 from app.Core.Security.jwt import get_password_hash, verify_password, create_access_token
 from app.Core.Config.Config import settings
-from app.Modules.Auth.Schema.authSchema import LoginRequest, RegisterRequest, TokenResponse
+from app.Modules.Auth.authSchema import LoginRequest, RegisterRequest, TokenResponse
 from app.Modules.Usuarios.usuario import Usuario
-from app.Modules.Auth.Model.refreshToken import RefreshToken
-from app.Modules.Auditoria.Model.auditoria import Auditoria
+from app.Modules.Auth.refreshToken import RefreshToken
+from app.Modules.Auditoria.auditoria import Auditoria
 
 class AuthService:
     def __init__(self, uow):

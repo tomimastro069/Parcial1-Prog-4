@@ -1,5 +1,5 @@
 from sqlmodel import Session
-from app.Modules.Auditoria.Model.auditoria import Auditoria
+from app.Modules.Auditoria.auditoria import Auditoria
 from app.Core.UnitOfWork.BaseRepository import BaseRepository
 
 class AuditoriaRepository(BaseRepository[Auditoria]):

@@ -1,9 +1,9 @@
 from fastapi import HTTPException, status
-from app.Modules.Ingrediente.Model.ingrediente import Ingrediente
-from app.Modules.Ingrediente.Schema.ingredienteSchema import IngredienteCreate, IngredienteUpdate, IngredienteRead
+from app.Modules.Ingrediente.ingrediente import Ingrediente
+from app.Modules.Ingrediente.ingredienteSchema import IngredienteCreate, IngredienteUpdate, IngredienteRead
 from app.Core.UnitOfWork.unit_of_work import UnitOfWork
 from app.Core.Schema.pagination import PaginatedResponse
-from app.Modules.Auditoria.Model.auditoria import Auditoria
+from app.Modules.Auditoria.auditoria import Auditoria
 
 class IngredienteService:
     def __init__(self, uow: UnitOfWork):

@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, Path, Query, status
 from typing import Annotated, Optional
 
-from app.Modules.Producto.Schema.productoSchema import ProductoCreate, ProductoRead, ProductoUpdate
-from app.Modules.Producto.Service.productoService import ProductoService
+from app.Modules.Producto.productoSchema import ProductoCreate, ProductoRead, ProductoUpdate
+from app.Modules.Producto.productoService import ProductoService
 from app.Core.Dependencies.dependencies import role_required, get_uow
 from app.Modules.Usuarios.usuario import UserRole, Usuario
 from app.Core.Schema.pagination import PaginatedResponse

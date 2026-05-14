@@ -1,9 +1,9 @@
 from fastapi import HTTPException, status
-from app.Modules.Categoria.Model.categoria import Categoria
-from app.Modules.Categoria.Schema.categoriaSchema import CategoriaCreate, CategoriaUpdate, CategoriaRead
+from app.Modules.Categoria.categoria import Categoria
+from app.Modules.Categoria.categoriaSchema import CategoriaCreate, CategoriaUpdate, CategoriaRead
 from app.Core.UnitOfWork.unit_of_work import UnitOfWork
 from app.Core.Schema.pagination import PaginatedResponse
-from app.Modules.Auditoria.Model.auditoria import Auditoria
+from app.Modules.Auditoria.auditoria import Auditoria
 
 class CategoriaService:
     def __init__(self, uow: UnitOfWork):

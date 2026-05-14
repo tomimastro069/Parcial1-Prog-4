@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status, Request
 from app.Core.Dependencies.dependencies import get_uow, get_current_user
-from app.Modules.Auth.Service.authService import AuthService
-from app.Modules.Auth.Schema.authSchema import LoginRequest, RegisterRequest, TokenResponse, LogoutRequest, RefreshRequest, UserProfile
+from app.Modules.Auth.authService import AuthService
+from app.Modules.Auth.authSchema import LoginRequest, RegisterRequest, TokenResponse, LogoutRequest, RefreshRequest, UserProfile
 from app.Modules.Usuarios.usuario import Usuario
 from app.Core.Config.rate_limit import limiter
 
