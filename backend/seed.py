@@ -4,12 +4,12 @@ from app.Core.database import engine
 from app.Core.Security.jwt import get_password_hash
 
 from app.Modules.Usuarios.usuario import Usuario, UserRole
-from app.Modules.Categoria.Model.categoria import Categoria
-from app.Modules.Ingrediente.Model.ingrediente import Ingrediente
+from app.Modules.Categoria.categoria import Categoria
+from app.Modules.Ingrediente.ingrediente import Ingrediente
 from app.Modules.Producto.Model.producto import Producto
 from app.Modules.Producto.Model.productoCategoria import ProductoCategoria
 from app.Modules.Producto.Model.productoIngrediente import ProductoIngrediente
-from app.Modules.UnidadMedida.Model.unidadMedida import UnidadMedida
+from app.Modules.UnidadMedida.unidadMedida import UnidadMedida
 
 
 # -----------------------------
@@ -125,11 +125,7 @@ def seed_ingredientes(session, unidades):
 
     for nombre, tipo_unidad, desc in data:
 
-        unidad = None
-        for u in unidades.values():
-            if u.tipo == tipo_unidad:
-                unidad = u
-                break
+        unidad = unidades.get(tipo_unidad)
 
         ing = session.exec(
             select(Ingrediente).where(Ingrediente.nombre == nombre)
@@ -160,9 +156,9 @@ def seed_productos(session, cats, ings):
         print("Productos ya existen")
         return
 
-    p1 = Producto(nombre="Burger Clásica", precio=1200, descripcion="Hamburguesa clásica")
-    p2 = Producto(nombre="Pizza Margherita", precio=1500, descripcion="Pizza italiana")
-    p3 = Producto(nombre="Coca Cola 500ml", precio=500, descripcion="Gaseosa")
+    p1 = Producto(nombre="Burger Clásica", precio_base=1200, descripcion="Hamburguesa clásica", es_terminado=False)
+    p2 = Producto(nombre="Pizza Margherita", precio_base=1500, descripcion="Pizza italiana", es_terminado=False)
+    p3 = Producto(nombre="Coca Cola 500ml", precio_base=500, descripcion="Gaseosa", es_terminado=True)
 
     session.add_all([p1, p2, p3])
     session.commit()
@@ -190,8 +186,6 @@ def seed_productos(session, cats, ings):
         ProductoIngrediente(producto_id=p2.id, ingrediente_id=ings["Salsa de tomate"].id, cantidad=100, unidad_medida_id=None),
         ProductoIngrediente(producto_id=p2.id, ingrediente_id=ings["Muzarella"].id, cantidad=200, unidad_medida_id=None),
         ProductoIngrediente(producto_id=p2.id, ingrediente_id=ings["Albahaca"].id, cantidad=5, unidad_medida_id=None),
-
-        ProductoIngrediente(producto_id=p3.id, ingrediente_id=ings["Coca Cola"].id, cantidad=1, unidad_medida_id=None),
     ])
 
     session.commit()

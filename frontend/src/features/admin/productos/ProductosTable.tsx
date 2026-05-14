@@ -21,7 +21,7 @@ const filtroToParam: Record<Filtro, boolean | null> = {
 
 export function ProductosTable() {
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   // Leer página de la URL
   const page = parseInt(searchParams.get('page') || '1', 10);
   const [filtro, setFiltro] = useState<Filtro>('todos');
@@ -92,11 +92,10 @@ export function ProductosTable() {
           <button
             key={f}
             onClick={() => handleFiltroChange(f)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              filtro === f
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${filtro === f
                 ? 'bg-[#1F3864] text-white'
                 : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
-            }`}
+              }`}
           >
             {f.charAt(0).toUpperCase() + f.slice(1)}
           </button>
@@ -122,71 +121,77 @@ export function ProductosTable() {
               {isLoading
                 ? Array.from({ length: 5 }).map((_, i) => <TableRowSkeleton key={i} cols={6} />)
                 : productos?.map((p) => (
-                    <tr key={p.id} className={`hover:bg-gray-50 transition-colors ${!p.is_active ? 'opacity-60' : ''}`}>
-                      <td className="px-4 py-3 font-medium text-gray-900">{p.nombre}</td>
-                      <td className="px-4 py-3 text-gray-500 hidden md:table-cell max-w-xs truncate">
-                        {p.descripcion ?? <span className="text-gray-300">—</span>}
-                      </td>
-                      <td className="px-4 py-3 text-gray-700 font-medium">
-                        ${p.precio.toFixed(2)}
-                      </td>
-                      <td className="px-4 py-3 hidden lg:table-cell">
-                        {p.categorias.length > 0 ? (
-                          <div className="flex flex-wrap gap-1">
-                            {p.categorias.map((c) => (
-                              <span
-                                key={c.id}
-                                className="px-2 py-0.5 bg-blue-50 text-[#2E75B6] text-xs rounded-full"
-                              >
-                                {c.nombre}
-                              </span>
-                            ))}
-                          </div>
-                        ) : (
-                          <span className="text-gray-300 text-sm">—</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                          p.is_active
+                  <tr key={p.id} className={`hover:bg-gray-50 transition-colors ${!p.is_active ? 'opacity-60' : ''}`}>
+                    <td className="px-4 py-3 font-medium text-gray-900">{p.nombre}</td>
+                    <td className="px-4 py-3 text-gray-500 hidden md:table-cell max-w-xs truncate">
+                      {p.descripcion ?? <span className="text-gray-300">—</span>}
+                    </td>
+                    <td className="px-4 py-3 text-gray-700 font-medium">
+                      ${p.precio.toFixed(2)}
+                    </td>
+                    <td className="px-4 py-3 hidden lg:table-cell">
+                      {p.categorias.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {p.categorias.map((c) => (
+                            <span
+                              key={c.id}
+                              className="px-2 py-0.5 bg-blue-50 text-[#2E75B6] text-xs rounded-full"
+                            >
+                              {c.nombre}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-gray-300 text-sm">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-col gap-1">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium w-fit ${p.is_active
                             ? 'bg-green-50 text-green-700'
                             : 'bg-red-50 text-red-600'
-                        }`}>
+                          }`}>
                           {p.is_active ? 'Activo' : 'Inactivo'}
                         </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex justify-end gap-2">
-                          {p.is_active ? (
-                            <>
-                              <button
-                                onClick={() => handleEditar(p)}
-                                className="p-1.5 rounded-md text-gray-500 hover:text-[#2E75B6] hover:bg-blue-50 transition-colors"
-                                title="Editar"
-                              >
-                                <PencilIcon className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => handleEliminar(p)}
-                                className="p-1.5 rounded-md text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
-                                title="Eliminar"
-                              >
-                                <TrashIcon className="w-4 h-4" />
-                              </button>
-                            </>
-                          ) : (
+                        {p.es_terminado && (
+                          <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-[10px] font-bold rounded-full w-fit uppercase">
+                            Terminado
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex justify-end gap-2">
+                        {p.is_active ? (
+                          <>
                             <button
-                              onClick={() => handleActivar(p)}
-                              className="p-1.5 rounded-md text-gray-500 hover:text-green-600 hover:bg-green-50 transition-colors"
-                              title="Reactivar"
+                              onClick={() => handleEditar(p)}
+                              className="p-1.5 rounded-md text-gray-500 hover:text-[#2E75B6] hover:bg-blue-50 transition-colors"
+                              title="Editar"
                             >
-                              <ArrowPathIcon className="w-4 h-4" />
+                              <PencilIcon className="w-4 h-4" />
                             </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                            <button
+                              onClick={() => handleEliminar(p)}
+                              className="p-1.5 rounded-md text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                              title="Eliminar"
+                            >
+                              <TrashIcon className="w-4 h-4" />
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            onClick={() => handleActivar(p)}
+                            className="p-1.5 rounded-md text-gray-500 hover:text-green-600 hover:bg-green-50 transition-colors"
+                            title="Reactivar"
+                          >
+                            <ArrowPathIcon className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         )}

@@ -1,6 +1,7 @@
 from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional, List, TYPE_CHECKING
 from decimal import Decimal
+from sqlalchemy import Column, JSON
 
 if TYPE_CHECKING:
     from app.Modules.Producto.Model.productoIngrediente import ProductoIngrediente
@@ -35,7 +36,7 @@ class Producto(SQLModel, table=True):
     )
 
     # TEXT[]
-    imagenes_url: Optional[List[str]] = Field(default=None)
+    imagenes_url: Optional[List[str]] = Field(default=None,sa_column=Column(JSON))
 
     # INTEGER NN DEFAULT 0
     stock_cantidad: int = Field(
@@ -47,6 +48,18 @@ class Producto(SQLModel, table=True):
     # BOOLEAN NN DEFAULT TRUE
     disponible: bool = Field(
         default=True,
+        nullable=False
+    )
+
+    # BOOLEAN NN DEFAULT TRUE
+    is_active: bool = Field(
+        default=True,
+        nullable=False
+    )
+
+    # BOOLEAN NN DEFAULT FALSE
+    es_terminado: bool = Field(
+        default=False,
         nullable=False
     )
 

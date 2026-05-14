@@ -26,8 +26,13 @@ class ProductoRepository(BaseRepository[Producto]):
         self.session.refresh(rel)
         return rel
 
-    def add_ingrediente_rel(self, producto_id: int, ingrediente_id: int, cantidad: float) -> ProductoIngrediente:
-        rel = ProductoIngrediente(producto_id=producto_id, ingrediente_id=ingrediente_id, cantidad=cantidad)
+    def add_ingrediente_rel(self, producto_id: int, ingrediente_id: int, cantidad: float, unidad_medida_id: int) -> ProductoIngrediente:
+        rel = ProductoIngrediente(
+            producto_id=producto_id, 
+            ingrediente_id=ingrediente_id, 
+            cantidad=cantidad,
+            unidad_medida_id=unidad_medida_id
+        )
         self.session.add(rel)
         self.session.flush()
         return rel

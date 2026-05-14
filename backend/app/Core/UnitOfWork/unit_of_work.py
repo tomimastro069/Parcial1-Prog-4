@@ -5,6 +5,7 @@ from app.Modules.Producto.ProductoRepository import ProductoRepository
 from app.Modules.Usuarios.UsuarioRepository import UsuarioRepository
 from app.Modules.Auth.authRepository import AuthRepository
 from app.Modules.Auditoria.auditoriaRepository import AuditoriaRepository
+from app.Modules.UnidadMedida.unidadRepository import UnidadMedidaRepository
 
 
 class UnitOfWork:
@@ -18,6 +19,7 @@ class UnitOfWork:
         self.usuarios = UsuarioRepository(session)
         self.auth = AuthRepository(session)
         self.auditoria = AuditoriaRepository(session)
+        self.unidades_medida = UnidadMedidaRepository(session)
 
     def __enter__(self):
         return self

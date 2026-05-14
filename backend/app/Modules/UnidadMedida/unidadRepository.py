@@ -43,7 +43,7 @@ class UnidadMedidaRepository(BaseRepository[UnidadMedida]):
 
     def get_by_tipo_grouped(self) -> dict[str, list[UnidadMedida]]:
         """Devuelve unidades agrupadas por tipo (masa, volumen, etc)."""
-        unidades = self.get_all()
+        unidades = self.get_list()
 
         grouped: dict[str, list[UnidadMedida]] = {}
 

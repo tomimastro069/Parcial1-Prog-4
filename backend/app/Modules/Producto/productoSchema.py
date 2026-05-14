@@ -32,6 +32,7 @@ class ProductoCreate(SQLModel):
     nombre: Annotated[str, Field(min_length=2, max_length=100)]
     precio: Annotated[float, Field(gt=0)]
     descripcion: Annotated[Optional[str], Field(max_length=500)] = None
+    es_terminado: bool = False
     categorias: List[int] = []
     ingredientes: List[ProductoIngredienteInput] = []
 
@@ -43,6 +44,7 @@ class ProductoRead(SQLModel):
     descripcion: Optional[str] = None
     imagen_url: Optional[str] = None
     is_active: bool = True
+    es_terminado: bool = False
     categorias: List[CategoriaEnProducto] = []
     ingredientes: List[IngredienteEnProducto] = []
 
@@ -51,6 +53,7 @@ class ProductoUpdate(SQLModel):
     nombre: Annotated[Optional[str], Field(min_length=2, max_length=100)] = None
     precio: Annotated[Optional[float], Field(gt=0)] = None
     descripcion: Annotated[Optional[str], Field(max_length=500)] = None
+    es_terminado: Optional[bool] = None
     categorias: Optional[List[int]] = None
     ingredientes: Optional[List[ProductoIngredienteInput]] = None
 

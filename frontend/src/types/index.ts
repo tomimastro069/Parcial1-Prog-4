@@ -55,6 +55,7 @@ export interface CategoriaUpdate {
 export interface Ingrediente {
   id: number;
   nombre: string;
+  unidad_medida_id?: number;
   unidad?: string;
   descripcion: string | null;
   es_alergeno: boolean;
@@ -63,14 +64,32 @@ export interface Ingrediente {
 
 export interface IngredienteCreate {
   nombre: string;
+  unidad_medida_id: number;
   descripcion?: string | null;
   es_alergeno?: boolean;
 }
 
 export interface IngredienteUpdate {
   nombre?: string;
+  unidad_medida_id?: number;
   descripcion?: string | null;
   es_alergeno?: boolean;
+}
+
+// ─── Unidad de Medida ────────────────────────────────────────────────────────
+
+export interface UnidadMedida {
+  id: number;
+  nombre: string;
+  simbolo: string;
+  tipo: string;
+  is_active: boolean;
+}
+
+export interface UnidadMedidaCreate {
+  nombre: string;
+  simbolo: string;
+  tipo: string;
 }
 
 // ─── Producto ────────────────────────────────────────────────────────────────
@@ -96,6 +115,7 @@ export interface ProductoRead {
   descripcion: string | null;
   imagen_url: string | null;
   is_active: boolean;
+  es_terminado: boolean;
   categorias: { id: number; nombre: string }[];
   ingredientes: ProductoIngredienteRead[];
 }
@@ -104,6 +124,7 @@ export interface ProductoCreate {
   nombre: string;
   precio: number;
   descripcion?: string | null;
+  es_terminado?: boolean;
   categorias?: number[];
   ingredientes?: ProductoIngredienteInput[];
 }
@@ -112,6 +133,7 @@ export interface ProductoUpdate {
   nombre?: string;
   precio?: number;
   descripcion?: string | null;
+  es_terminado?: boolean;
   categorias?: number[];
   ingredientes?: ProductoIngredienteInput[];
 }
@@ -122,6 +144,7 @@ export interface Producto {
   descripcion: string | null;
   precio: number;
   is_active: boolean;
+  es_terminado: boolean;
   imagen_url?: string | null;
   categorias?: Categoria[];
 }

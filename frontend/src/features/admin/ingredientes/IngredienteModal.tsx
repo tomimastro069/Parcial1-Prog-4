@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Modal from '../../../components/Modal';
 import { Button } from '../../../components/Button';
 import { useCreateIngrediente, useUpdateIngrediente } from '../../../hooks/useIngredientes';
+import { useUnidades } from '../../../hooks/useUnidades';
 import type { Ingrediente } from '../../../types';
 
 interface Props {
@@ -13,28 +14,33 @@ interface Props {
 export function IngredienteModal({ isOpen, onClose, editando }: Props) {
   const crear = useCreateIngrediente();
   const actualizar = useUpdateIngrediente();
+  const { data: unidades = [], isLoading: cargandoUnidades } = useUnidades();
 
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [esAlergeno, setEsAlergeno] = useState(false);
-  const [errors, setErrors] = useState<{ nombre?: string }>({});
+  const [unidadMedidaId, setUnidadMedidaId] = useState<number | ''>('');
+  const [errors, setErrors] = useState<{ nombre?: string; unidad?: string }>({});
 
   useEffect(() => {
     if (editando) {
       setNombre(editando.nombre);
       setDescripcion(editando.descripcion ?? '');
       setEsAlergeno(editando.es_alergeno);
+      setUnidadMedidaId(editando.unidad_medida_id ?? '');
     } else {
       setNombre('');
       setDescripcion('');
       setEsAlergeno(false);
+      setUnidadMedidaId('');
     }
     setErrors({});
   }, [editando, isOpen]);
 
   const validate = () => {
-    const e: { nombre?: string } = {};
+    const e: { nombre?: string; unidad?: string } = {};
     if (!nombre.trim() || nombre.length < 2) e.nombre = 'Mínimo 2 caracteres';
+    if (!unidadMedidaId) e.unidad = 'Debe seleccionar una unidad';
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -47,6 +53,7 @@ export function IngredienteModal({ isOpen, onClose, editando }: Props) {
       nombre: nombre.trim(),
       descripcion: descripcion.trim() || null,
       es_alergeno: esAlergeno,
+      unidad_medida_id: Number(unidadMedidaId),
     };
 
     if (editando) {
@@ -79,6 +86,28 @@ export function IngredienteModal({ isOpen, onClose, editando }: Props) {
           />
           {errors.nombre && (
             <p className="mt-1 text-xs text-red-600">{errors.nombre}</p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            Unidad de medida <span className="text-red-500">*</span>
+          </label>
+          <select
+            value={unidadMedidaId}
+            onChange={(e) => setUnidadMedidaId(e.target.value === '' ? '' : Number(e.target.value))}
+            className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-[#2E75B6] focus:ring-2 focus:ring-[#2E75B6]/20 focus:outline-none bg-white"
+            disabled={cargandoUnidades}
+          >
+            <option value="">Seleccione una unidad</option>
+            {unidades.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.nombre} ({u.simbolo})
+              </option>
+            ))}
+          </select>
+          {errors.unidad && (
+            <p className="mt-1 text-xs text-red-600">{errors.unidad}</p>
           )}
         </div>
 

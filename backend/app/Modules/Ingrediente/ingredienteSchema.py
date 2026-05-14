@@ -5,7 +5,7 @@ from typing import Annotated, Optional
 
 class IngredienteCreate(SQLModel):
     nombre: Annotated[str, Field(min_length=2, max_length=100)]
-    unidad: Optional[str] = "u"
+    unidad_medida_id: int
     descripcion: Optional[str] = None
     es_alergeno: bool = False
 
@@ -13,6 +13,7 @@ class IngredienteCreate(SQLModel):
 class IngredienteRead(SQLModel):
     id: int
     nombre: str
+    unidad_medida_id: Optional[int] = None
     unidad: str
     descripcion: Optional[str] = None
     es_alergeno: bool = False
@@ -21,6 +22,6 @@ class IngredienteRead(SQLModel):
 
 class IngredienteUpdate(SQLModel):
     nombre: Annotated[Optional[str], Field(min_length=2, max_length=100)] = None
-    unidad: Optional[str] = None
+    unidad_medida_id: Optional[int] = None
     descripcion: Optional[str] = None
     es_alergeno: Optional[bool] = None

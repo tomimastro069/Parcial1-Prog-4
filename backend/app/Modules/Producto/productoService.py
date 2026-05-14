@@ -1,6 +1,7 @@
 import math
 from sqlmodel import select, func
 from fastapi import HTTPException, status
+from decimal import Decimal
 from app.Modules.Producto.Model.producto import Producto
 from app.Modules.Producto.Model.productoCategoria import ProductoCategoria
 from app.Modules.Producto.productoSchema import (
@@ -12,6 +13,7 @@ from app.Modules.Producto.productoSchema import (
 )
 from app.Core.UnitOfWork.unit_of_work import UnitOfWork
 from app.Modules.Auditoria.auditoria import Auditoria
+from app.Modules.UnidadMedida.unidadMedida import UnidadMedida
 
 class ProductoService:
     def __init__(self, uow: UnitOfWork):
@@ -27,26 +29,35 @@ class ProductoService:
         ]
 
         pis = self.uow.productos.list_ingredientes_rel(p.id)
-        ingredientes = [
-            IngredienteEnProducto(
-                id=ing.id,
-                nombre=ing.nombre,
-                unidad=ing.unidad,
-                cantidad=pi.cantidad,
-                es_alergeno=ing.es_alergeno,
-                descripcion=ing.descripcion,
-            )
-            for pi in pis
-            if (ing := self.uow.ingredientes.get(pi.ingrediente_id))
-        ]
+        ingredientes = []
+        for pi in pis:
+            ing = self.uow.ingredientes.get(pi.ingrediente_id)
+            if ing:
+                # Intentamos obtener el símbolo de la unidad de medida
+                unidad_simbolo = "u"
+                if ing.unidad_medida_id:
+                    um = self.uow.session.get(UnidadMedida, ing.unidad_medida_id)
+                    if um:
+                        unidad_simbolo = um.simbolo
+                
+                ingrediente_read = IngredienteEnProducto(
+                    id=ing.id,
+                    nombre=ing.nombre,
+                    unidad=unidad_simbolo,
+                    cantidad=pi.cantidad,
+                    es_alergeno=ing.es_alergeno,
+                    descripcion=ing.descripcion,
+                )
+                ingredientes.append(ingrediente_read)
 
         return ProductoRead(
             id=p.id,
             nombre=p.nombre,
-            precio=p.precio,
+            precio=float(p.precio_base),
             descripcion=p.descripcion,
             imagen_url=None,
             is_active=p.is_active,
+            es_terminado=p.es_terminado,
             categorias=categorias,
             ingredientes=ingredientes,
         )
@@ -124,7 +135,12 @@ class ProductoService:
             self._validar_categorias(data.categorias)
             self._validar_ingredientes(data.ingredientes)
 
-            p = Producto(nombre=data.nombre, precio=data.precio, descripcion=data.descripcion)
+            p = Producto(
+                nombre=data.nombre, 
+                precio_base=Decimal(str(data.precio)), 
+                descripcion=data.descripcion,
+                es_terminado=data.es_terminado
+            )
             self.uow.productos.add(p)
 
             for cat_id in data.categorias:
@@ -132,10 +148,12 @@ class ProductoService:
                 p.producto_categorias.append(rel)
 
             for ing_input in data.ingredientes:
+                ing = self.uow.ingredientes.get(ing_input.ingrediente_id)
                 rel = self.uow.productos.add_ingrediente_rel(
                     producto_id=p.id,
                     ingrediente_id=ing_input.ingrediente_id,
                     cantidad=ing_input.cantidad,
+                    unidad_medida_id=ing.unidad_medida_id
                 )
                 p.producto_ingredientes.append(rel)
 
@@ -145,7 +163,7 @@ class ProductoService:
                 accion="PRODUCTO_CREAR",
                 modulo="PRODUCTOS",
                 descripcion=f"Se creó el producto: {p.nombre}",
-                metadata_info={"id": p.id, "precio": p.precio}
+                metadata_info={"id": p.id, "precio": float(p.precio_base)}
             ))
 
             return self._build_read(p)
@@ -162,7 +180,10 @@ class ProductoService:
             # Actualizar campos básicos
             campos_base = data.model_dump(exclude_unset=True, exclude={"categorias", "ingredientes"})
             for key, val in campos_base.items():
-                setattr(p, key, val)
+                if key == "precio":
+                    p.precio_base = Decimal(str(val))
+                else:
+                    setattr(p, key, val)
 
             # Sincronizar categorías
             if data.categorias is not None:
@@ -179,10 +200,12 @@ class ProductoService:
                 self.uow.productos.clear_ingredientes_rel(producto_id)
                 p.producto_ingredientes = []
                 for ing_input in data.ingredientes:
+                    ing = self.uow.ingredientes.get(ing_input.ingrediente_id)
                     rel = self.uow.productos.add_ingrediente_rel(
                         producto_id=producto_id,
                         ingrediente_id=ing_input.ingrediente_id,
                         cantidad=ing_input.cantidad,
+                        unidad_medida_id=ing.unidad_medida_id
                     )
                     p.producto_ingredientes.append(rel)
 
