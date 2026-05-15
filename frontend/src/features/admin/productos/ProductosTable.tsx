@@ -7,8 +7,9 @@ import { TableRowSkeleton } from '../../../components/Skeleton';
 import { Pagination } from '../../../components/Pagination';
 import { ProductoModal } from './ProductoModal';
 import { useProductosAdmin, useDeleteProducto, useActivarProducto } from '../../../hooks/useProductos';
+import { useCategorias } from '../../../hooks/useCategorias';
 import { useUIStore } from '../../../store/uiStore';
-import type { ProductoRead } from '../../../types';
+import type { ProductoRead, Categoria } from '../../../types';
 
 const PAGE_SIZE = 10;
 
@@ -35,12 +36,32 @@ export function ProductosTable() {
     search: debouncedSearch || undefined,
   });
 
+  const { data: catData } = useCategorias({ size: 1000, is_active: true });
+  const allCategorias: Categoria[] = (catData as any)?.items ?? [];
+
   const productos: ProductoRead[] = (data as any)?.items ?? [];
   const totalPages: number = (data as any)?.pages ?? 0;
 
   const eliminar = useDeleteProducto();
   const activar = useActivarProducto();
   const openConfirm = useUIStore((s) => s.openConfirmModal);
+
+  const getNombreCompletoCategoria = (catId: number): string => {
+    const cat = allCategorias.find(c => c.id === catId);
+    if (!cat) return "";
+
+    // Extraer solo el nombre corto (el último después de /) 
+    // porque el backend ya manda el nombre con el path
+    const partes = cat.nombre.split(' / ');
+    const nombreCorto = partes[partes.length - 1] || cat.nombre;
+
+    if (cat.parent_id) {
+      const nombrePadre = getNombreCompletoCategoria(cat.parent_id);
+      return nombrePadre ? `${nombrePadre} / ${nombreCorto}` : nombreCorto;
+    }
+
+    return nombreCorto;
+  };
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editando, setEditando] = useState<ProductoRead | null>(null);
@@ -152,7 +173,7 @@ export function ProductosTable() {
                               key={c.id}
                               className="px-2 py-0.5 bg-blue-50 text-[#2E75B6] text-xs rounded-full"
                             >
-                              {c.nombre}
+                              {allCategorias.length > 0 ? getNombreCompletoCategoria(c.id) : c.nombre}
                             </span>
                           ))}
                         </div>

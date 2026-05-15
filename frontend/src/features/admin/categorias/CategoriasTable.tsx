@@ -85,6 +85,11 @@ export function CategoriasTable() {
     return allCategorias.find((c) => c.id === parentId)?.nombre ?? null;
   };
 
+  const getNombreCorto = (nombre: string) => {
+    const partes = nombre.split(' / ');
+    return partes[partes.length - 1] || nombre;
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -153,7 +158,7 @@ export function CategoriasTable() {
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
                             <TagIcon className="w-4 h-4 text-[#4472C4] flex-shrink-0" />
-                            <span className="font-medium text-gray-900">{cat.nombre}</span>
+                            <span className="font-medium text-gray-900">{getNombreCorto(cat.nombre)}</span>
                           </div>
                         </td>
                         <td className="px-4 py-3 text-gray-500 hidden md:table-cell max-w-xs truncate">
