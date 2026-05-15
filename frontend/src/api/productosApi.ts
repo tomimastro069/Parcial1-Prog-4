@@ -23,7 +23,7 @@ export const productosApi = {
       .patch<Producto>(`/api/v1/productos/${id}/disponibilidad`, { disponible })
       .then((r) => r.data),
 
-  listAdmin: (params: { page?: number; size?: number; is_active?: boolean | null } = {}) =>
+  listAdmin: (params: { page?: number; size?: number; is_active?: boolean | null; search?: string } = {}) =>
     axiosClient
       .get<PaginatedResponse<ProductoRead>>('/api/v1/productos', { params })
       .then((r) => r.data),

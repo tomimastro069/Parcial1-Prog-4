@@ -1,12 +1,20 @@
 import { PlusIcon } from '@heroicons/react/24/outline';
 import { useUnidades } from '../../../hooks/useUnidades';
 import { Button } from '../../../components/Button';
+import { SearchBar } from '../../../components/SearchBar';
 import { useState } from 'react';
 import { UnidadModal } from './UnidadModal';
 
 export function UnidadesTable() {
   const { data: unidades = [], isLoading } = useUnidades();
   const [modalOpen, setModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const unidadesFiltradas = unidades.filter(u => 
+    u.nombre.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    u.simbolo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    u.tipo.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="space-y-4">
@@ -18,11 +26,21 @@ export function UnidadesTable() {
         </Button>
       </div>
 
+      <div className="flex mb-4">
+        <SearchBar 
+          placeholder="Buscar unidades..." 
+          onSearch={(term) => setSearchTerm(term)}
+          debounceMs={200}
+        />
+      </div>
+
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center text-gray-500">Cargando unidades...</div>
-        ) : unidades.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">No hay unidades registradas</div>
+        ) : unidadesFiltradas.length === 0 ? (
+          <div className="p-8 text-center text-gray-500">
+            {searchTerm ? 'No se encontraron unidades para esa búsqueda' : 'No hay unidades registradas'}
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
@@ -34,7 +52,7 @@ export function UnidadesTable() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {unidades.map(u => (
+                {unidadesFiltradas.map(u => (
                   <tr key={u.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 font-medium text-gray-900">{u.nombre}</td>
                     <td className="px-6 py-4 text-gray-600">{u.simbolo}</td>

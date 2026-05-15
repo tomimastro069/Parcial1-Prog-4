@@ -15,4 +15,4 @@ class IngredienteRepository(BaseRepository[Ingrediente]):
         statement = select(ProductoIngrediente).where(ProductoIngrediente.ingrediente_id == ingrediente_id)
         for rel in self.session.exec(statement).all():
             self.session.delete(rel)
-        self.session.flush()
+        self.session.flush()

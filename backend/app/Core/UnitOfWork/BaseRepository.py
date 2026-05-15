@@ -84,6 +84,26 @@ class BaseRepository(Generic[T]):
             statement = statement.where(getattr(self.model, field) == value)
         return self.session.exec(statement).one()
 
+    def search(self, search_term: str | None = None, search_field: str = "nombre", offset: int = 0, limit: int = 100, base_statement: Any = None, **filters: Any) -> tuple[list[T], int]:
+        """Búsqueda genérica paginada con filtros exactos y búsqueda parcial por un campo de texto."""
+        statement = select(self.model) if base_statement is None else base_statement
+        
+        # Filtros exactos (ignora los valores None)
+        for field, value in filters.items():
+            if value is not None:
+                statement = statement.where(getattr(self.model, field) == value)
+                
+        # Búsqueda parcial (ILIKE)
+        if search_term and hasattr(self.model, search_field):
+            statement = statement.where(getattr(self.model, search_field).ilike(f"%{search_term}%"))
+            
+        # Contar total antes de paginar
+        total = self.session.exec(select(func.count()).select_from(statement.subquery())).one()
+        
+        # Paginar y obtener items
+        items = self.session.exec(statement.offset(offset).limit(limit)).all()
+        return list(items), total
+
     # --- Hook para subclases ---
 
     def get_with_relations(self, id: int) -> Optional[T]:

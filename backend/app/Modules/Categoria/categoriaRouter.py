@@ -15,10 +15,11 @@ def listar_categorias(
     uow=Depends(get_uow),
     page: Annotated[int, Query(ge=1)] = 1,
     size: Annotated[int, Query(ge=1, le=1000)] = 10,
+    search: Annotated[str | None, Query()] = None,
     is_active: Annotated[bool | None, Query()] = None,
 ):
     service = CategoriaService(uow)
-    return service.get_all(page, size, is_active=is_active)
+    return service.get_all(page, size, search=search, is_active=is_active)
 
 
 @router.get("/{categoria_id}", response_model=CategoriaRead)

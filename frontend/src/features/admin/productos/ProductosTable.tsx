@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { PencilIcon, TrashIcon, PlusIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import { Button } from '../../../components/Button';
+import { SearchBar } from '../../../components/SearchBar';
 import { TableRowSkeleton } from '../../../components/Skeleton';
 import { Pagination } from '../../../components/Pagination';
 import { ProductoModal } from './ProductoModal';
@@ -25,11 +26,13 @@ export function ProductosTable() {
   // Leer página de la URL
   const page = parseInt(searchParams.get('page') || '1', 10);
   const [filtro, setFiltro] = useState<Filtro>('todos');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
 
   const { data, isLoading, isError } = useProductosAdmin({
     page,
     size: PAGE_SIZE,
     is_active: filtroToParam[filtro] ?? undefined,
+    search: debouncedSearch || undefined,
   });
 
   const productos: ProductoRead[] = (data as any)?.items ?? [];
@@ -86,20 +89,32 @@ export function ProductosTable() {
         </Button>
       </div>
 
-      {/* Filtro de estado */}
-      <div className="flex gap-2 mb-4">
-        {(['todos', 'activos', 'inactivos'] as Filtro[]).map((f) => (
-          <button
-            key={f}
-            onClick={() => handleFiltroChange(f)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${filtro === f
-                ? 'bg-[#1F3864] text-white'
-                : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
-              }`}
-          >
-            {f.charAt(0).toUpperCase() + f.slice(1)}
-          </button>
-        ))}
+      {/* Filtro de estado y buscador */}
+      <div className="flex flex-col sm:flex-row gap-4 mb-4 justify-between items-center">
+        <div className="flex gap-2">
+          {(['todos', 'activos', 'inactivos'] as Filtro[]).map((f) => (
+            <button
+              key={f}
+              onClick={() => handleFiltroChange(f)}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${filtro === f
+                  ? 'bg-[#1F3864] text-white'
+                  : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                }`}
+            >
+              {f.charAt(0).toUpperCase() + f.slice(1)}
+            </button>
+          ))}
+        </div>
+        <SearchBar 
+          placeholder="Buscar productos..." 
+          onSearch={(term) => {
+            setDebouncedSearch(term);
+            setSearchParams(prev => {
+              prev.set('page', '1');
+              return prev;
+            });
+          }} 
+        />
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">

@@ -2,7 +2,7 @@ import axiosClient from './axiosClient';
 import type { Categoria, CategoriaCreate, CategoriaUpdate, PaginatedResponse } from '../types';
 
 export const categoriasApi = {
-  list: (params: { page?: number; size?: number; is_active?: boolean | null } = {}) =>
+  list: (params: { page?: number; size?: number; is_active?: boolean | null; search?: string } = {}) =>
     axiosClient.get<PaginatedResponse<Categoria>>('/api/v1/categorias', { params }).then((r) => r.data),
 
   activar: (id: number) =>

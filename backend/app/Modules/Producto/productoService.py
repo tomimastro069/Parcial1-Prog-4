@@ -23,7 +23,11 @@ class ProductoService:
         """Construye el schema de lectura con datos de categorías e ingredientes."""
         pcs = self.uow.productos.list_categorias_rel(p.id)
         categorias = [
-            CategoriaEnProducto(id=cat.id, nombre=cat.nombre)
+            CategoriaEnProducto(
+                id=cat.id, 
+                nombre=cat.nombre, 
+                full_path=self.uow.categorias.get_full_path(cat.id)
+            )
             for pc in pcs
             if (cat := self.uow.categorias.get(pc.categoria_id))
         ]
@@ -71,28 +75,16 @@ class ProductoService:
         is_active: bool | None = None,
     ) -> dict:
         with self.uow:
-            if is_active is not None:
-                query = select(Producto).where(Producto.is_active == is_active)
-                count_query = select(func.count(Producto.id)).where(Producto.is_active == is_active)
-            else:
-                query = select(Producto)
-                count_query = select(func.count(Producto.id))
-
-            if search:
-                query = query.where(Producto.nombre.ilike(f"%{search}%"))
-                count_query = count_query.where(Producto.nombre.ilike(f"%{search}%"))
-
-            if categoria_id:
-                query = query.join(
-                    ProductoCategoria, Producto.id == ProductoCategoria.producto_id
-                ).where(ProductoCategoria.categoria_id == categoria_id)
-                count_query = count_query.join(
-                    ProductoCategoria, Producto.id == ProductoCategoria.producto_id
-                ).where(ProductoCategoria.categoria_id == categoria_id)
-
-            total = self.uow.session.exec(count_query).one()
-            offset = (page - 1) * size
-            productos = self.uow.session.exec(query.offset(offset).limit(size)).all()
+            page = max(1, page)
+            offset = max(0, (page - 1) * size)
+            
+            productos, total = self.uow.productos.search(
+                search_term=search,
+                categoria_id=categoria_id,
+                offset=offset,
+                limit=size,
+                is_active=is_active
+            )
 
             return {
                 "items": [self._build_read(p) for p in productos],

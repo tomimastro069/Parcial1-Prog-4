@@ -5,9 +5,10 @@ from app.Modules.Producto.Model.productoIngrediente import ProductoIngrediente
 from app.Core.UnitOfWork.BaseRepository import BaseRepository
 
 
+from app.Modules.Categoria.categoria import Categoria
+
 class ProductoRepository(BaseRepository[Producto]):
     
-
     def __init__(self, session: Session):
         super().__init__(session, Producto)
 
@@ -47,15 +48,27 @@ class ProductoRepository(BaseRepository[Producto]):
             self.session.delete(rel)
         self.session.flush()
 
-    def search(self, is_active: bool, search: str | None, categoria_id: int | None, offset: int, limit: int) -> tuple[list[Producto], int]:
-        statement = select(Producto).where(Producto.is_active == is_active)
+    def search(self, search_term: str | None = None, categoria_id: int | None = None, offset: int = 0, limit: int = 100, **filters) -> tuple[list[Producto], int]:
+        statement = select(Producto)
         
-        if search:
-            statement = statement.where(Producto.nombre.ilike(f"%{search}%"))
-            
         if categoria_id:
-            statement = statement.join(ProductoCategoria).where(ProductoCategoria.categoria_id == categoria_id)
+            # Obtener todas las subcategorías de manera recursiva
+            from app.Modules.Categoria.categoria import Categoria
             
-        total = self.session.exec(select(func.count()).select_from(statement.subquery())).one()
-        productos = self.session.exec(statement.offset(offset).limit(limit)).all()
-        return list(productos), total
+            def get_descendants(cid: int) -> set[int]:
+                res = {cid}
+                children = self.session.exec(select(Categoria.id).where(Categoria.parent_id == cid)).all()
+                for child in children:
+                    res.update(get_descendants(child))
+                return res
+            
+            allowed_cats = get_descendants(categoria_id)
+            statement = statement.join(ProductoCategoria).where(ProductoCategoria.categoria_id.in_(allowed_cats))
+            
+        return super().search(
+            search_term=search_term,
+            offset=offset,
+            limit=limit,
+            base_statement=statement,
+            **filters
+        )

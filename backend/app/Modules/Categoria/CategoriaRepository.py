@@ -17,4 +17,13 @@ class CategoriaRepository(BaseRepository[Categoria]):
         for rel in self.session.exec(statement).all():
             self.session.delete(rel)
         self.session.flush()
-    
+
+    def get_full_path(self, categoria_id: int) -> str:
+        """Construye el árbol recursivo de la categoría (Ej: Bebidas > Alcohólicas > Vinos)"""
+        cat = self.get(categoria_id)
+        if not cat:
+            return ""
+        if cat.parent_id:
+            parent_path = self.get_full_path(cat.parent_id)
+            return f"{parent_path} > {cat.nombre}"
+        return cat.nombre

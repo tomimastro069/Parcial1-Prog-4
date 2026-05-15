@@ -9,18 +9,24 @@ class CategoriaService:
     def __init__(self, uow: UnitOfWork):
         self.uow = uow
 
-    def get_all(self, page: int = 1, size: int = 10, is_active: bool | None = None) -> PaginatedResponse[CategoriaRead]:
+    def get_all(self, page: int = 1, size: int = 10, search: str | None = None, is_active: bool | None = None) -> PaginatedResponse[CategoriaRead]:
         with self.uow:
             page = max(1, page)
             offset = max(0, (page - 1) * size)
-            if is_active is not None:
-                categorias_db = self.uow.categorias.filter_by(offset=offset, limit=size, is_active=is_active)
-                total = self.uow.categorias.count_by(is_active=is_active)
-            else:
-                categorias_db = self.uow.categorias.get_list(offset=offset, limit=size)
-                total = self.uow.categorias.count()
+            
+            categorias_db, total = self.uow.categorias.search(
+                search_term=search,
+                offset=offset,
+                limit=size,
+                is_active=is_active
+            )
 
-            items = [CategoriaRead.model_validate(c) for c in categorias_db]
+            items = []
+            for c in categorias_db:
+                item = CategoriaRead.model_validate(c)
+                item.nombre = self.uow.categorias.get_full_path(c.id)
+                items.append(item)
+                
             pages = max(1, (total + size - 1) // size)
 
             return PaginatedResponse(

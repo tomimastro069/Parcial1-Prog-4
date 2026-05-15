@@ -28,16 +28,17 @@ class IngredienteService:
             is_active=c.is_active
         )
 
-    def get_all(self, page: int = 1, size: int = 10, is_active: bool | None = None) -> PaginatedResponse[IngredienteRead]:
+    def get_all(self, page: int = 1, size: int = 10, search: str | None = None, is_active: bool | None = None) -> PaginatedResponse[IngredienteRead]:
         with self.uow:
             page = max(1, page)
             offset = max(0, (page - 1) * size)
-            if is_active is not None:
-                ings_db = self.uow.ingredientes.filter_by(offset=offset, limit=size, is_active=is_active)
-                total = self.uow.ingredientes.count_by(is_active=is_active)
-            else:
-                ings_db = self.uow.ingredientes.get_list(offset=offset, limit=size)
-                total = self.uow.ingredientes.count()
+            
+            ings_db, total = self.uow.ingredientes.search(
+                search_term=search,
+                offset=offset,
+                limit=size,
+                is_active=is_active
+            )
 
             items = [self._build_read(c) for c in ings_db]
             pages = max(1, (total + size - 1) // size)
