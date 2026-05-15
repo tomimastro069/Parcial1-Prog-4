@@ -25,5 +25,5 @@ class CategoriaRepository(BaseRepository[Categoria]):
             return ""
         if cat.parent_id:
             parent_path = self.get_full_path(cat.parent_id)
-            return f"{parent_path} > {cat.nombre}"
+            return f"{parent_path} / {cat.nombre}"
         return cat.nombre

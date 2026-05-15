@@ -97,23 +97,23 @@ export function ProductosTable() {
               key={f}
               onClick={() => handleFiltroChange(f)}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${filtro === f
-                  ? 'bg-[#1F3864] text-white'
-                  : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                ? 'bg-[#1F3864] text-white'
+                : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
                 }`}
             >
               {f.charAt(0).toUpperCase() + f.slice(1)}
             </button>
           ))}
         </div>
-        <SearchBar 
-          placeholder="Buscar productos..." 
+        <SearchBar
+          placeholder="Buscar productos..."
           onSearch={(term) => {
             setDebouncedSearch(term);
             setSearchParams(prev => {
               prev.set('page', '1');
               return prev;
             });
-          }} 
+          }}
         />
       </div>
 
@@ -163,8 +163,8 @@ export function ProductosTable() {
                     <td className="px-4 py-3">
                       <div className="flex flex-col gap-1">
                         <span className={`px-2 py-0.5 rounded-full text-xs font-medium w-fit ${p.is_active
-                            ? 'bg-green-50 text-green-700'
-                            : 'bg-red-50 text-red-600'
+                          ? 'bg-green-50 text-green-700'
+                          : 'bg-red-50 text-red-600'
                           }`}>
                           {p.is_active ? 'Activo' : 'Inactivo'}
                         </span>
