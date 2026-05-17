@@ -176,16 +176,16 @@ def seed_productos(session, cats, ings):
 
     # ingredientes
     session.add_all([
-        ProductoIngrediente(producto_id=p1.id, ingrediente_id=ings["Carne vacuna"].id, cantidad=180, unidad_medida_id=None),
-        ProductoIngrediente(producto_id=p1.id, ingrediente_id=ings["Lechuga"].id, cantidad=20, unidad_medida_id=None),
-        ProductoIngrediente(producto_id=p1.id, ingrediente_id=ings["Tomate"].id, cantidad=30, unidad_medida_id=None),
-        ProductoIngrediente(producto_id=p1.id, ingrediente_id=ings["Queso Cheddar"].id, cantidad=2, unidad_medida_id=None),
-        ProductoIngrediente(producto_id=p1.id, ingrediente_id=ings["Pan de burger"].id, cantidad=1, unidad_medida_id=None),
+        ProductoIngrediente(producto_id=p1.id, ingrediente_id=ings["Carne vacuna"].id, cantidad=180, unidad_medida_id=ings["Carne vacuna"].unidad_medida_id),
+        ProductoIngrediente(producto_id=p1.id, ingrediente_id=ings["Lechuga"].id, cantidad=20, unidad_medida_id=ings["Lechuga"].unidad_medida_id),
+        ProductoIngrediente(producto_id=p1.id, ingrediente_id=ings["Tomate"].id, cantidad=30, unidad_medida_id=ings["Tomate"].unidad_medida_id),
+        ProductoIngrediente(producto_id=p1.id, ingrediente_id=ings["Queso Cheddar"].id, cantidad=2, unidad_medida_id=ings["Queso Cheddar"].unidad_medida_id),
+        ProductoIngrediente(producto_id=p1.id, ingrediente_id=ings["Pan de burger"].id, cantidad=1, unidad_medida_id=ings["Pan de burger"].unidad_medida_id),
 
-        ProductoIngrediente(producto_id=p2.id, ingrediente_id=ings["Harina"].id, cantidad=250, unidad_medida_id=None),
-        ProductoIngrediente(producto_id=p2.id, ingrediente_id=ings["Salsa de tomate"].id, cantidad=100, unidad_medida_id=None),
-        ProductoIngrediente(producto_id=p2.id, ingrediente_id=ings["Muzarella"].id, cantidad=200, unidad_medida_id=None),
-        ProductoIngrediente(producto_id=p2.id, ingrediente_id=ings["Albahaca"].id, cantidad=5, unidad_medida_id=None),
+        ProductoIngrediente(producto_id=p2.id, ingrediente_id=ings["Harina"].id, cantidad=250, unidad_medida_id=ings["Harina"].unidad_medida_id),
+        ProductoIngrediente(producto_id=p2.id, ingrediente_id=ings["Salsa de tomate"].id, cantidad=100, unidad_medida_id=ings["Salsa de tomate"].unidad_medida_id),
+        ProductoIngrediente(producto_id=p2.id, ingrediente_id=ings["Muzarella"].id, cantidad=200, unidad_medida_id=ings["Muzarella"].unidad_medida_id),
+        ProductoIngrediente(producto_id=p2.id, ingrediente_id=ings["Albahaca"].id, cantidad=5, unidad_medida_id=ings["Albahaca"].unidad_medida_id),
     ])
 
     session.commit()
