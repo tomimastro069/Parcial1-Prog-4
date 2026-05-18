@@ -3,7 +3,7 @@ from sqlmodel import select
 from app.Modules.Ingrediente.ingrediente import Ingrediente
 from app.Modules.Ingrediente.ingredienteSchema import IngredienteCreate, IngredienteUpdate, IngredienteRead
 from app.Core.UnitOfWork.unit_of_work import UnitOfWork
-from app.Core.Schema.pagination import PaginatedResponse
+from app.Core.pagination import PaginatedResponse
 from app.Modules.Auditoria.auditoria import Auditoria
 from app.Modules.UnidadMedida.unidadMedida import UnidadMedida
 

@@ -79,7 +79,7 @@ async def get_current_user(
 
     Responsabilidades:
     - Validar token
-    - Extraer identidad (username)
+    - Extraer identidad (email)
     - Buscar usuario en base de datos
     """
 

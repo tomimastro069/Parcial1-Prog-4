@@ -58,7 +58,7 @@ class ProductoUpdate(SQLModel):
     ingredientes: Optional[List[ProductoIngredienteInput]] = None
 
 
-from app.Core.Schema.pagination import PaginatedResponse
+from app.Core.pagination import PaginatedResponse
 
 
 class PaginatedProductoResponse(PaginatedResponse[ProductoRead]):
