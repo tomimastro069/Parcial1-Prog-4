@@ -58,6 +58,7 @@ class OAuth2PasswordBearerWithCookie(OAuth2PasswordBearer):
         #         token = authorization.split(" ")[1]
                 
         if not token:   
+            print("Entro en la condicion de que no hay token")
             if self.auto_error:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,

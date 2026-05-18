@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status, Request
+from fastapi import APIRouter, Depends, status, Request, Response
 from app.Core.dependencies import get_uow
 from app.Core.Security.deps import get_current_active_user as get_current_user
 from app.Modules.Auth.authService import AuthService
@@ -15,19 +15,25 @@ def register(data: RegisterRequest, uow=Depends(get_uow)):
 
 @router.post("/login", response_model=TokenResponse)
 @limiter.limit("5/minute")
-def login(request: Request, data: LoginRequest, uow=Depends(get_uow)):
+def login(request: Request, response: Response, data: LoginRequest, uow=Depends(get_uow)):
     service = AuthService(uow)
-    return service.login(data)
+    token_data = service.login(data)
+    response.set_cookie(key="access_token", value=token_data.access_token, httponly=True, samesite="lax")
+    return token_data
 
 @router.post("/logout")
-def logout(data: LogoutRequest, uow=Depends(get_uow)):
+def logout(response: Response, data: LogoutRequest, uow=Depends(get_uow)):
     service = AuthService(uow)
-    return service.logout(data.refresh_token)
+    result = service.logout(data.refresh_token)
+    response.delete_cookie("access_token")
+    return result
 
 @router.post("/refresh", response_model=TokenResponse)
-def refresh(data: RefreshRequest, uow=Depends(get_uow)):
+def refresh(response: Response, data: RefreshRequest, uow=Depends(get_uow)):
     service = AuthService(uow)
-    return service.refresh_session(data.refresh_token)
+    token_data = service.refresh_session(data.refresh_token)
+    response.set_cookie(key="access_token", value=token_data.access_token, httponly=True, samesite="lax")
+    return token_data
 
 @router.get("/me", response_model=UserProfile)
 def me(current_user: Usuario = Depends(get_current_user)):
