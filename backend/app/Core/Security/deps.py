@@ -11,7 +11,7 @@ Flujo de ejecución típico:
 
     Request HTTP
         ↓
-    oauth2_scheme → extrae el token Bearer del header Authorization
+    oauth2_scheme → extrae el token Bearer del header Authorization o cookie
         ↓
     get_current_user → decodifica el JWT y busca el usuario en DB
         ↓
@@ -31,17 +31,15 @@ Arquitectura:
         * Modelo Usuario
 """
 
-from typing import Annotated  # Permite tipado enriquecido para Depends
+from typing import Annotated
 
-from fastapi import Depends, HTTPException, status  # Inyección y manejo de errores HTTP
-from fastapi.security import OAuth2PasswordBearer  # Manejo estándar de OAuth2 con Bearer
+from fastapi import Depends, HTTPException, status, Request
+from fastapi.security import OAuth2PasswordBearer
 
-from app.core.security import decode_access_token  # Función para decodificar JWT
-from app.core.uow import UnitOfWork, get_uow       # Patrón Unit of Work para DB
-from app.modules.usuarios.model import Usuario     # Modelo de dominio Usuario
-from app.modules.usuarios.model import UserPublic     # Modelo de dominio Usuario
-
-from fastapi import Request
+from app.Core.Security.jwt import decode_token
+from app.Core.UnitOfWork.unit_of_work import UnitOfWork
+from app.Core.Dependencies.dependencies import get_uow
+from app.Modules.Usuarios.usuario import Usuario, UserRole
 
 class OAuth2PasswordBearerWithCookie(OAuth2PasswordBearer):
     async def __call__(self, request: Request) -> str | None:
@@ -59,7 +57,7 @@ class OAuth2PasswordBearerWithCookie(OAuth2PasswordBearer):
         #     if authorization and authorization.startswith("Bearer "):
         #         token = authorization.split(" ")[1]
                 
-        if not token:
+        if not token:   
             if self.auto_error:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
@@ -70,15 +68,12 @@ class OAuth2PasswordBearerWithCookie(OAuth2PasswordBearer):
                 return None
         return token
 
-# Define el esquema OAuth2 que extrae el token de la cookie (o header)
-oauth2_scheme = OAuth2PasswordBearerWithCookie(tokenUrl="/api/v1/auth/token")
-
-
+oauth2_scheme = OAuth2PasswordBearerWithCookie(tokenUrl="auth/login")
 
 async def get_current_user(
-    token: Annotated[str, Depends(oauth2_scheme)],  # Token extraído automáticamente
-    uow: Annotated[UnitOfWork, Depends(get_uow)],   # Inyección del Unit of Work
-):
+    token: Annotated[str, Depends(oauth2_scheme)],
+    uow: Annotated[UnitOfWork, Depends(get_uow)],
+) -> Usuario:
     """
     Decodifica el JWT y retorna el Usuario correspondiente.
 
@@ -95,49 +90,37 @@ async def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},  # Obligatorio en OAuth2 por protocolo
     )
 
-    # Decodifica el JWT → devuelve payload o None si es inválido
-    payload = decode_access_token(token)
+    payload = decode_token(token)
     if payload is None:
         raise credentials_exception
 
     # Extrae el "subject" (usuario) del token
-    username: str | None = payload.get("sub")
-    if username is None:
+    email: str | None = payload.get("sub")
+    if email is None:
         raise credentials_exception
 
     # Abre contexto de Unit of Work (manejo de sesión/transacción)
     with uow:
-        # Busca el usuario en base de datos
-        user = uow.usuarios.get_by_username(username)
-
-        # Si no existe el usuario → token inválido
+        user = uow.usuarios.get_by_email(email)
         if user is None:
             raise credentials_exception
-
-        return UserPublic.model_validate(user)  # Usuario autenticado válido
-
+        return user
 
 async def get_current_active_user(
     current_user: Annotated[Usuario, Depends(get_current_user)],
-) :
+) -> Usuario:
     """
     Verifica que el usuario autenticado esté activo.
-
-    Regla de negocio:
-    - Un usuario con disabled=True no puede operar
     """
-
-    if current_user.disabled:
-        # Error semántico: el usuario existe pero no puede operar
+    if not current_user.is_active:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Cuenta de usuario desactivada",
         )
 
-    return UserPublic.model_validate(current_user) # Usuario válido y activo
+    return current_user
 
-
-def require_role(allowed_roles: list[str]):
+def require_role(allowed_roles: list[UserRole]):
     """
     Factory de dependencias para control de acceso basado en roles (RBAC).
 
@@ -150,7 +133,6 @@ def require_role(allowed_roles: list[str]):
     Uso típico:
         @router.get("/admin", dependencies=[Depends(require_role(["admin"]))])
     """
-
     async def role_checker(
         current_user: Annotated[Usuario, Depends(get_current_active_user)],
     ) -> Usuario:
@@ -159,12 +141,12 @@ def require_role(allowed_roles: list[str]):
         """
 
         # Si el rol del usuario no está permitido → 403 (prohibido)
-        if current_user.role not in allowed_roles:
+        if current_user.rol not in allowed_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=(
-                    f"Permisos insuficientes. Tu rol es '{current_user.role}'. "
-                    f"Se requiere uno de: {allowed_roles}"
+                    f"Permisos insuficientes. Tu rol es '{current_user.rol.value}'. "
+                    f"Se requiere uno de: {[r.value for r in allowed_roles]}"
                 ),
             )
 
