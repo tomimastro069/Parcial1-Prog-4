@@ -3,7 +3,8 @@ from typing import Annotated
 
 from app.Modules.Categoria.categoriaSchema import CategoriaCreate, CategoriaRead, CategoriaUpdate
 from app.Modules.Categoria.categoriaService import CategoriaService
-from app.Core.Dependencies.dependencies import role_required, get_uow
+from app.Core.dependencies import get_uow
+from app.Core.Security.deps import require_role as role_required
 from app.Modules.Usuarios.usuario import UserRole, Usuario
 from app.Core.Schema.pagination import PaginatedResponse
 

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from app.Core.Dependencies.dependencies import get_uow
+from app.Core.dependencies import get_uow
 from app.Modules.UnidadMedida.unidadService import UnidadMedidaService
 
 from app.Modules.UnidadMedida.unidadSchema import UnidadMedidaRead, UnidadMedidaCreate

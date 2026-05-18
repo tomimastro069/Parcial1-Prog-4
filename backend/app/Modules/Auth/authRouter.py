@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, status, Request
-from app.Core.Dependencies.dependencies import get_uow, get_current_user
+from app.Core.dependencies import get_uow
+from app.Core.Security.deps import get_current_active_user as get_current_user
 from app.Modules.Auth.authService import AuthService
 from app.Modules.Auth.authSchema import LoginRequest, RegisterRequest, TokenResponse, LogoutRequest, RefreshRequest, UserProfile
 from app.Modules.Usuarios.usuario import Usuario
