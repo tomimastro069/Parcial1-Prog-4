@@ -38,7 +38,7 @@ from fastapi.security import OAuth2PasswordBearer
 
 from app.Core.Security.jwt import decode_token
 from app.Core.UnitOfWork.unit_of_work import UnitOfWork
-from app.Core.Dependencies.dependencies import get_uow
+from app.Core.dependencies import get_uow
 from app.Modules.Usuarios.usuario import Usuario, UserRole
 
 class OAuth2PasswordBearerWithCookie(OAuth2PasswordBearer):
