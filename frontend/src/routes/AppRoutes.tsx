@@ -9,6 +9,10 @@ import DashboardPage from '../pages/admin/DashboardPage';
 import IngredientesAdminPage from '../pages/admin/IngredientesAdminPage';
 import CategoriasAdminPage from '../pages/admin/CategoriasAdminPage';
 import ProductosAdminPage from '../pages/admin/ProductosAdminPage';
+import CheckoutPage from '../pages/store/CheckoutPage';
+import MisPedidosPage from '../pages/store/MisPedidosPage';
+import GestorPedidosPage from '../pages/admin/GestorPedidosPage';
+import PerfilPage from '../pages/store/PerfilPage';
 
 export const router = createBrowserRouter([
   // ─── Rutas públicas ────────────────────────────────────────────────────────
@@ -21,6 +25,9 @@ export const router = createBrowserRouter([
     children: [
       { path: '/store', element: <StorePage /> },
       { path: '/store/producto/:id', element: <ProductoDetallePage /> },
+      { path: '/store/checkout', element: <CheckoutPage /> },
+      { path: '/store/mis-pedidos', element: <MisPedidosPage /> },
+      { path: '/store/perfil', element: <PerfilPage /> },
     ],
   },
 
@@ -37,6 +44,7 @@ export const router = createBrowserRouter([
           { path: 'productos', element: <ProductosAdminPage /> },
           { path: 'ingredientes', element: <IngredientesAdminPage /> },
           { path: 'categorias', element: <CategoriasAdminPage /> },
+          { path: 'pedidos', element: <GestorPedidosPage /> },
         ],
       },
     ],
@@ -44,14 +52,16 @@ export const router = createBrowserRouter([
 
   // ─── Fallback ──────────────────────────────────────────────────────────────
   { path: '/', element: <Navigate to="/login" replace /> },
-  { path: '/unauthorized', element: (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">403</h1>
-        <p className="text-gray-600 mb-4">No tenés permisos para acceder a esta página.</p>
-        <a href="/store" className="text-[#2E75B6] hover:underline">Volver al menú</a>
+  {
+    path: '/unauthorized', element: (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">403</h1>
+          <p className="text-gray-600 mb-4">No tenés permisos para acceder a esta página.</p>
+          <a href="/store" className="text-[#2E75B6] hover:underline">Volver al menú</a>
+        </div>
       </div>
-    </div>
-  )},
+    )
+  },
   { path: '*', element: <Navigate to="/login" replace /> },
 ]);

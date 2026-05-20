@@ -17,7 +17,7 @@ def get_direccion_service(uow: Annotated[UnitOfWork, Depends(get_uow)]) -> Direc
     return DireccionService(uow)
 
 
-@router.get("/", response_model=list[DireccionEntregaRead])
+@router.get("/mis-direcciones", response_model=list[DireccionEntregaRead])
 def get_user_direcciones(
     current_user: Annotated[Usuario, Depends(get_current_active_user)],
     service: Annotated[DireccionService, Depends(get_direccion_service)],

@@ -7,6 +7,7 @@ import {
   Bars3Icon,
   XMarkIcon,
   ArrowRightOnRectangleIcon,
+  ClipboardDocumentListIcon
 } from '@heroicons/react/24/outline';
 import { useUIStore } from '../../store/uiStore';
 import { useAuthStore } from '../../store/authStore';
@@ -17,6 +18,7 @@ const navItems = [
   { to: '/admin/productos', label: 'Productos', icon: ShoppingBagIcon },
   { to: '/admin/categorias', label: 'Categorías', icon: TagIcon },
   { to: '/admin/ingredientes', label: 'Ingredientes', icon: BeakerIcon },
+  { to: '/admin/pedidos', label: 'Gestor de Pedidos', icon: ClipboardDocumentListIcon },
 ];
 
 export default function AdminLayout() {

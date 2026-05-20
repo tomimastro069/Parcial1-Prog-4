@@ -47,6 +47,16 @@ def get_pedidos(
     else:
         return service.get_user_pedidos(current_user.id, page=page, size=size)
 
+@router.get("/mis-pedidos", response_model=PaginatedPedidoResponse)
+def get_mis_pedidos(
+    current_user: Annotated[Usuario, Depends(get_current_active_user)],
+    service: Annotated[PedidoService, Depends(get_pedido_service)],
+    page: int = 1,
+    size: int = 12
+):
+    """Alias endpoint for client-specific pedidos."""
+    return service.get_user_pedidos(current_user.id, page=page, size=size)
+
 
 @router.get("/{pedido_id}", response_model=PedidoRead)
 def get_pedido(

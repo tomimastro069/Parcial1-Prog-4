@@ -1,0 +1,103 @@
+import Header from '../../components/Header';
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { getMisPedidos } from '../../api/pedidosApi';
+
+
+export default function MisPedidosPage() {
+  const [page, setPage] = useState(1);
+  const size = 12;
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['misPedidos', page],
+    queryFn: () => getMisPedidos(page, size),
+  });
+
+  if (isLoading) return <div className="p-8 text-center text-gray-500">Cargando pedidos...</div>;
+  if (isError) return <div className="p-8 text-center text-red-500">Error al cargar pedidos</div>;
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-10">
+      <Header />
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">Mis Pedidos</h1>
+
+        {!data || data.items.length === 0 ? (
+          <div className="bg-white p-8 rounded-lg shadow text-center">
+            <p className="text-gray-600">No realizaste ningún pedido todavía.</p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {data.items.map((pedido) => (
+              <div key={pedido.id} className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
+                <div className="bg-gray-100 px-6 py-4 border-b flex flex-wrap justify-between items-center gap-4">
+                  <div>
+                    <span className="text-sm text-gray-500">Pedido #{pedido.id}</span>
+                    <p className="text-sm font-semibold text-gray-800">
+                      Fecha: {new Date(pedido.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#FFF3E0] text-[#E65100]">
+                      {pedido.estado_codigo}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-sm text-gray-500">Total</span>
+                    <p className="text-lg font-bold text-gray-900">${pedido.total.toFixed(2)}</p>
+                  </div>
+                </div>
+                
+                <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-700 mb-2">Detalles</h4>
+                    <ul className="space-y-2 text-sm text-gray-600">
+                      {pedido.detalles.map((d: any) => (
+                        <li key={d.producto_id} className="flex justify-between">
+                          <span>{d.cantidad}x {d.nombre_snapshot}</span>
+                          <span>${d.subtotal_snap.toFixed(2)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-700 mb-2">Resumen</h4>
+                    <ul className="space-y-1 text-sm text-gray-600">
+                      <li>Forma de pago: <span className="font-medium">{pedido.forma_pago_codigo}</span></li>
+                      <li>Entrega: <span className="font-medium">{pedido.direccion_id ? `Envío (ID: ${pedido.direccion_id})` : 'Retiro en local'}</span></li>
+                      <li>Costo de envío: <span className="font-medium">${pedido.costo_envio.toFixed(2)}</span></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {/* Pagination Controls */}
+            {data.pages > 1 && (
+              <div className="flex justify-center items-center space-x-2 mt-8">
+                <button
+                  disabled={page === 1}
+                  onClick={() => setPage(p => p - 1)}
+                  className="px-3 py-1 border rounded hover:bg-gray-100 disabled:opacity-50"
+                >
+                  Anterior
+                </button>
+                <span className="text-sm text-gray-600">
+                  Página {page} de {data.pages}
+                </span>
+                <button
+                  disabled={page === data.pages}
+                  onClick={() => setPage(p => p + 1)}
+                  className="px-3 py-1 border rounded hover:bg-gray-100 disabled:opacity-50"
+                >
+                  Siguiente
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
