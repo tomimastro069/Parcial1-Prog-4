@@ -6,6 +6,10 @@ from app.Modules.Usuarios.UsuarioRepository import UsuarioRepository
 from app.Modules.Auth.authRepository import AuthRepository
 from app.Modules.Auditoria.auditoriaRepository import AuditoriaRepository
 from app.Modules.UnidadMedida.unidadRepository import UnidadMedidaRepository
+from app.Modules.Direcciones.DireccionRepository import DireccionRepository
+from app.Modules.Pagos.PagoRepository import PagoRepository
+from app.Modules.Pedidos.EstadoPedidoRepository import EstadoPedidoRepository
+from app.Modules.Pedidos.PedidoRepository import PedidoRepository
 
 
 class UnitOfWork:
@@ -20,6 +24,10 @@ class UnitOfWork:
         self.auth = AuthRepository(session)
         self.auditoria = AuditoriaRepository(session)
         self.unidades_medida = UnidadMedidaRepository(session)
+        self.direcciones = DireccionRepository(session)
+        self.pagos = PagoRepository(session)
+        self.estado_pedidos = EstadoPedidoRepository(session)
+        self.pedidos = PedidoRepository(session)
 
     def __enter__(self):
         return self

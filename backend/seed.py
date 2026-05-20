@@ -10,6 +10,8 @@ from app.Modules.Producto.Model.producto import Producto
 from app.Modules.Producto.Model.productoCategoria import ProductoCategoria
 from app.Modules.Producto.Model.productoIngrediente import ProductoIngrediente
 from app.Modules.UnidadMedida.unidadMedida import UnidadMedida
+from app.Modules.Pedidos.Model.estadoPedido import EstadoPedido
+from app.Modules.Pagos.Model.formaPago import FormaPago
 
 
 # -----------------------------
@@ -192,6 +194,41 @@ def seed_productos(session, cats, ings):
 
 
 # -----------------------------
+# ESTADOS PEDIDO
+# -----------------------------
+def seed_estados_pedidos(session):
+    print("Verificando estados de pedido...")
+    estados_data = [
+        {"codigo": "PENDIENTE", "descripcion": "Pedido pendiente de confirmación", "orden": 1, "es_terminal": False},
+        {"codigo": "CONFIRMADO", "descripcion": "Pedido confirmado", "orden": 2, "es_terminal": False},
+        {"codigo": "EN_PREP", "descripcion": "Pedido en preparación", "orden": 3, "es_terminal": False},
+        {"codigo": "EN_CAMINO", "descripcion": "Pedido en camino", "orden": 4, "es_terminal": False},
+        {"codigo": "ENTREGADO", "descripcion": "Pedido entregado con éxito", "orden": 5, "es_terminal": True},
+        {"codigo": "CANCELADO", "descripcion": "Pedido cancelado", "orden": 6, "es_terminal": True},
+    ]
+    for data in estados_data:
+        estado_db = session.exec(select(EstadoPedido).where(EstadoPedido.codigo == data["codigo"])).first()
+        if not estado_db:
+            session.add(EstadoPedido(**data))
+    session.commit()
+
+# -----------------------------
+# FORMAS PAGO
+# -----------------------------
+def seed_formas_pago(session):
+    print("Verificando formas de pago...")
+    formas_data = [
+        {"codigo": "MERCADOPAGO", "descripcion": "Pago online con MercadoPago"},
+        {"codigo": "EFECTIVO", "descripcion": "Pago en efectivo al retirar o recibir"},
+        {"codigo": "TRANSFERENCIA", "descripcion": "Transferencia bancaria o billetera virtual"},
+    ]
+    for data in formas_data:
+        forma_db = session.exec(select(FormaPago).where(FormaPago.codigo == data["codigo"])).first()
+        if not forma_db:
+            session.add(FormaPago(**data))
+    session.commit()
+
+# -----------------------------
 # MAIN SEED
 # -----------------------------
 def seed_data():
@@ -202,6 +239,8 @@ def seed_data():
         ings = seed_ingredientes(session, unidades)
 
         seed_productos(session, cats, ings)
+        seed_estados_pedidos(session)
+        seed_formas_pago(session)
 
         print("SEED COMPLETO OK")
 
