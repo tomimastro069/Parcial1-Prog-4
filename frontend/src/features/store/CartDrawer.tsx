@@ -18,18 +18,22 @@ export function CartDrawer() {
   const costoEnvio = useCartStore((s) => s.costoEnvio());
   const total = useCartStore((s) => s.total());
 
-  if (!cartOpen) return null;
-
   return (
     <>
       {/* Overlay */}
       <div
-        className="fixed inset-0 bg-gray-900/40 z-40"
+        className={`fixed inset-0 bg-gray-900/40 z-40 transition-opacity duration-300 ${
+          cartOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
         onClick={closeCart}
       />
 
       {/* Drawer */}
-      <div className="fixed right-0 top-0 bottom-0 w-full max-w-sm bg-white z-50 flex flex-col shadow-2xl">
+      <div
+        className={`fixed right-0 top-0 bottom-0 w-full max-w-sm bg-white z-50 flex flex-col shadow-2xl transition-transform duration-300 ease-in-out ${
+          cartOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
           <div className="flex items-center gap-2">

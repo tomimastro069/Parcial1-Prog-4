@@ -1,14 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { PencilIcon, TrashIcon, PlusIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, TrashIcon, PlusIcon, ArrowPathIcon, EyeIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import toast from 'react-hot-toast';
 import { Button } from '../../../components/Button';
 import { SearchBar } from '../../../components/SearchBar';
+import { SortableHeader } from '../../../components/SortableHeader';
 import { TableRowSkeleton } from '../../../components/Skeleton';
 import { Pagination } from '../../../components/Pagination';
 import { ProductoModal } from './ProductoModal';
 import { useProductosAdmin, useDeleteProducto, useActivarProducto } from '../../../hooks/useProductos';
 import { useCategorias } from '../../../hooks/useCategorias';
 import { useUIStore } from '../../../store/uiStore';
+import { useAuthStore } from '../../../store/authStore';
+import { productosApi } from '../../../api/productosApi';
+import { descargarExcel } from '../../../utils/exportarExcel';
+import { useSort } from '../../../hooks/useSort';
 import type { ProductoRead, Categoria } from '../../../types';
 
 const PAGE_SIZE = 10;
@@ -24,23 +30,58 @@ const filtroToParam: Record<Filtro, boolean | null> = {
 export function ProductosTable() {
   const [searchParams, setSearchParams] = useSearchParams();
 
+  // RBAC: ADMIN=full CRUD, STOCK=puede editar (sin crear ni eliminar), PEDIDOS=solo lectura
+  const hasRole = useAuthStore((s) => s.hasRole);
+  const isAdmin = hasRole('ADMIN');
+  const isStock = hasRole('STOCK');
+  const canEdit = isAdmin || isStock;
+  const canCreate = isAdmin;
+  const canDelete = isAdmin;
+
+  const [exportando, setExportando] = useState(false);
+
+  const handleExportar = async () => {
+    setExportando(true);
+    try {
+      const res = await productosApi.listAdmin({ page: 1, size: 1000 });
+      const items: ProductoRead[] = (res as any)?.items ?? [];
+      if (items.length === 0) { toast.error('No hay productos para exportar'); return; }
+      const filas = items.map((p) => ({
+        Nombre: p.nombre,
+        Precio: p.precio,
+        Descripción: p.descripcion ?? '',
+        Categorías: p.categorias.map((c) => c.nombre).join(', '),
+        Ingredientes: p.ingredientes.map((i) => i.nombre).join(', '),
+        Terminado: p.es_terminado ? 'Sí' : 'No',
+        Estado: p.is_active ? 'Activo' : 'Inactivo',
+      }));
+      descargarExcel(filas, 'Productos', 'productos');
+      toast.success(`${items.length} productos exportados`);
+    } catch { toast.error('Error al exportar'); }
+    finally { setExportando(false); }
+  };
+
   // Leer página de la URL
   const page = parseInt(searchParams.get('page') || '1', 10);
   const [filtro, setFiltro] = useState<Filtro>('todos');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [categoriaId, setCategoriaId] = useState<number | null>(null);
 
   const { data, isLoading, isError } = useProductosAdmin({
     page,
     size: PAGE_SIZE,
     is_active: filtroToParam[filtro] ?? undefined,
     search: debouncedSearch || undefined,
+    categoria_id: categoriaId ?? undefined,
   });
 
   const { data: catData } = useCategorias({ size: 1000, is_active: true });
   const allCategorias: Categoria[] = (catData as any)?.items ?? [];
 
-  const productos: ProductoRead[] = (data as any)?.items ?? [];
+  const productosRaw: ProductoRead[] = (data as any)?.items ?? [];
   const totalPages: number = (data as any)?.pages ?? 0;
+
+  const { sorted: productos, field: sortField, dir: sortDir, toggle: sortToggle } = useSort(productosRaw, 'nombre');
 
   const eliminar = useDeleteProducto();
   const activar = useActivarProducto();
@@ -97,6 +138,11 @@ export function ProductosTable() {
     setSearchParams({ page: '1' });
   };
 
+  const handleCategoriaChange = (id: number | null) => {
+    setCategoriaId(id);
+    setSearchParams({ page: '1' });
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -104,15 +150,39 @@ export function ProductosTable() {
           <h1 className="text-2xl font-bold text-[#1F3864]">Productos</h1>
           <p className="text-sm text-gray-500 mt-0.5">Gestión del catálogo de productos</p>
         </div>
-        <Button onClick={handleNuevo} className="gap-2">
-          <PlusIcon className="w-4 h-4" />
-          Nuevo producto
-        </Button>
+        <div className="flex items-center gap-2">
+          {!canEdit && (
+            <span className="flex items-center gap-1.5 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
+              <EyeIcon className="w-3.5 h-3.5" />
+              Solo lectura
+            </span>
+          )}
+          {isStock && !isAdmin && (
+            <span className="flex items-center gap-1.5 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-full">
+              Gestor de Stock
+            </span>
+          )}
+          <Button
+            onClick={handleExportar}
+            disabled={exportando}
+            className="gap-2 bg-green-600 hover:bg-green-700"
+          >
+            <ArrowDownTrayIcon className="w-4 h-4" />
+            {exportando ? 'Exportando...' : 'Excel'}
+          </Button>
+          {canCreate && (
+            <Button onClick={handleNuevo} className="gap-2">
+              <PlusIcon className="w-4 h-4" />
+              Nuevo producto
+            </Button>
+          )}
+        </div>
       </div>
 
-      {/* Filtro de estado y buscador */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-4 justify-between items-center">
-        <div className="flex gap-2">
+      {/* Filtros: estado + categoría + buscador */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-4 items-start sm:items-center justify-between flex-wrap">
+        <div className="flex flex-wrap gap-2 items-center">
+          {/* Botones de estado */}
           {(['todos', 'activos', 'inactivos'] as Filtro[]).map((f) => (
             <button
               key={f}
@@ -125,7 +195,32 @@ export function ProductosTable() {
               {f.charAt(0).toUpperCase() + f.slice(1)}
             </button>
           ))}
+
+          {/* Dropdown filtro por categoría */}
+          <select
+            value={categoriaId ?? ''}
+            onChange={(e) => handleCategoriaChange(e.target.value ? Number(e.target.value) : null)}
+            className="px-3 py-1.5 rounded-lg text-sm border border-gray-200 bg-white text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#1F3864]/20 focus:border-[#1F3864] cursor-pointer"
+          >
+            <option value="">Todas las categorías</option>
+            {allCategorias.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.nombre.split(' / ').pop() ?? c.nombre}
+              </option>
+            ))}
+          </select>
+
+          {/* Limpiar filtro de categoría */}
+          {categoriaId !== null && (
+            <button
+              onClick={() => handleCategoriaChange(null)}
+              className="text-xs text-gray-400 hover:text-gray-600 underline"
+            >
+              Limpiar
+            </button>
+          )}
         </div>
+
         <SearchBar
           placeholder="Buscar productos..."
           onSearch={(term) => {
@@ -145,9 +240,9 @@ export function ProductosTable() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="text-left px-4 py-3 font-semibold text-gray-700">Nombre</th>
+                <SortableHeader label="Nombre" field="nombre" activeField={sortField as string} dir={sortDir} onSort={(f) => sortToggle(f as keyof ProductoRead)} />
                 <th className="text-left px-4 py-3 font-semibold text-gray-700 hidden md:table-cell">Descripción</th>
-                <th className="text-left px-4 py-3 font-semibold text-gray-700">Precio</th>
+                <SortableHeader label="Precio" field="precio" activeField={sortField as string} dir={sortDir} onSort={(f) => sortToggle(f as keyof ProductoRead)} />
                 <th className="text-left px-4 py-3 font-semibold text-gray-700 hidden lg:table-cell">Categorías</th>
                 <th className="text-left px-4 py-3 font-semibold text-gray-700">Estado</th>
                 <th className="text-right px-4 py-3 font-semibold text-gray-700">Acciones</th>
@@ -198,31 +293,37 @@ export function ProductosTable() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-2">
-                        {p.is_active ? (
-                          <>
+                        {canEdit ? (
+                          p.is_active ? (
+                            <>
+                              <button
+                                onClick={() => handleEditar(p)}
+                                className="p-1.5 rounded-md text-gray-500 hover:text-[#2E75B6] hover:bg-blue-50 transition-colors"
+                                title="Editar"
+                              >
+                                <PencilIcon className="w-4 h-4" />
+                              </button>
+                              {canDelete && (
+                                <button
+                                  onClick={() => handleEliminar(p)}
+                                  className="p-1.5 rounded-md text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                  title="Eliminar"
+                                >
+                                  <TrashIcon className="w-4 h-4" />
+                                </button>
+                              )}
+                            </>
+                          ) : (
                             <button
-                              onClick={() => handleEditar(p)}
-                              className="p-1.5 rounded-md text-gray-500 hover:text-[#2E75B6] hover:bg-blue-50 transition-colors"
-                              title="Editar"
+                              onClick={() => handleActivar(p)}
+                              className="p-1.5 rounded-md text-gray-500 hover:text-green-600 hover:bg-green-50 transition-colors"
+                              title="Reactivar"
                             >
-                              <PencilIcon className="w-4 h-4" />
+                              <ArrowPathIcon className="w-4 h-4" />
                             </button>
-                            <button
-                              onClick={() => handleEliminar(p)}
-                              className="p-1.5 rounded-md text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
-                              title="Eliminar"
-                            >
-                              <TrashIcon className="w-4 h-4" />
-                            </button>
-                          </>
+                          )
                         ) : (
-                          <button
-                            onClick={() => handleActivar(p)}
-                            className="p-1.5 rounded-md text-gray-500 hover:text-green-600 hover:bg-green-50 transition-colors"
-                            title="Reactivar"
-                          >
-                            <ArrowPathIcon className="w-4 h-4" />
-                          </button>
+                          <span className="text-xs text-gray-300">—</span>
                         )}
                       </div>
                     </td>

@@ -13,23 +13,31 @@ export default function MisPedidosPage() {
     queryFn: () => getMisPedidos(page, size),
   });
 
-  if (isLoading) return <div className="p-8 text-center text-gray-500">Cargando pedidos...</div>;
-  if (isError) return <div className="p-8 text-center text-red-500">Error al cargar pedidos</div>;
-
   return (
-    <div className="min-h-screen bg-gray-50 py-10">
+    <div className="min-h-screen bg-gray-50">
       <Header />
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Mis Pedidos</h1>
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-6">Mis Pedidos</h1>
 
-        {!data || data.items.length === 0 ? (
+        {isLoading ? (
+          <div className="text-center py-16 text-gray-500">Cargando pedidos...</div>
+        ) : isError ? (
+          <div className="bg-white p-8 rounded-lg shadow text-center">
+            <p className="text-red-500 mb-3">Error al cargar pedidos.</p>
+            <p className="text-sm text-gray-500">Verificá que el servidor esté activo.</p>
+          </div>
+        ) : !data || data.items.length === 0 ? (
           <div className="bg-white p-8 rounded-lg shadow text-center">
             <p className="text-gray-600">No realizaste ningún pedido todavía.</p>
           </div>
         ) : (
           <div className="space-y-6">
-            {data.items.map((pedido) => (
-              <div key={pedido.id} className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
+            {data.items.map((pedido, index) => (
+              <div
+                key={pedido.id}
+                className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden"
+                style={{ animation: 'slideUp 0.3s ease-out both', animationDelay: `${index * 0.06}s` }}
+              >
                 <div className="bg-gray-100 px-6 py-4 border-b flex flex-wrap justify-between items-center gap-4">
                   <div>
                     <span className="text-sm text-gray-500">Pedido #{pedido.id}</span>

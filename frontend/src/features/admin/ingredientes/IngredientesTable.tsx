@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { PencilIcon, TrashIcon, PlusIcon, ArrowPathIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
-import * as XLSX from 'xlsx';
+import { PencilIcon, TrashIcon, PlusIcon, ArrowPathIcon, ArrowDownTrayIcon, EyeIcon } from '@heroicons/react/24/outline';
+import { descargarExcel } from '../../../utils/exportarExcel';
+import toast from 'react-hot-toast';
 import { Badge } from '../../../components/Badge';
 import { Button } from '../../../components/Button';
 import { SearchBar } from '../../../components/SearchBar';
@@ -9,8 +10,11 @@ import { TableRowSkeleton } from '../../../components/Skeleton';
 import { IngredienteModal } from './IngredienteModal';
 import { useIngredientes, useDeleteIngrediente, useActivarIngrediente } from '../../../hooks/useIngredientes';
 import { useUIStore } from '../../../store/uiStore';
+import { useAuthStore } from '../../../store/authStore';
 import { Pagination } from '../../../components/Pagination';
 import { ingredientesApi } from '../../../api/ingredientesApi';
+import { useSort } from '../../../hooks/useSort';
+import { SortableHeader } from '../../../components/SortableHeader';
 import type { Ingrediente } from '../../../types';
 
 const PAGE_SIZE = 10;
@@ -25,7 +29,11 @@ const filtroToParam: Record<Filtro, boolean | null> = {
 
 export function IngredientesTable() {
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
+  // RBAC: ADMIN y STOCK pueden escribir; PEDIDOS solo lectura
+  const hasRole = useAuthStore((s) => s.hasRole);
+  const canWrite = hasRole('ADMIN') || hasRole('STOCK');
+
   // Leer página de la URL
   const page = parseInt(searchParams.get('page') || '1', 10);
   const [filtro, setFiltro] = useState<Filtro>('todos');
@@ -39,8 +47,10 @@ export function IngredientesTable() {
   });
 
   const responseData = data as any;
-  const ingredientes: Ingrediente[] = responseData?.items || [];
+  const ingredientesRaw: Ingrediente[] = responseData?.items || [];
   const totalPages = responseData?.pages || 0;
+
+  const { sorted: ingredientes, field: sortField, dir: sortDir, toggle: sortToggle } = useSort(ingredientesRaw, 'nombre');
 
   const eliminar = useDeleteIngrediente();
   const activar = useActivarIngrediente();
@@ -65,10 +75,7 @@ export function IngredientesTable() {
         Alérgeno: ing.es_alergeno ? 'Sí' : 'No',
         Estado: ing.is_active ? 'Activo' : 'Inactivo',
       }));
-      const ws = XLSX.utils.json_to_sheet(filas);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Ingredientes');
-      XLSX.writeFile(wb, 'ingredientes.xlsx');
+      descargarExcel(filas, 'Ingredientes', 'ingredientes');
       toast.success(`${items.length} ingredientes exportados`);
     } catch (e) {
       console.error('Error al exportar:', e);
@@ -116,7 +123,13 @@ export function IngredientesTable() {
           <h1 className="text-2xl font-bold text-[#1F3864]">Ingredientes</h1>
           <p className="text-sm text-gray-500 mt-0.5">Gestión de ingredientes e información de alérgenos</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          {!canWrite && (
+            <span className="flex items-center gap-1.5 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
+              <EyeIcon className="w-3.5 h-3.5" />
+              Solo lectura
+            </span>
+          )}
           <Button
             onClick={handleExportar}
             disabled={exportando}
@@ -125,10 +138,12 @@ export function IngredientesTable() {
             <ArrowDownTrayIcon className="w-4 h-4" />
             {exportando ? 'Exportando...' : 'Exportar Excel'}
           </Button>
-          <Button onClick={handleNuevo} className="gap-2">
-            <PlusIcon className="w-4 h-4" />
-            Nuevo ingrediente
-          </Button>
+          {canWrite && (
+            <Button onClick={handleNuevo} className="gap-2">
+              <PlusIcon className="w-4 h-4" />
+              Nuevo ingrediente
+            </Button>
+          )}
         </div>
       </div>
 
@@ -170,7 +185,7 @@ export function IngredientesTable() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="text-left px-4 py-3 font-semibold text-gray-700">Nombre</th>
+                <SortableHeader label="Nombre" field="nombre" activeField={sortField as string} dir={sortDir} onSort={(f) => sortToggle(f as keyof Ingrediente)} />
                 <th className="text-left px-4 py-3 font-semibold text-gray-700 hidden md:table-cell">Descripción</th>
                 <th className="text-left px-4 py-3 font-semibold text-gray-700">Alérgeno</th>
                 <th className="text-left px-4 py-3 font-semibold text-gray-700">Estado</th>
@@ -208,31 +223,35 @@ export function IngredientesTable() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex justify-end gap-2">
-                          {ing.is_active ? (
-                            <>
+                          {canWrite ? (
+                            ing.is_active ? (
+                              <>
+                                <button
+                                  onClick={() => handleEditar(ing)}
+                                  className="p-1.5 rounded-md text-gray-500 hover:text-[#2E75B6] hover:bg-blue-50 transition-colors"
+                                  title="Editar"
+                                >
+                                  <PencilIcon className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleEliminar(ing)}
+                                  className="p-1.5 rounded-md text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                  title="Eliminar"
+                                >
+                                  <TrashIcon className="w-4 h-4" />
+                                </button>
+                              </>
+                            ) : (
                               <button
-                                onClick={() => handleEditar(ing)}
-                                className="p-1.5 rounded-md text-gray-500 hover:text-[#2E75B6] hover:bg-blue-50 transition-colors"
-                                title="Editar"
+                                onClick={() => handleActivar(ing)}
+                                className="p-1.5 rounded-md text-gray-500 hover:text-green-600 hover:bg-green-50 transition-colors"
+                                title="Reactivar"
                               >
-                                <PencilIcon className="w-4 h-4" />
+                                <ArrowPathIcon className="w-4 h-4" />
                               </button>
-                              <button
-                                onClick={() => handleEliminar(ing)}
-                                className="p-1.5 rounded-md text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
-                                title="Eliminar"
-                              >
-                                <TrashIcon className="w-4 h-4" />
-                              </button>
-                            </>
+                            )
                           ) : (
-                            <button
-                              onClick={() => handleActivar(ing)}
-                              className="p-1.5 rounded-md text-gray-500 hover:text-green-600 hover:bg-green-50 transition-colors"
-                              title="Reactivar"
-                            >
-                              <ArrowPathIcon className="w-4 h-4" />
-                            </button>
+                            <span className="text-xs text-gray-300">—</span>
                           )}
                         </div>
                       </td>

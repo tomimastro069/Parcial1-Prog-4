@@ -17,8 +17,8 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
   const actualizar = useUpdateProducto();
   const { data: catData } = useCategorias({ size: 1000 });
   const { data: ingData, isLoading: loadingIngredientes } = useIngredientes({ size: 1000 });
-  const categorias = (catData as any)?.items ?? [];
-  const ingredientes = (ingData as any)?.items ?? [];
+  const categorias: { id: number; nombre: string }[] = (catData as any)?.items ?? [];
+  const ingredientes: { id: number; nombre: string; unidad?: string; es_alergeno: boolean }[] = (ingData as any)?.items ?? [];
 
   const [nombre, setNombre] = useState('');
   const [precio, setPrecio] = useState('');

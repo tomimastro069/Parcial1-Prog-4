@@ -49,11 +49,12 @@ export default function Modal({
       }}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity" />
+      <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" style={{ animation: 'fadeIn 0.2s ease-out' }} />
 
       {/* Modal Box */}
       <div
         className={`relative w-full ${sizeClasses[size]} bg-white border border-gray-200 rounded-lg shadow-xl`}
+        style={{ animation: 'slideUp 0.2s ease-out' }}
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">{title}</h2>

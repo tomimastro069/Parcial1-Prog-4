@@ -36,7 +36,7 @@ export function CatalogoGrid() {
   });
 
   const { data: categoriasData } = useCategorias({ is_active: true });
-  const categorias = (categoriasData as any)?.items ?? [];
+  const categorias: { id: number; nombre: string }[] = (categoriasData as any)?.items ?? [];
 
   const handleCategoriaChange = useCallback((id: number | null) => {
     setCategoriaId(id);
@@ -139,8 +139,10 @@ export function CatalogoGrid() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {productos.map((p) => (
-            <ProductoCard key={p.id} producto={p} />
+          {productos.map((p, i) => (
+            <div key={p.id} style={{ animation: 'slideUp 0.3s ease-out both', animationDelay: `${i * 0.04}s` }}>
+              <ProductoCard producto={p} />
+            </div>
           ))}
         </div>
       )}

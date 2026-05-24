@@ -33,7 +33,7 @@ export function useToggleDisponibilidad() {
   });
 }
 
-export function useProductosAdmin(params: { page?: number; size?: number; is_active?: boolean | null; search?: string } = {}) {
+export function useProductosAdmin(params: { page?: number; size?: number; is_active?: boolean | null; search?: string; categoria_id?: number | null } = {}) {
   return useQuery({
     queryKey: ['productos-admin', params],
     queryFn: () => productosApi.listAdmin(params),

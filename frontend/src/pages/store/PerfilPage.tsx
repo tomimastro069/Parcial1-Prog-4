@@ -4,9 +4,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 import { authApi } from '../../api/authApi';
-import { getMisDirecciones, createDireccion, deleteDireccion } from '../../api/direccionesApi';
+import { getMisDirecciones, createDireccion, deleteDireccion, type Direccion } from '../../api/direccionesApi';
 import Header from '../../components/Header';
 import { useAuthStore } from '../../store/authStore';
+import type { UserResponse } from '../../types';
 
 export default function PerfilPage() {
   const navigate = useNavigate();
@@ -46,7 +47,7 @@ export default function PerfilPage() {
 
   // Mutation to create address
   const createAddressMutation = useMutation({
-    mutationFn: (data) => createDireccion(data),
+    mutationFn: (data: Omit<Direccion, 'id' | 'usuario_id'>) => createDireccion(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['misDireccionesPerfil'] });
       setNewAddress({
@@ -66,7 +67,7 @@ export default function PerfilPage() {
   });
 
   const deleteAddressMutation = useMutation({
-    mutationFn: (id) => deleteDireccion(id),
+    mutationFn: (id: number) => deleteDireccion(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['misDireccionesPerfil'] });
       toast.success('Dirección eliminada');
@@ -74,47 +75,46 @@ export default function PerfilPage() {
     onError: () => toast.error('Error al eliminar dirección'),
   });
 
-  const handleDelete = (id) => {
+  const handleDelete = (id: number) => {
     deleteAddressMutation.mutate(id);
   };
 
-  const handleAddAddress = (e) => {
+  const handleAddAddress = (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = {
-      ...newAddress,
-      ...(newAddress.latitud && { latitud: parseFloat(newAddress.latitud) }),
-      ...(newAddress.longitud && { longitud: parseFloat(newAddress.longitud) }),
+    const payload: Omit<Direccion, 'id' | 'usuario_id'> = {
+      alias: newAddress.alias || undefined,
+      linea1: newAddress.linea1,
+      linea2: newAddress.linea2 || undefined,
+      ciudad: newAddress.ciudad,
+      provincia: newAddress.provincia || undefined,
+      codigo_postal: newAddress.codigo_postal || undefined,
+      latitud: newAddress.latitud ? parseFloat(newAddress.latitud) : undefined,
+      longitud: newAddress.longitud ? parseFloat(newAddress.longitud) : undefined,
+      es_principal: newAddress.es_principal,
     };
     createAddressMutation.mutate(payload);
   };
 
   const handleNameUpdate = () => {
-    // Placeholder: update local store; replace with real API when available
-    useAuthStore.getState().setUsuario({ ...user, nombre: editName });
+    if (!user) return;
+    useAuthStore.getState().setUsuario({ ...user, nombre: editName } as UserResponse);
     toast.success('Nombre actualizado');
   };
 
-  if (loadingUser || loadingDirs) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-500">Cargando datos...</p>
-      </div>
-    );
-  }
-
-  if (errorUser) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-red-500">Error al cargar la información del usuario.</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50 py-10">
+    <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-6">Mi Perfil</h1>
+
+        {(loadingUser || loadingDirs) ? (
+          <div className="text-center py-16 text-gray-500">Cargando datos...</div>
+        ) : errorUser ? (
+          <div className="bg-white p-8 rounded-lg shadow text-center">
+            <p className="text-red-500 mb-2">Error al cargar la información del usuario.</p>
+            <p className="text-sm text-gray-500">Verificá que el servidor esté activo.</p>
+          </div>
+        ) : (<>
         {/* User data */}
         <section className="bg-white p-6 rounded-lg shadow mb-8">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Datos del Usuario</h2>
@@ -246,6 +246,7 @@ export default function PerfilPage() {
             Volver a la tienda
           </button>
         </div>
+        </>)}
       </div>
     </div>
   );

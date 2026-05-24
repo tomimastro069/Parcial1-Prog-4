@@ -79,14 +79,14 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10">
+    <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Finalizar Compra</h1>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Seccion Detalles del Usuario */}
-          <div className="col-span-2 space-y-6">
+          <div className="col-span-2 space-y-6" style={{ animation: 'slideUp 0.3s ease-out' }}>
 
             {/* Direcciones */}
             <div className="bg-white p-6 rounded-lg shadow">

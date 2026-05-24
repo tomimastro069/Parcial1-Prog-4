@@ -9,9 +9,10 @@ interface Props {
   onClose: () => void;
   editando: Categoria | null;
   categorias: Categoria[];
+  defaultParentId?: number | null;
 }
 
-export function CategoriaModal({ isOpen, onClose, editando, categorias }: Props) {
+export function CategoriaModal({ isOpen, onClose, editando, categorias, defaultParentId }: Props) {
   const crear = useCreateCategoria();
   const actualizar = useUpdateCategoria();
 
@@ -28,10 +29,10 @@ export function CategoriaModal({ isOpen, onClose, editando, categorias }: Props)
     } else {
       setNombre('');
       setDescripcion('');
-      setParentId(null);
+      setParentId(defaultParentId ?? null);
     }
     setErrors({});
-  }, [editando, isOpen]);
+  }, [editando, isOpen, defaultParentId]);
 
   const validate = () => {
     const e: { nombre?: string } = {};

@@ -65,7 +65,7 @@ export default function ProductoDetallePage() {
           Volver al menú
         </button>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden" style={{ animation: 'slideUp 0.3s ease-out' }}>
           <div className="md:flex">
             {/* Imagen */}
             <div className="md:w-96 h-64 md:h-auto bg-gray-100 flex-shrink-0">
