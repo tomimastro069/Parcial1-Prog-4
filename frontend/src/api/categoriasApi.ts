@@ -3,7 +3,7 @@ import type { Categoria, CategoriaCreate, CategoriaUpdate, PaginatedResponse } f
 
 export const categoriasApi = {
   list: (params: { page?: number; size?: number; is_active?: boolean | null; search?: string } = {}) =>
-    axiosClient.get<PaginatedResponse<Categoria>>('/api/v1/categorias', { params }).then((r) => r.data),
+    axiosClient.get<PaginatedResponse<Categoria>>('/api/v1/categorias/', { params }).then((r) => r.data),
 
   activar: (id: number) =>
     axiosClient.patch<Categoria>(`/api/v1/categorias/${id}/activar`).then((r) => r.data),
@@ -13,7 +13,7 @@ export const categoriasApi = {
     axiosClient.get<Categoria>(`/api/v1/categorias/${id}`).then((r) => r.data),
 
   create: (data: CategoriaCreate) =>
-    axiosClient.post<Categoria>('/api/v1/categorias', data).then((r) => r.data),
+    axiosClient.post<Categoria>('/api/v1/categorias/', data).then((r) => r.data),
 
   update: (id: number, data: CategoriaUpdate) =>
     axiosClient.patch<Categoria>(`/api/v1/categorias/${id}`, data).then((r) => r.data),

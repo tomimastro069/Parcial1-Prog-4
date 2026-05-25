@@ -4,7 +4,7 @@ import type { Ingrediente, IngredienteCreate, IngredienteUpdate, PaginatedRespon
 export const ingredientesApi = {
   list: (params: { page?: number; size?: number; is_active?: boolean | null; search?: string } = {}) =>
     axiosClient
-      .get<PaginatedResponse<Ingrediente>>('/api/v1/ingredientes', { params })
+      .get<PaginatedResponse<Ingrediente>>('/api/v1/ingredientes/', { params })
       .then((r) => r.data),
 
   activar: (id: number) =>
@@ -14,7 +14,7 @@ export const ingredientesApi = {
     axiosClient.get<Ingrediente>(`/api/v1/ingredientes/${id}`).then((r) => r.data),
 
   create: (data: IngredienteCreate) =>
-    axiosClient.post<Ingrediente>('/api/v1/ingredientes', data).then((r) => r.data),
+    axiosClient.post<Ingrediente>('/api/v1/ingredientes/', data).then((r) => r.data),
 
   update: (id: number, data: IngredienteUpdate) =>
     axiosClient.patch<Ingrediente>(`/api/v1/ingredientes/${id}`, data).then((r) => r.data),

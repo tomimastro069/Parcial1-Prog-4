@@ -12,7 +12,7 @@ export interface ProductosParams {
 export const productosApi = {
   list: (params: ProductosParams = {}) =>
     axiosClient
-      .get<PaginatedResponse<Producto>>('/api/v1/productos', { params })
+      .get<PaginatedResponse<Producto>>('/api/v1/productos/', { params })
       .then((r) => r.data),
 
   getById: (id: number) =>
@@ -25,14 +25,14 @@ export const productosApi = {
 
   listAdmin: (params: { page?: number; size?: number; is_active?: boolean | null; search?: string; categoria_id?: number | null } = {}) =>
     axiosClient
-      .get<PaginatedResponse<ProductoRead>>('/api/v1/productos', { params })
+      .get<PaginatedResponse<ProductoRead>>('/api/v1/productos/', { params })
       .then((r) => r.data),
 
   activar: (id: number) =>
     axiosClient.patch<ProductoRead>(`/api/v1/productos/${id}/activar`).then((r) => r.data),
 
   create: (data: ProductoCreate) =>
-    axiosClient.post<ProductoRead>('/api/v1/productos', data).then((r) => r.data),
+    axiosClient.post<ProductoRead>('/api/v1/productos/', data).then((r) => r.data),
 
   update: (id: number, data: ProductoUpdate) =>
     axiosClient.patch<ProductoRead>(`/api/v1/productos/${id}`, data).then((r) => r.data),
