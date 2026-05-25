@@ -148,6 +148,9 @@ class PedidoService:
 
             subtotal_total = Decimal("0.00")
             
+            costo_envio_db = self.uow.ajustes.get_by_clave("costo_envio")
+            costo_envio_val = Decimal(costo_envio_db.valor) if costo_envio_db else Decimal("50.00")
+
             p = Pedido(
                 usuario_id=usuario_id,
                 direccion_id=data.direccion_id,
@@ -155,7 +158,7 @@ class PedidoService:
                 estado_codigo=estado_pendiente.codigo,
                 subtotal=subtotal_total,
                 total=subtotal_total,
-                costo_envio=Decimal("50.00"),
+                costo_envio=costo_envio_val,
                 descuento=Decimal("0.00"),
                 notas=data.notas
             )

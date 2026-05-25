@@ -1,14 +1,17 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { CartItem } from '../types';
+import { getAjuste } from '../api/ajustesApi';
 
 interface CartState {
   items: CartItem[];
+  costoEnvioValor: number;
 
   addItem: (item: CartItem) => void;
   removeItem: (productoId: number) => void;
   updateCantidad: (productoId: number, cantidad: number) => void;
   clearCart: () => void;
+  fetchCostoEnvio: () => Promise<void>;
 
   itemCount: () => number;
   subtotal: () => number;
@@ -20,6 +23,7 @@ export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
+      costoEnvioValor: 50,
 
       addItem: (item) =>
         set((s) => {
@@ -48,12 +52,21 @@ export const useCartStore = create<CartState>()(
 
       clearCart: () => set({ items: [] }),
 
+      fetchCostoEnvio: async () => {
+        try {
+          const ajuste = await getAjuste('costo_envio');
+          set({ costoEnvioValor: parseFloat(ajuste.valor) });
+        } catch (error) {
+          console.error('Error al obtener el costo de envío:', error);
+        }
+      },
+
       itemCount: () => get().items.reduce((acc, i) => acc + i.cantidad, 0),
 
       subtotal: () =>
         get().items.reduce((acc, i) => acc + i.precio * i.cantidad, 0),
 
-      costoEnvio: () => (get().items.length > 0 ? 50 : 0),
+      costoEnvio: () => (get().items.length > 0 ? get().costoEnvioValor : 0),
 
       total: () => get().subtotal() + get().costoEnvio(),
     }),
@@ -63,3 +76,6 @@ export const useCartStore = create<CartState>()(
     }
   )
 );
+
+// Intentar cargar el costo de envío al importar
+useCartStore.getState().fetchCostoEnvio();

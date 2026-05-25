@@ -1,5 +1,5 @@
 import Header from '../../components/Header';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useCartStore } from '../../store/cartStore';
@@ -18,6 +18,10 @@ export default function CheckoutPage() {
   const [selectedDireccion, setSelectedDireccion] = useState<number | null>(null);
   const [selectedFormaPago, setSelectedFormaPago] = useState<string>('');
   const [notas, setNotas] = useState('');
+
+  useEffect(() => {
+    useCartStore.getState().fetchCostoEnvio();
+  }, []);
 
   const { data: direcciones, isLoading: isLoadingDirs } = useQuery({
     queryKey: ['misDirecciones'],
@@ -56,7 +60,8 @@ export default function CheckoutPage() {
     );
   }
 
-  const costoEnvio = selectedDireccion ? 50 : 0;
+  const costoEnvioValor = useCartStore(s => s.costoEnvioValor);
+  const costoEnvio = selectedDireccion ? costoEnvioValor : 0;
   const total = subtotal + costoEnvio;
 
   const handleSubmit = (e: React.FormEvent) => {

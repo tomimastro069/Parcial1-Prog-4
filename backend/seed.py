@@ -226,6 +226,22 @@ def seed_formas_pago(session):
     session.commit()
 
 # -----------------------------
+# AJUSTES
+# -----------------------------
+def seed_ajustes(session):
+    print("Verificando ajustes...")
+    from app.Modules.Ajustes.Model.ajuste import Ajuste
+    costo_envio = session.exec(select(Ajuste).where(Ajuste.clave == "costo_envio")).first()
+    if not costo_envio:
+        costo_envio = Ajuste(
+            clave="costo_envio",
+            valor="50.00",
+            descripcion="Costo de envío para los pedidos"
+        )
+        session.add(costo_envio)
+        session.commit()
+
+# -----------------------------
 # MAIN SEED
 # -----------------------------
 def seed_data():
@@ -238,6 +254,7 @@ def seed_data():
         seed_productos(session, cats, ings)
         seed_estados_pedidos(session)
         seed_formas_pago(session)
+        seed_ajustes(session)
 
         print("SEED COMPLETO OK")
 

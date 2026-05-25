@@ -31,6 +31,8 @@ from app.Modules.Pedidos.Model.estadoPedido import EstadoPedido  # noqa: F401
 from app.Modules.Pedidos.Model.pedido import Pedido  # noqa: F401
 from app.Modules.Pedidos.Model.detallePedido import DetallePedido  # noqa: F401
 from app.Modules.Pedidos.Model.historialEstadoPedido import HistorialEstadoPedido  # noqa: F401
+from app.Modules.Ajustes.Model.ajuste import Ajuste  # noqa: F401
+from app.Modules.Ajustes.ajusteRouter import router as ajuste_router
 
 from app.Core.Config.rate_limit import limiter
 from slowapi.errors import RateLimitExceeded
@@ -69,6 +71,7 @@ app.include_router(unidad_router, prefix="/api/v1/unidades-medida", tags=["unida
 app.include_router(direccion_router, prefix="/api/v1/direcciones", tags=["direcciones"])
 app.include_router(pago_router, prefix="/api/v1/pagos", tags=["pagos"])
 app.include_router(pedido_router, prefix="/api/v1/pedidos", tags=["pedidos"])
+app.include_router(ajuste_router, prefix="/api/v1/ajustes", tags=["ajustes"])
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True, reload_excludes=[".venv"])
