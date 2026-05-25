@@ -23,3 +23,15 @@ export function useCreateUnidad() {
     onError: () => toast.error('Error al crear la unidad de medida'),
   });
 }
+
+export function useDeleteUnidad() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => unidadesMedidaApi.delete(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [QK] });
+      toast.success('Unidad eliminada');
+    },
+    onError: () => toast.error('Error al eliminar la unidad de medida'),
+  });
+}

@@ -17,6 +17,10 @@ class UnidadMedidaService:
                 ) for u in unidades
             ]
 
+    def delete(self, unidad_id: int) -> bool:
+        with self.uow:
+            return self.uow.unidades_medida.delete(unidad_id)
+
     def create(self, data: UnidadMedidaCreate, user_id: int) -> UnidadMedidaRead:
         from app.Modules.UnidadMedida.unidadMedida import UnidadMedida
         from app.Modules.Auditoria.auditoria import Auditoria
