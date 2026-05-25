@@ -54,9 +54,6 @@ def seed_unidades(session):
         # unidad
         ("pieza", "u", "unidad"),
         ("docena", "doc", "unidad"),
-
-        # area
-        ("metro cuadrado", "m²", "area"),
     ]
 
     dict_unidades = {}
