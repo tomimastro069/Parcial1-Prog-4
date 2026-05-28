@@ -5,7 +5,7 @@ import { ShoppingCartIcon } from '@heroicons/react/24/solid';
 import { useAuthStore } from '../store/authStore';
 import { useCartStore } from '../store/cartStore';
 import { useUIStore } from '../store/uiStore';
-
+import logoRestaurante from '../assets/restaurante.png';
 export default function Header() {
   const navigate = useNavigate();
   const usuario = useAuthStore(s => s.usuario);
@@ -17,7 +17,13 @@ export default function Header() {
     <header className="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-2xl">🍔</span>
+          <span className="text-2xl">
+            <img
+              src={logoRestaurante}
+              alt="Logo"
+              className="w-[50px] h-[50px] object-contain"
+            />
+          </span>
           <span className="font-bold text-[#1F3864] text-lg hidden sm:block">Food Store</span>
         </div>
         <div className="flex items-center gap-3">
