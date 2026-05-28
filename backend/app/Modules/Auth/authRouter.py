@@ -18,7 +18,7 @@ def register(data: RegisterRequest, uow=Depends(get_uow)):
 def login(request: Request, response: Response, data: LoginRequest, uow=Depends(get_uow)):
     service = AuthService(uow)
     token_data = service.login(data)
-    response.set_cookie(key="access_token", value=token_data.access_token, httponly=True, samesite="lax")
+    response.set_cookie(key="access_token", value=token_data.access_token, httponly=True, samesite="lax", secure=True)
     return token_data
 
 @router.post("/logout")
