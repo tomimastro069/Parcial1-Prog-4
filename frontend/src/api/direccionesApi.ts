@@ -24,6 +24,11 @@ export const createDireccion = async (direccion: Omit<Direccion, 'id' | 'usuario
   return data;
 };
 
+export const updateDireccion = async (id: number, direccion: Partial<Omit<Direccion, 'id' | 'usuario_id'>>): Promise<Direccion> => {
+  const { data } = await axiosClient.put(`/api/v1/direcciones/${id}`, direccion);
+  return data;
+};
+
 export const deleteDireccion = async (id: number): Promise<void> => {
   await axiosClient.delete(`/api/v1/direcciones/${id}`);
 };

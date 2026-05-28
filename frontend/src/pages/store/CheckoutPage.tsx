@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useCartStore } from '../../store/cartStore';
 import { getMisDirecciones } from '../../api/direccionesApi';
+import AddressFormModal from '../../components/AddressFormModal';
 import { getFormasPago } from '../../api/pagosApi';
 import { createPedido } from '../../api/pedidosApi';
 import toast from 'react-hot-toast';
@@ -17,6 +18,8 @@ export default function CheckoutPage() {
   const [selectedDireccion, setSelectedDireccion] = useState<number | null>(null);
   const [selectedFormaPago, setSelectedFormaPago] = useState<string>('');
   const [notas, setNotas] = useState('');
+
+  const [showAddressModal, setShowAddressModal] = useState(false);
 
   useEffect(() => {
     useCartStore.getState().fetchCostoEnvio();
@@ -105,20 +108,29 @@ export default function CheckoutPage() {
                 {isLoadingDirs ? (
                   <p className="text-sm text-gray-500">Cargando direcciones...</p>
                 ) : (
-                  direcciones?.map(dir => (
-                    <label key={dir.id} className="flex items-center space-x-3 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="entrega"
-                        className="form-radio text-[#D32F2F]"
-                        checked={selectedDireccion === dir.id}
-                        onChange={() => setSelectedDireccion(dir.id)}
-                      />
-                      <span>
-                        Envío a: {dir.alias ? `[${dir.alias}] ` : ''}{dir.linea1}, {dir.ciudad}
-                      </span>
-                    </label>
-                  ))
+                  <>
+                    {direcciones?.map(dir => (
+                      <label key={dir.id} className="flex items-center space-x-3 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="entrega"
+                          className="form-radio text-[#D32F2F]"
+                          checked={selectedDireccion === dir.id}
+                          onChange={() => setSelectedDireccion(dir.id)}
+                        />
+                        <span>
+                          Envío a: {dir.alias ? `[${dir.alias}] ` : ''}{dir.linea1}, {dir.ciudad}
+                        </span>
+                      </label>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => setShowAddressModal(true)}
+                      className="text-sm text-[#D32F2F] hover:underline font-medium mt-2 block"
+                    >
+                      + Añadir nueva dirección
+                    </button>
+                  </>
                 )}
               </div>
             </div>
@@ -205,6 +217,12 @@ export default function CheckoutPage() {
             </div>
           </div>
         </form>
-    </div>
-  );
-}
+
+        <AddressFormModal 
+          isOpen={showAddressModal} 
+          onClose={() => setShowAddressModal(false)} 
+          onSuccess={(newDir) => setSelectedDireccion(newDir.id)} 
+        />
+      </div>
+    );
+  }
