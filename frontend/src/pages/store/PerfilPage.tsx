@@ -5,7 +5,6 @@ import toast from 'react-hot-toast';
 
 import { authApi } from '../../api/authApi';
 import { getMisDirecciones, createDireccion, deleteDireccion, type Direccion } from '../../api/direccionesApi';
-import Header from '../../components/Header';
 import { useAuthStore } from '../../store/authStore';
 import type { UserResponse } from '../../types';
 
@@ -102,10 +101,8 @@ export default function PerfilPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Mi Perfil</h1>
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <h1 className="text-3xl font-bold text-gray-900 mb-6">Mi Perfil</h1>
 
         {(loadingUser || loadingDirs) ? (
           <div className="text-center py-16 text-gray-500">Cargando datos...</div>
@@ -247,7 +244,6 @@ export default function PerfilPage() {
           </button>
         </div>
         </>)}
-      </div>
     </div>
   );
 }

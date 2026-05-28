@@ -4,6 +4,7 @@ import AdminLayout from '../pages/admin/AdminLayout';
 import LoginPage from '../pages/auth/LoginPage';
 import RegisterPage from '../pages/auth/RegisterPage';
 import StorePage from '../pages/store/StorePage';
+import StoreLayout from '../pages/store/StoreLayout';
 import ProductoDetallePage from '../pages/store/ProductoDetallePage';
 import DashboardPage from '../pages/admin/DashboardPage';
 import IngredientesAdminPage from '../pages/admin/IngredientesAdminPage';
@@ -23,11 +24,17 @@ export const router = createBrowserRouter([
   {
     element: <ProtectedRoute />,
     children: [
-      { path: '/store', element: <StorePage /> },
-      { path: '/store/producto/:id', element: <ProductoDetallePage /> },
-      { path: '/store/checkout', element: <CheckoutPage /> },
-      { path: '/store/mis-pedidos', element: <MisPedidosPage /> },
-      { path: '/store/perfil', element: <PerfilPage /> },
+      {
+        path: '/store',
+        element: <StoreLayout />,
+        children: [
+          { index: true, element: <StorePage /> },
+          { path: 'producto/:id', element: <ProductoDetallePage /> },
+          { path: 'checkout', element: <CheckoutPage /> },
+          { path: 'mis-pedidos', element: <MisPedidosPage /> },
+          { path: 'perfil', element: <PerfilPage /> },
+        ],
+      },
     ],
   },
 

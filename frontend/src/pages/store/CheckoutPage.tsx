@@ -1,4 +1,3 @@
-import Header from '../../components/Header';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -48,14 +47,11 @@ export default function CheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 py-10">
-        <Header />
-        <div className="flex flex-col items-center justify-center">
-          <h2 className="text-2xl font-bold mb-4 text-gray-800">Tu carrito está vacío</h2>
-          <button onClick={() => navigate('/store')} className="bg-[#D32F2F] text-white px-6 py-2 rounded shadow">
-            Volver a la tienda
-          </button>
-        </div>
+      <div className="py-10 flex flex-col items-center justify-center">
+        <h2 className="text-2xl font-bold mb-4 text-gray-800">Tu carrito está vacío</h2>
+        <button onClick={() => navigate('/store')} className="bg-[#D32F2F] text-white px-6 py-2 rounded shadow">
+          Volver a la tienda
+        </button>
       </div>
     );
   }
@@ -84,10 +80,8 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Finalizar Compra</h1>
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <h1 className="text-3xl font-bold text-gray-900 mb-8">Finalizar Compra</h1>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Seccion Detalles del Usuario */}
@@ -211,7 +205,6 @@ export default function CheckoutPage() {
             </div>
           </div>
         </form>
-      </div>
     </div>
   );
 }
