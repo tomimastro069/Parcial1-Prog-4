@@ -34,6 +34,38 @@ def seed_admin():
             )
             session.add(admin_user)
             session.commit()
+def seed_users():
+    with Session(engine) as session:
+        stock = Usuario(
+                nombre="Stock",
+                apellido="Sistema",
+                email="stock@foodstore.com",
+                password_hash=get_password_hash("admin123"),
+                rol=UserRole.STOCK,
+                is_active=True
+            )
+        session.add(stock)
+        session.commit()
+        pedidos = Usuario(
+                nombre="Pedidos",
+                apellido="Sistema",
+                email="pedidos@foodstore.com",
+                password_hash=get_password_hash("admin123"),
+                rol=UserRole.PEDIDOS,
+                is_active=True
+            )
+        session.add(pedidos)
+        session.commit()
+        client = Usuario(
+                nombre="Cliente",
+                apellido="Sistema",
+                email="client@foodstore.com",
+                password_hash=get_password_hash("admin123"),
+                rol=UserRole.CLIENT,
+                is_active=True
+            )
+        session.add(client)
+        session.commit()
 
 
 # -----------------------------
@@ -256,7 +288,7 @@ def seed_data():
         seed_formas_pago(session)
         seed_ajustes(session)
 
-        print("SEED COMPLETO OK")
+        print("---------SEED COMPLETO OK---------")
 
 
 # -----------------------------
@@ -264,4 +296,5 @@ def seed_data():
 # -----------------------------
 if __name__ == "__main__":
     seed_admin()
+    seed_users()
     seed_data()
