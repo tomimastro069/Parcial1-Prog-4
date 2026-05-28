@@ -136,7 +136,7 @@ export function IngredientesTable() {
             className="gap-2 bg-green-600 hover:bg-green-700"
           >
             <ArrowDownTrayIcon className="w-4 h-4" />
-            {exportando ? 'Exportando...' : 'Exportar Excel'}
+            {exportando ? 'Exportando...' : 'Excel'}
           </Button>
           {canWrite && (
             <Button onClick={handleNuevo} className="gap-2">
@@ -154,25 +154,24 @@ export function IngredientesTable() {
             <button
               key={f}
               onClick={() => handleFiltroChange(f)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                filtro === f
-                  ? 'bg-[#1F3864] text-white'
-                  : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
-              }`}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${filtro === f
+                ? 'bg-[#1F3864] text-white'
+                : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                }`}
             >
               {f.charAt(0).toUpperCase() + f.slice(1)}
             </button>
           ))}
         </div>
-        <SearchBar 
-          placeholder="Buscar ingredientes..." 
+        <SearchBar
+          placeholder="Buscar ingredientes..."
           onSearch={(term) => {
             setDebouncedSearch(term);
             setSearchParams(prev => {
               prev.set('page', '1');
               return prev;
             });
-          }} 
+          }}
         />
       </div>
 
@@ -195,68 +194,67 @@ export function IngredientesTable() {
             <tbody className="divide-y divide-gray-100">
               {isLoading
                 ? Array.from({ length: 5 }).map((_, i) => (
-                    <TableRowSkeleton key={i} cols={5} />
-                  ))
+                  <TableRowSkeleton key={i} cols={5} />
+                ))
                 : ingredientes?.map((ing) => (
-                    <tr key={ing.id} className={`hover:bg-gray-50 transition-colors ${!ing.is_active ? 'opacity-60' : ''}`}>
-                      <td className="px-4 py-3 font-medium text-gray-900">{ing.nombre}</td>
-                      <td className="px-4 py-3 text-gray-500 hidden md:table-cell max-w-xs truncate">
-                        {ing.descripcion ?? <span className="text-gray-300">—</span>}
-                      </td>
-                      <td className="px-4 py-3">
-                        {ing.es_alergeno ? (
-                          <Badge variant="alergeno">
-                            ⚠️ Alérgeno
-                          </Badge>
-                        ) : (
-                          <Badge variant="gray">Sin alérgeno</Badge>
-                        )}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                          ing.is_active
-                            ? 'bg-green-50 text-green-700'
-                            : 'bg-red-50 text-red-600'
+                  <tr key={ing.id} className={`hover:bg-gray-50 transition-colors ${!ing.is_active ? 'opacity-60' : ''}`}>
+                    <td className="px-4 py-3 font-medium text-gray-900">{ing.nombre}</td>
+                    <td className="px-4 py-3 text-gray-500 hidden md:table-cell max-w-xs truncate">
+                      {ing.descripcion ?? <span className="text-gray-300">—</span>}
+                    </td>
+                    <td className="px-4 py-3">
+                      {ing.es_alergeno ? (
+                        <Badge variant="alergeno">
+                          ⚠️ Alérgeno
+                        </Badge>
+                      ) : (
+                        <Badge variant="gray">Sin alérgeno</Badge>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${ing.is_active
+                        ? 'bg-green-50 text-green-700'
+                        : 'bg-red-50 text-red-600'
                         }`}>
-                          {ing.is_active ? 'Activo' : 'Inactivo'}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex justify-end gap-2">
-                          {canWrite ? (
-                            ing.is_active ? (
-                              <>
-                                <button
-                                  onClick={() => handleEditar(ing)}
-                                  className="p-1.5 rounded-md text-gray-500 hover:text-[#2E75B6] hover:bg-blue-50 transition-colors"
-                                  title="Editar"
-                                >
-                                  <PencilIcon className="w-4 h-4" />
-                                </button>
-                                <button
-                                  onClick={() => handleEliminar(ing)}
-                                  className="p-1.5 rounded-md text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
-                                  title="Eliminar"
-                                >
-                                  <TrashIcon className="w-4 h-4" />
-                                </button>
-                              </>
-                            ) : (
+                        {ing.is_active ? 'Activo' : 'Inactivo'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex justify-end gap-2">
+                        {canWrite ? (
+                          ing.is_active ? (
+                            <>
                               <button
-                                onClick={() => handleActivar(ing)}
-                                className="p-1.5 rounded-md text-gray-500 hover:text-green-600 hover:bg-green-50 transition-colors"
-                                title="Reactivar"
+                                onClick={() => handleEditar(ing)}
+                                className="p-1.5 rounded-md text-gray-500 hover:text-[#2E75B6] hover:bg-blue-50 transition-colors"
+                                title="Editar"
                               >
-                                <ArrowPathIcon className="w-4 h-4" />
+                                <PencilIcon className="w-4 h-4" />
                               </button>
-                            )
+                              <button
+                                onClick={() => handleEliminar(ing)}
+                                className="p-1.5 rounded-md text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                title="Eliminar"
+                              >
+                                <TrashIcon className="w-4 h-4" />
+                              </button>
+                            </>
                           ) : (
-                            <span className="text-xs text-gray-300">—</span>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                            <button
+                              onClick={() => handleActivar(ing)}
+                              className="p-1.5 rounded-md text-gray-500 hover:text-green-600 hover:bg-green-50 transition-colors"
+                              title="Reactivar"
+                            >
+                              <ArrowPathIcon className="w-4 h-4" />
+                            </button>
+                          )
+                        ) : (
+                          <span className="text-xs text-gray-300">—</span>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         )}
