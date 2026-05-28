@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { createDireccion, type Direccion } from '../api/direccionesApi';
+import { createDireccion, updateDireccion, type Direccion } from '../api/direccionesApi';
 
 interface AddressFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: (newDir: Direccion) => void;
+  initialData?: Direccion;
 }
 
-export default function AddressFormModal({ isOpen, onClose, onSuccess }: AddressFormModalProps) {
+export default function AddressFormModal({ isOpen, onClose, onSuccess, initialData }: AddressFormModalProps) {
   const queryClient = useQueryClient();
   const [newAddress, setNewAddress] = useState({
     alias: '',
@@ -23,13 +24,20 @@ export default function AddressFormModal({ isOpen, onClose, onSuccess }: Address
     es_principal: false,
   });
 
-  const createAddressMutation = useMutation({
-    mutationFn: (data: Omit<Direccion, 'id' | 'usuario_id'>) => createDireccion(data),
-    onSuccess: (newDir) => {
-      // Invalidate queries from both Checkout and Profile to keep them fresh
-      queryClient.invalidateQueries({ queryKey: ['misDirecciones'] });
-      queryClient.invalidateQueries({ queryKey: ['misDireccionesPerfil'] });
-      toast.success('Dirección creada');
+  useEffect(() => {
+    if (initialData && isOpen) {
+      setNewAddress({
+        alias: initialData.alias || '',
+        linea1: initialData.linea1 || '',
+        linea2: initialData.linea2 || '',
+        ciudad: initialData.ciudad || '',
+        provincia: initialData.provincia || '',
+        codigo_postal: initialData.codigo_postal || '',
+        latitud: initialData.latitud?.toString() || '',
+        longitud: initialData.longitud?.toString() || '',
+        es_principal: initialData.es_principal || false,
+      });
+    } else if (isOpen && !initialData) {
       setNewAddress({
         alias: '',
         linea1: '',
@@ -41,10 +49,32 @@ export default function AddressFormModal({ isOpen, onClose, onSuccess }: Address
         longitud: '',
         es_principal: false,
       });
+    }
+  }, [initialData, isOpen]);
+
+  const createAddressMutation = useMutation({
+    mutationFn: (data: Omit<Direccion, 'id' | 'usuario_id'>) => createDireccion(data),
+    onSuccess: (newDir) => {
+      // Invalidate queries from both Checkout and Profile to keep them fresh
+      queryClient.invalidateQueries({ queryKey: ['misDirecciones'] });
+      queryClient.invalidateQueries({ queryKey: ['misDireccionesPerfil'] });
+      toast.success('Dirección creada');
       if (onSuccess) onSuccess(newDir);
       onClose();
     },
     onError: () => toast.error('Error al crear dirección'),
+  });
+
+  const updateAddressMutation = useMutation({
+    mutationFn: (data: { id: number, payload: Partial<Omit<Direccion, 'id' | 'usuario_id'>> }) => updateDireccion(data.id, data.payload),
+    onSuccess: (updatedDir) => {
+      queryClient.invalidateQueries({ queryKey: ['misDirecciones'] });
+      queryClient.invalidateQueries({ queryKey: ['misDireccionesPerfil'] });
+      toast.success('Dirección actualizada');
+      if (onSuccess) onSuccess(updatedDir);
+      onClose();
+    },
+    onError: () => toast.error('Error al actualizar dirección'),
   });
 
   const handleAddAddress = (e: React.FormEvent) => {
@@ -60,15 +90,22 @@ export default function AddressFormModal({ isOpen, onClose, onSuccess }: Address
       longitud: newAddress.longitud ? parseFloat(newAddress.longitud) : undefined,
       es_principal: newAddress.es_principal,
     };
-    createAddressMutation.mutate(payload);
+    
+    if (initialData) {
+      updateAddressMutation.mutate({ id: initialData.id, payload });
+    } else {
+      createAddressMutation.mutate(payload);
+    }
   };
 
   if (!isOpen) return null;
 
+  const isPending = createAddressMutation.isPending || updateAddressMutation.isPending;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-        <h2 className="text-xl font-bold mb-4">Nueva Dirección</h2>
+        <h2 className="text-xl font-bold mb-4">{initialData ? 'Editar Dirección' : 'Nueva Dirección'}</h2>
         <form onSubmit={handleAddAddress} className="space-y-3">
           <input type="text" placeholder="Alias (Ej. Casa)(Opcional)" value={newAddress.alias} onChange={e => setNewAddress({ ...newAddress, alias: e.target.value })} className="w-full border rounded p-2" />
           <input type="text" placeholder="Línea 1 *" value={newAddress.linea1} onChange={e => setNewAddress({ ...newAddress, linea1: e.target.value })} required className="w-full border rounded p-2" />
@@ -94,7 +131,7 @@ export default function AddressFormModal({ isOpen, onClose, onSuccess }: Address
 
           <div className="flex justify-end space-x-2 mt-4">
             <button type="button" onClick={onClose} className="px-4 py-2 text-gray-600 bg-gray-200 rounded hover:bg-gray-300">Cancelar</button>
-            <button type="submit" disabled={createAddressMutation.isPending} className="px-4 py-2 text-white bg-[#D32F2F] rounded hover:bg-red-800 disabled:opacity-50">Guardar</button>
+            <button type="submit" disabled={isPending} className="px-4 py-2 text-white bg-[#D32F2F] rounded hover:bg-red-800 disabled:opacity-50">Guardar</button>
           </div>
         </form>
       </div>
