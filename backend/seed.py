@@ -257,6 +257,13 @@ def seed_formas_pago(session):
             session.add(FormaPago(**data))
     session.commit()
 
+
+#------------------------------
+# PEDIDOS
+#------------------------------
+
+def seed_pedidos(session):
+    pass
 # -----------------------------
 # AJUSTES
 # -----------------------------
