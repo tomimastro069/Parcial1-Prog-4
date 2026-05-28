@@ -11,7 +11,7 @@ from app.Core.pagination import PaginatedResponse
 router = APIRouter()
 
 
-@router.get("", response_model=PaginatedResponse[ProductoRead])
+@router.get("/", response_model=PaginatedResponse[ProductoRead])
 def listar_productos(
     uow=Depends(get_uow),
     page: Annotated[int, Query(ge=1)] = 1,
@@ -28,12 +28,12 @@ def listar_productos(
 def obtener_producto(
     producto_id: Annotated[int, Path(gt=0)],
     uow=Depends(get_uow),
-):
+) -> ProductoRead:
     service = ProductoService(uow)
     return service.get_by_id(producto_id)
 
 
-@router.post("", 
+@router.post("/", 
              response_model=ProductoRead, 
              status_code=status.HTTP_201_CREATED)
 def crear_producto(
