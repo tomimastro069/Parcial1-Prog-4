@@ -85,6 +85,7 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
       }
       return [...prev, { ingrediente_id: id, cantidad: 1 }];
     });
+    setBusquedaIngrediente('');
   };
 
   const setCantidad = (id: number, cantidad: number) => {
