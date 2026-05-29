@@ -100,7 +100,10 @@ export default function CheckoutPage() {
                     name="entrega"
                     className="form-radio text-[#D32F2F]"
                     checked={selectedDireccion === null}
-                    onChange={() => setSelectedDireccion(null)}
+                    onChange={() => {
+                      setSelectedDireccion(null);
+                      setSelectedFormaPago('');
+                    }}
                   />
                   <span>Retiro en local</span>
                 </label>
@@ -116,7 +119,10 @@ export default function CheckoutPage() {
                           name="entrega"
                           className="form-radio text-[#D32F2F]"
                           checked={selectedDireccion === dir.id}
-                          onChange={() => setSelectedDireccion(dir.id)}
+                          onChange={() => {
+                            setSelectedDireccion(dir.id);
+                            setSelectedFormaPago('');
+                          }}
                         />
                         <span>
                           Envío a: {dir.alias ? `[${dir.alias}] ` : ''}{dir.linea1}, {dir.ciudad}
@@ -142,7 +148,11 @@ export default function CheckoutPage() {
                 <p className="text-sm text-gray-500">Cargando formas de pago...</p>
               ) : (
                 <div className="space-y-4">
-                  {formasPago?.filter(f => f.habilitado).map(forma => (
+                  {formasPago?.filter(f => f.habilitado).filter(f => {
+                    // Si es envío a domicilio, no permitir efectivo
+                    if (selectedDireccion !== null && f.codigo === 'EFECTIVO') return false;
+                    return true;
+                  }).map(forma => (
                     <label key={forma.codigo} className="flex items-center space-x-3 cursor-pointer">
                       <input
                         type="radio"
