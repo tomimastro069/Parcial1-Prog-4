@@ -4,6 +4,8 @@ import { getTodosPedidos, updateEstadoPedido } from '../../api/pedidosApi';
 import { useAuthStore } from '../../store/authStore';
 import Modal from '../../components/Modal';
 import toast from 'react-hot-toast';
+import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import { descargarExcelDesdeServidor } from '../../utils/exportarExcel';
 
 // ─── Configuración de estados ────────────────────────────────────────────────
 
@@ -43,6 +45,19 @@ export default function GestorPedidosPage() {
 
   const [page, setPage] = useState(1);
   const size = 10;
+  const [exportando, setExportando] = useState(false);
+
+  const handleExportar = async () => {
+    setExportando(true);
+    try {
+      await descargarExcelDesdeServidor('/api/v1/reportes/excel/pedidos', 'pedidos');
+      toast.success('Pedidos exportados');
+    } catch {
+      toast.error('Error al exportar');
+    } finally {
+      setExportando(false);
+    }
+  };
 
   // Modal de cancelación
   const [cancelModal, setCancelModal] = useState<{ open: boolean; pedidoId: number | null }>({
@@ -110,11 +125,21 @@ export default function GestorPedidosPage() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-[#1F3864]">Gestor de Pedidos</h1>
-        <p className="text-sm text-gray-500 mt-0.5">
-          Seguimiento y avance de estados en tiempo real
-        </p>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-[#1F3864]">Gestor de Pedidos</h1>
+          <p className="text-sm text-gray-500 mt-0.5">
+            Seguimiento y avance de estados en tiempo real
+          </p>
+        </div>
+        <button
+          onClick={handleExportar}
+          disabled={exportando}
+          className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50 shadow-sm"
+        >
+          <ArrowDownTrayIcon className="w-4 h-4" />
+          {exportando ? 'Exportando...' : 'Excel'}
+        </button>
       </div>
 
       {/* Lista de pedidos tipo "kanban card" */}

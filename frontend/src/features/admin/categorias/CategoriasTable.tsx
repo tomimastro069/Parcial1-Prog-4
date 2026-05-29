@@ -15,7 +15,7 @@ import { useUIStore } from '../../../store/uiStore';
 import { useAuthStore } from '../../../store/authStore';
 import { Pagination } from '../../../components/Pagination';
 import { categoriasApi } from '../../../api/categoriasApi';
-import { descargarExcel } from '../../../utils/exportarExcel';
+import { descargarExcelDesdeServidor } from '../../../utils/exportarExcel';
 import { useSort } from '../../../hooks/useSort';
 import { SortableHeader } from '../../../components/SortableHeader';
 import type { Categoria } from '../../../types';
@@ -111,20 +111,13 @@ export function CategoriasTable() {
   const handleExportar = async () => {
     setExportando(true);
     try {
-      const res = await categoriasApi.list({ page: 1, size: 1000 });
-      const items: Categoria[] = (res as any)?.items ?? [];
-      if (items.length === 0) { toast.error('No hay categorías para exportar'); return; }
-      const padreMap = new Map(items.map((c) => [c.id, c.nombre]));
-      const filas = items.map((c) => ({
-        Nombre: c.nombre.split(' / ').pop() ?? c.nombre,
-        Descripción: c.descripcion ?? '',
-        'Categoría padre': c.parent_id ? (padreMap.get(c.parent_id)?.split(' / ').pop() ?? '') : '',
-        Estado: c.is_active ? 'Activa' : 'Inactiva',
-      }));
-      descargarExcel(filas, 'Categorías', 'categorias');
-      toast.success(`${items.length} categorías exportadas`);
-    } catch { toast.error('Error al exportar'); }
-    finally { setExportando(false); }
+      await descargarExcelDesdeServidor('/api/v1/reportes/excel/categorias', 'categorias');
+      toast.success('Categorías exportadas');
+    } catch {
+      toast.error('Error al exportar');
+    } finally {
+      setExportando(false);
+    }
   };
 
   const handleFiltroChange = (nuevo: Filtro) => {

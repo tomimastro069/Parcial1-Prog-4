@@ -13,7 +13,7 @@ import { useCategorias } from '../../../hooks/useCategorias';
 import { useUIStore } from '../../../store/uiStore';
 import { useAuthStore } from '../../../store/authStore';
 import { productosApi } from '../../../api/productosApi';
-import { descargarExcel } from '../../../utils/exportarExcel';
+import { descargarExcelDesdeServidor } from '../../../utils/exportarExcel';
 import { useSort } from '../../../hooks/useSort';
 import type { ProductoRead, Categoria } from '../../../types';
 
@@ -43,22 +43,13 @@ export function ProductosTable() {
   const handleExportar = async () => {
     setExportando(true);
     try {
-      const res = await productosApi.listAdmin({ page: 1, size: 1000 });
-      const items: ProductoRead[] = (res as any)?.items ?? [];
-      if (items.length === 0) { toast.error('No hay productos para exportar'); return; }
-      const filas = items.map((p) => ({
-        Nombre: p.nombre,
-        Precio: p.precio,
-        Descripción: p.descripcion ?? '',
-        Categorías: p.categorias.map((c) => c.nombre).join(', '),
-        Ingredientes: p.ingredientes.map((i) => i.nombre).join(', '),
-        Terminado: p.es_terminado ? 'Sí' : 'No',
-        Estado: p.is_active ? 'Activo' : 'Inactivo',
-      }));
-      descargarExcel(filas, 'Productos', 'productos');
-      toast.success(`${items.length} productos exportados`);
-    } catch { toast.error('Error al exportar'); }
-    finally { setExportando(false); }
+      await descargarExcelDesdeServidor('/api/v1/reportes/excel/productos', 'productos');
+      toast.success('Productos exportados');
+    } catch {
+      toast.error('Error al exportar');
+    } finally {
+      setExportando(false);
+    }
   };
 
   // Leer página de la URL

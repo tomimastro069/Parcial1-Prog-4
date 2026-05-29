@@ -11,7 +11,7 @@ import { categoriasApi } from '../../api/categoriasApi';
 import { ingredientesApi } from '../../api/ingredientesApi';
 import { getAjuste, updateAjuste } from '../../api/ajustesApi';
 import { useAuthStore } from '../../store/authStore';
-import { descargarExcelMultiHoja } from '../../utils/exportarExcel';
+import { descargarExcelDesdeServidor } from '../../utils/exportarExcel';
 import type { Categoria, ProductoRead, Ingrediente } from '../../types';
 
 // ── Queries de resumen ────────────────────────────────────────────────────────
@@ -103,79 +103,9 @@ export default function DashboardPage() {
     setExportando(true);
     const toastId = toast.loading('Generando reporte...');
     try {
-      // Fetch todo en paralelo
-      const [pedRes, prodRes, catRes, ingRes] = await Promise.all([
-        getTodosPedidos(1, 10000),
-        productosApi.listAdmin({ page: 1, size: 10000 }),
-        categoriasApi.list({ page: 1, size: 10000 }),
-        ingredientesApi.list({ page: 1, size: 10000 }),
-      ]);
-
-      const pedidos = pedRes?.items ?? [];
-      const productos: ProductoRead[] = (prodRes as any)?.items ?? [];
-      const categorias: Categoria[] = (catRes as any)?.items ?? [];
-      const ingredientes: Ingrediente[] = (ingRes as any)?.items ?? [];
-
       const fecha = new Date().toLocaleDateString('es-AR').replace(/\//g, '-');
-
-      descargarExcelMultiHoja(
-        [
-          {
-            nombre: 'Pedidos',
-            filas: pedidos.map((p) => ({
-              ID: p.id,
-              Fecha: new Date(p.created_at).toLocaleString('es-AR'),
-              Estado: ESTADO_DISPLAY[p.estado_codigo]?.label ?? p.estado_codigo,
-              'Forma de pago': p.forma_pago_codigo,
-              Subtotal: p.subtotal,
-              'Costo envío': p.costo_envio,
-              Total: p.total,
-              Notas: p.notas ?? '',
-            })),
-          },
-          {
-            nombre: 'Productos',
-            filas: productos.map((p) => ({
-              Nombre: p.nombre,
-              Precio: p.precio,
-              Descripción: p.descripcion ?? '',
-              Categorías: p.categorias.map((c) => c.nombre).join(', '),
-              Ingredientes: p.ingredientes.map((i) => i.nombre).join(', '),
-              Terminado: p.es_terminado ? 'Sí' : 'No',
-              Estado: p.is_active ? 'Activo' : 'Inactivo',
-            })),
-          },
-          {
-            nombre: 'Categorías',
-            filas: (() => {
-              const padreMap = new Map(categorias.map((c) => [c.id, c.nombre]));
-              return categorias.map((c) => ({
-                Nombre: c.nombre.split(' / ').pop() ?? c.nombre,
-                Descripción: c.descripcion ?? '',
-                'Categoría padre': c.parent_id
-                  ? (padreMap.get(c.parent_id)?.split(' / ').pop() ?? '')
-                  : '',
-                Estado: c.is_active ? 'Activa' : 'Inactiva',
-              }));
-            })(),
-          },
-          {
-            nombre: 'Ingredientes',
-            filas: ingredientes.map((i) => ({
-              Nombre: i.nombre,
-              Descripción: i.descripcion ?? '',
-              Alérgeno: i.es_alergeno ? 'Sí' : 'No',
-              Estado: i.is_active ? 'Activo' : 'Inactivo',
-            })),
-          },
-        ],
-        `reporte-foodstore-${fecha}`
-      );
-
-      toast.success(
-        `Reporte generado: ${pedidos.length} pedidos, ${productos.length} productos`,
-        { id: toastId }
-      );
+      await descargarExcelDesdeServidor('/api/v1/reportes/excel/general', `reporte-foodstore-${fecha}`);
+      toast.success('Reporte generado correctamente', { id: toastId });
     } catch {
       toast.error('Error al generar el reporte', { id: toastId });
     } finally {

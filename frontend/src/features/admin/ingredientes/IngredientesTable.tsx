@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { PencilIcon, TrashIcon, PlusIcon, ArrowPathIcon, ArrowDownTrayIcon, EyeIcon } from '@heroicons/react/24/outline';
-import { descargarExcel } from '../../../utils/exportarExcel';
+import { descargarExcelDesdeServidor } from '../../../utils/exportarExcel';
 import toast from 'react-hot-toast';
 import { Badge } from '../../../components/Badge';
 import { Button } from '../../../components/Button';
@@ -63,23 +63,11 @@ export function IngredientesTable() {
   const handleExportar = async () => {
     setExportando(true);
     try {
-      const todos = await ingredientesApi.list({ page: 1, size: 1000 });
-      const items: Ingrediente[] = (todos as any)?.items ?? [];
-      if (items.length === 0) {
-        toast.error('No hay ingredientes para exportar');
-        return;
-      }
-      const filas = items.map((ing) => ({
-        Nombre: ing.nombre,
-        Descripción: ing.descripcion ?? '',
-        Alérgeno: ing.es_alergeno ? 'Sí' : 'No',
-        Estado: ing.is_active ? 'Activo' : 'Inactivo',
-      }));
-      descargarExcel(filas, 'Ingredientes', 'ingredientes');
-      toast.success(`${items.length} ingredientes exportados`);
+      await descargarExcelDesdeServidor('/api/v1/reportes/excel/ingredientes', 'ingredientes');
+      toast.success('Ingredientes exportados');
     } catch (e) {
       console.error('Error al exportar:', e);
-      toast.error('Error al exportar. Revisá la consola.');
+      toast.error('Error al exportar.');
     } finally {
       setExportando(false);
     }
