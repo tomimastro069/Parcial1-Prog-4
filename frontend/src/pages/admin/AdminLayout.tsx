@@ -12,6 +12,7 @@ import {
 import { useUIStore } from '../../store/uiStore';
 import { useAuthStore } from '../../store/authStore';
 import { ConfirmModal } from '../../components/ConfirmModal';
+import logoRestaurante from '../../assets/restaurante.png';
 
 const navItems = [
   { to: '/admin/dashboard', label: 'Dashboard', icon: HomeIcon, end: true },
@@ -53,7 +54,7 @@ export default function AdminLayout() {
         {/* Logo */}
         <div className="px-6 py-5 flex items-center justify-between border-b border-white/10">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">🍔</span>
+            <img src={logoRestaurante} alt="Logo" className="w-8 h-8 object-contain brightness-0 invert" />
             <span className="font-bold text-white text-lg">Food Store</span>
           </div>
           <button
@@ -119,7 +120,10 @@ export default function AdminLayout() {
           >
             <Bars3Icon className="w-6 h-6" />
           </button>
-          <span className="font-semibold text-[#1F3864] ml-2">🍔 Food Store Admin</span>
+          <div className="flex items-center gap-2 ml-2">
+            <img src={logoRestaurante} alt="Logo" className="w-6 h-6 object-contain" />
+            <span className="font-semibold text-[#1F3864]">Food Store Admin</span>
+          </div>
         </header>
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
