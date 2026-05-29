@@ -27,6 +27,13 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
   const [ingredientesSeleccionados, setIngredientesSeleccionados] = useState<ProductoIngredienteInput[]>([]);
   const [esTerminado, setEsTerminado] = useState(false);
   const [errors, setErrors] = useState<{ nombre?: string; precio?: string; ingredientes?: string }>({});
+  const [busquedaCategoria, setBusquedaCategoria] = useState('');
+  const [mostrarDropdown, setMostrarDropdown] = useState(false);
+  const [busquedaIngrediente, setBusquedaIngrediente] = useState('');
+
+  const ingredientesFiltrados = ingredientes.filter((ing) =>
+    ing.nombre.toLowerCase().includes(busquedaIngrediente.toLowerCase())
+  );
 
   useEffect(() => {
     if (editando) {
@@ -47,6 +54,8 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
       setEsTerminado(false);
     }
     setErrors({});
+    setBusquedaCategoria('');
+    setBusquedaIngrediente('');
   }, [editando, isOpen]);
 
   const validate = () => {
@@ -181,26 +190,91 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
         </div>
 
         {/* Categorías */}
-        {categorias && categorias.length > 0 && (
+        {categorias && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Categorías</label>
-            <div className="flex flex-wrap gap-2">
-              {categorias.map((cat) => {
-                const sel = categoriasSeleccionadas.includes(cat.id);
-                return (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    onClick={() => toggleCategoria(cat.id)}
-                    className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${sel
-                      ? 'bg-[#2E75B6] text-white border-[#2E75B6]'
-                      : 'bg-white text-gray-600 border-gray-300 hover:border-[#2E75B6]'
-                      }`}
-                  >
-                    {cat.nombre}
-                  </button>
-                );
-              })}
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Categorías
+            </label>
+
+            {/* Categorías seleccionadas */}
+            {categoriasSeleccionadas.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {categoriasSeleccionadas.map((id) => {
+                  const cat = categorias.find((c) => c.id === id);
+                  if (!cat) return null;
+                  return (
+                    <span
+                      key={cat.id}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#2E75B6]/10 text-[#2E75B6] border border-[#2E75B6]/20 transition-all hover:bg-[#2E75B6]/15"
+                    >
+                      {cat.nombre}
+                      <button
+                        type="button"
+                        onClick={() => toggleCategoria(cat.id)}
+                        className="p-0.5 rounded-full hover:bg-[#2E75B6]/20 text-[#2E75B6]/70 hover:text-[#2E75B6] transition-colors cursor-pointer"
+                        title="Quitar categoría"
+                      >
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Buscador de categorías */}
+            <div className="relative">
+              <input
+                type="text"
+                placeholder={
+                  categoriasSeleccionadas.length === 0
+                    ? "Buscar y seleccionar categorías..."
+                    : "Buscar más categorías..."
+                }
+                value={busquedaCategoria}
+                onChange={(e) => setBusquedaCategoria(e.target.value)}
+                onFocus={() => setMostrarDropdown(true)}
+                onBlur={() => setTimeout(() => setMostrarDropdown(false), 200)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') e.preventDefault();
+                }}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-[#2E75B6] focus:ring-2 focus:ring-[#2E75B6]/20 focus:outline-none"
+              />
+
+              {mostrarDropdown && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                  {categorias
+                    .filter((cat) =>
+                      cat.nombre.toLowerCase().includes(busquedaCategoria.toLowerCase()) &&
+                      !categoriasSeleccionadas.includes(cat.id)
+                    )
+                    .map((cat) => (
+                      <button
+                        key={cat.id}
+                        type="button"
+                        onClick={() => {
+                          toggleCategoria(cat.id);
+                          setBusquedaCategoria('');
+                        }}
+                        className="w-full text-left px-4 py-2.5 text-sm hover:bg-[#2E75B6]/5 hover:text-[#2E75B6] focus:bg-[#2E75B6]/5 focus:outline-none transition-colors border-b last:border-b-0 border-gray-100 font-medium text-gray-700 cursor-pointer"
+                      >
+                        {cat.nombre}
+                      </button>
+                    ))}
+                  {categorias.filter((cat) =>
+                    cat.nombre.toLowerCase().includes(busquedaCategoria.toLowerCase()) &&
+                    !categoriasSeleccionadas.includes(cat.id)
+                  ).length === 0 && (
+                      <p className="text-xs text-gray-400 py-3 text-center">
+                        {categorias.length === 0
+                          ? "No hay categorías registradas"
+                          : "No se encontraron categorías disponibles"}
+                      </p>
+                    )}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -210,6 +284,23 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
           <label className="block text-sm font-medium text-gray-700 mb-1.5">
             Ingredientes {!esTerminado && <span className="text-red-500">*</span>}
           </label>
+
+          {/* Buscador de ingredientes */}
+          {!esTerminado && ingredientes && ingredientes.length > 0 && (
+            <div className="mb-2">
+              <input
+                type="text"
+                placeholder="Buscar ingredientes..."
+                value={busquedaIngrediente}
+                onChange={(e) => setBusquedaIngrediente(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') e.preventDefault();
+                }}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#2E75B6] focus:ring-2 focus:ring-[#2E75B6]/20 focus:outline-none"
+              />
+            </div>
+          )}
+
           <div className={`max-h-48 overflow-y-auto border rounded-lg p-2 ${errors.ingredientes ? 'border-red-300 bg-red-50/20' : 'border-gray-200'}`}>
             {loadingIngredientes ? (
               <p className="text-xs text-gray-400 py-2 text-center">Cargando ingredientes...</p>
@@ -217,9 +308,13 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
               <p className="text-xs text-gray-400 py-2 text-center">
                 No hay ingredientes disponibles. Crealos desde la pestaña Ingredientes.
               </p>
+            ) : ingredientesFiltrados.length === 0 ? (
+              <p className="text-xs text-gray-400 py-2 text-center">
+                No se encontraron ingredientes que coincidan
+              </p>
             ) : (
               <div className="space-y-1.5">
-                {ingredientes.map((ing) => {
+                {ingredientesFiltrados.map((ing) => {
                   const sel = ingredientesSeleccionados.find((i) => i.ingrediente_id === ing.id);
                   return (
                     <div key={ing.id} className="flex items-center gap-2">
