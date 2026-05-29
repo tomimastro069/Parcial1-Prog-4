@@ -11,6 +11,7 @@ class UserRole(str, Enum):
     CLIENT = "CLIENT"
 
 class Usuario(SQLModel, table=True):
+    
     id: Optional[int] = Field(default=None, primary_key=True)
     nombre: str = Field(max_length=100)
     apellido: str = Field(max_length=100)

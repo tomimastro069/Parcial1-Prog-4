@@ -12,6 +12,7 @@ from app.Modules.Auth.authRouter import router as auth_router
 from app.Modules.UnidadMedida.unidadRouter import router as unidad_router
 from app.Modules.Direcciones.direccionRouter import router as direccion_router
 from app.Modules.Pagos.pagoRouter import router as pago_router
+from app.Modules.MercadoPago.mercadoPagoRouter import router as mercadopago_router
 from app.Modules.Pedidos.pedidoRouter import router as pedido_router
 from app.Modules.Reportes.reporteRouter import router as reporte_router
 from seed import seed_admin
@@ -28,6 +29,7 @@ from app.Modules.Auth.refreshToken import RefreshToken  # noqa: F401
 from app.Modules.Auditoria.auditoria import Auditoria  # noqa: F401
 from app.Modules.Direcciones.Model.direccionEntrega import DireccionEntrega  # noqa: F401
 from app.Modules.Pagos.Model.formaPago import FormaPago  # noqa: F401
+from app.Modules.Pagos.Model.Pagos import Pagos  # noqa: F401
 from app.Modules.Pedidos.Model.estadoPedido import EstadoPedido  # noqa: F401
 from app.Modules.Pedidos.Model.pedido import Pedido  # noqa: F401
 from app.Modules.Pedidos.Model.detallePedido import DetallePedido  # noqa: F401
@@ -74,6 +76,7 @@ app.include_router(auth_router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(unidad_router, prefix="/api/v1/unidades-medida", tags=["unidades-medida"])
 app.include_router(direccion_router, prefix="/api/v1/direcciones", tags=["direcciones"])
 app.include_router(pago_router, prefix="/api/v1/pagos", tags=["pagos"])
+app.include_router(mercadopago_router, prefix="/api/v1/mercadopago", tags=["mercadopago"])
 app.include_router(pedido_router, prefix="/api/v1/pedidos", tags=["pedidos"])
 app.include_router(ajuste_router, prefix="/api/v1/ajustes", tags=["ajustes"])
 app.include_router(reporte_router, prefix="/api/v1/reportes", tags=["reportes"])

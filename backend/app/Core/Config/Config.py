@@ -18,5 +18,9 @@ class Settings:
     PROJECT_NAME: str = "Food Store API"
     VERSION: str = "4.0"
 
+    # --- MERCADO PAGO ---
+    TEST_ACCESS_TOKEN_MP: str = os.getenv("TEST_ACCESS_TOKEN_MP", "")
+    PUBLIC_KEY_MP: str = os.getenv("PUBLIC_KEY_MP", "")
+
 # Creamos una instancia única (Singleton) para importar en el resto del código
 settings = Settings()

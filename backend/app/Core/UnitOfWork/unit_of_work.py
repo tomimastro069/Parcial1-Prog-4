@@ -8,6 +8,7 @@ from app.Modules.Auditoria.auditoriaRepository import AuditoriaRepository
 from app.Modules.UnidadMedida.unidadRepository import UnidadMedidaRepository
 from app.Modules.Direcciones.DireccionRepository import DireccionRepository
 from app.Modules.Pagos.PagoRepository import PagoRepository
+from app.Modules.MercadoPago.MercadoPagoRepository import MercadoPagoRepository
 from app.Modules.Pedidos.EstadoPedidoRepository import EstadoPedidoRepository
 from app.Modules.Pedidos.PedidoRepository import PedidoRepository
 from app.Modules.Ajustes.ajusteRepository import AjusteRepository
@@ -27,6 +28,7 @@ class UnitOfWork:
         self.unidades_medida = UnidadMedidaRepository(session)
         self.direcciones = DireccionRepository(session)
         self.pagos = PagoRepository(session)
+        self.mercadopago_pagos = MercadoPagoRepository(session)
         self.estado_pedidos = EstadoPedidoRepository(session)
         self.pedidos = PedidoRepository(session)
         self.ajustes = AjusteRepository(session)
