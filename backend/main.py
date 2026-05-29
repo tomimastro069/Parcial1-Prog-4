@@ -13,6 +13,7 @@ from app.Modules.UnidadMedida.unidadRouter import router as unidad_router
 from app.Modules.Direcciones.direccionRouter import router as direccion_router
 from app.Modules.Pagos.pagoRouter import router as pago_router
 from app.Modules.Pedidos.pedidoRouter import router as pedido_router
+from app.Modules.Reportes.reporteRouter import router as reporte_router
 from seed import seed_admin
 from seed import seed_data
 
@@ -75,6 +76,7 @@ app.include_router(direccion_router, prefix="/api/v1/direcciones", tags=["direcc
 app.include_router(pago_router, prefix="/api/v1/pagos", tags=["pagos"])
 app.include_router(pedido_router, prefix="/api/v1/pedidos", tags=["pedidos"])
 app.include_router(ajuste_router, prefix="/api/v1/ajustes", tags=["ajustes"])
+app.include_router(reporte_router, prefix="/api/v1/reportes", tags=["reportes"])
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True, reload_excludes=[".venv"])
