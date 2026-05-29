@@ -46,6 +46,7 @@ export default function GestorPedidosPage() {
   const [page, setPage] = useState(1);
   const size = 10;
   const [exportando, setExportando] = useState(false);
+  const [filtroEstado, setFiltroEstado] = useState<string | undefined>(undefined);
 
   const handleExportar = async () => {
     setExportando(true);
@@ -69,8 +70,8 @@ export default function GestorPedidosPage() {
   // ── Server State ────────────────────────────────────────────────────────────
   // useQuery para el listado de pedidos (invalidado tras cada cambio)
   const { data: pedidosData, isLoading } = useQuery({
-    queryKey: ['todosPedidos', page],
-    queryFn: () => getTodosPedidos(page, size),
+    queryKey: ['todosPedidos', page, filtroEstado],
+    queryFn: () => getTodosPedidos(page, size, filtroEstado),
   });
 
   // useMutation para actualizar estado — invalida la caché al completar
@@ -140,6 +141,33 @@ export default function GestorPedidosPage() {
           <ArrowDownTrayIcon className="w-4 h-4" />
           {exportando ? 'Exportando...' : 'Excel'}
         </button>
+      </div>
+
+      {/* Filtro por estado */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        <button
+          onClick={() => { setFiltroEstado(undefined); setPage(1); }}
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+            !filtroEstado
+              ? 'bg-[#1F3864] text-white'
+              : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+          }`}
+        >
+          Todos
+        </button>
+        {Object.entries(ESTADO_DISPLAY).map(([codigo, info]) => (
+          <button
+            key={codigo}
+            onClick={() => { setFiltroEstado(codigo); setPage(1); }}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+              filtroEstado === codigo
+                ? 'bg-[#1F3864] text-white'
+                : `${info.badgeClass} hover:opacity-80`
+            }`}
+          >
+            {info.label}
+          </button>
+        ))}
       </div>
 
       {/* Lista de pedidos tipo "kanban card" */}

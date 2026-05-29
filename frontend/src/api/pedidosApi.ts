@@ -43,8 +43,10 @@ export const getMisPedidos = async (page = 1, size = 12): Promise<PaginatedPedid
   return data;
 };
 
-export const getTodosPedidos = async (page = 1, size = 12): Promise<PaginatedPedidos> => {
-  const { data } = await axiosClient.get('/api/v1/pedidos/', { params: { page, size } });
+export const getTodosPedidos = async (page = 1, size = 12, estado?: string): Promise<PaginatedPedidos> => {
+  const params: Record<string, any> = { page, size };
+  if (estado) params.estado = estado;
+  const { data } = await axiosClient.get('/api/v1/pedidos/', { params });
   return data;
 };
 

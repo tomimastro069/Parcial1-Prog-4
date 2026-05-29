@@ -61,15 +61,19 @@ class PedidoService:
             historial=historial_read
         )
 
-    def get_all_paginated(self, page: int = 1, size: int = 12) -> dict:
+    def get_all_paginated(self, page: int = 1, size: int = 12, estado_codigo: str | None = None) -> dict:
         with self.uow:
             page = max(1, page)
             offset = max(0, (page - 1) * size)
             
+            filters = {"deleted_at": None}
+            if estado_codigo:
+                filters["estado_codigo"] = estado_codigo
+            
             pedidos, total = self.uow.pedidos.search(
                 offset=offset,
                 limit=size,
-                deleted_at=None
+                **filters
             )
 
             items = []
