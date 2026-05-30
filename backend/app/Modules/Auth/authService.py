@@ -31,6 +31,7 @@ class AuthService:
                 nombre=data.nombre,
                 apellido=data.apellido,
                 email=data.email,
+                celular=data.celular,
                 password_hash=hashed_pass,
                 rol=data.rol
             )

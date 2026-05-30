@@ -11,13 +11,14 @@ export function RegisterForm() {
       nombre: '',
       apellido: '',
       email: '',
+      celular: '',
       password: '',
       confirmarPassword: '',
     },
     onSubmit: ({ value }) => {
       const { confirmarPassword: _, ...data } = value;
       void _;
-      register.mutate(data);
+      register.mutate({ ...data, celular: data.celular || undefined });
     },
   });
 
@@ -76,6 +77,24 @@ export function RegisterForm() {
           )}
         </form.Field>
       </div>
+
+      <form.Field name="celular">
+        {(field) => (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Celular <span className="text-gray-400 font-normal">(opcional)</span>
+            </label>
+            <input
+              type="tel"
+              value={field.state.value}
+              onChange={(e) => field.handleChange(e.target.value)}
+              onBlur={field.handleBlur}
+              placeholder="+54 9 11 1234-5678"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-[#2E75B6] focus:ring-2 focus:ring-[#2E75B6]/20 focus:outline-none"
+            />
+          </div>
+        )}
+      </form.Field>
 
       <form.Field
         name="email"

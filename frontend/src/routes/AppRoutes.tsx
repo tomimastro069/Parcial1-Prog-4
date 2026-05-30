@@ -53,13 +53,63 @@ export const router = createBrowserRouter([
         path: '/admin',
         element: <AdminLayout />,
         children: [
-          { index: true, element: <Navigate to="/admin/dashboard" replace /> },
-          { path: 'dashboard', element: <DashboardPage /> },
-          { path: 'productos', element: <ProductosAdminPage /> },
-          { path: 'ingredientes', element: <IngredientesAdminPage /> },
-          { path: 'categorias', element: <CategoriasAdminPage /> },
-          { path: 'pedidos', element: <GestorPedidosPage /> },
-          { path: 'usuarios', element: <GestorUsuariosPage /> },
+          // ADMIN → dashboard, STOCK → productos, PEDIDOS → pedidos
+          {
+            index: true,
+            element: (
+              <ProtectedRoute requiredRoles={['ADMIN']} redirectTo="/admin/productos">
+                <Navigate to="/admin/dashboard" replace />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: 'dashboard',
+            element: (
+              <ProtectedRoute requiredRoles={['ADMIN']} redirectTo="/admin/productos">
+                <DashboardPage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: 'productos',
+            element: (
+              <ProtectedRoute requiredRoles={['ADMIN', 'STOCK']} redirectTo="/admin/pedidos">
+                <ProductosAdminPage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: 'ingredientes',
+            element: (
+              <ProtectedRoute requiredRoles={['ADMIN', 'STOCK']} redirectTo="/admin/pedidos">
+                <IngredientesAdminPage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: 'categorias',
+            element: (
+              <ProtectedRoute requiredRoles={['ADMIN']} redirectTo="/admin/productos">
+                <CategoriasAdminPage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: 'pedidos',
+            element: (
+              <ProtectedRoute requiredRoles={['ADMIN', 'PEDIDOS']} redirectTo="/admin/productos">
+                <GestorPedidosPage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: 'usuarios',
+            element: (
+              <ProtectedRoute requiredRoles={['ADMIN']} redirectTo="/admin/pedidos">
+                <GestorUsuariosPage />
+              </ProtectedRoute>
+            ),
+          },
         ],
       },
     ],

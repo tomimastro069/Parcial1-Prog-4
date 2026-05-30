@@ -11,6 +11,7 @@ class RegisterRequest(BaseModel):
     apellido: str
     email: EmailStr
     password: str
+    celular: str | None = None
     rol: UserRole = UserRole.CLIENT
 
 class TokenResponse(BaseModel):
@@ -28,11 +29,12 @@ class RefreshRequest(BaseModel):
 
 class UserProfile(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    
+
     id: int
     nombre: str
     apellido: str
     email: str
+    celular: str | None = None
     rol: str
     is_active: bool
     created_at: datetime

@@ -18,6 +18,7 @@ class CrearUsuarioBody(BaseModel):
     nombre: str
     apellido: str
     email: EmailStr
+    celular: str | None = None
     password: str
     rol: UserRole = UserRole.CLIENT
 
@@ -26,7 +27,7 @@ def crear_usuario(
     body: CrearUsuarioBody,
     service: Annotated[UsuarioService, Depends(get_service)]
 ):
-    return service.crear_usuario(body.nombre, body.apellido, body.email, body.password, body.rol)
+    return service.crear_usuario(body.nombre, body.apellido, body.email, body.password, body.rol, body.celular)
 
 @router.get("/", dependencies=[Depends(require_role([UserRole.ADMIN]))])
 def listar_usuarios(

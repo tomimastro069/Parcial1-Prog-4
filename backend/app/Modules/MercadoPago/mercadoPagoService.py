@@ -97,8 +97,10 @@ class MercadoPagoService:
             return  # Fail silently to webhook or handle gracefully
 
         status_mp = payment_data.get("status")
+        status_detail = payment_data.get("status_detail")
         external_reference = payment_data.get("external_reference")
         amount = payment_data.get("transaction_amount")
+        payment_method_id = payment_data.get("payment_method_id")
 
         if not external_reference or not external_reference.isdigit():
             return
@@ -121,12 +123,16 @@ class MercadoPagoService:
             pago_existente = self.uow.mercadopago_pagos.get_by_payment_id(payment_id)
             if pago_existente:
                 pago_existente.status = payment_status
+                pago_existente.mp_status_detail = status_detail
                 pago_existente.updated_at = datetime.now(timezone.utc)
             else:
                 nuevo_pago = Pagos(
                     payment_id=payment_id,
                     status=payment_status,
-                    amount=Decimal(str(amount)),
+                    mp_status_detail=status_detail,
+                    external_reference=external_reference,
+                    amount=Decimal(str(amount)) if amount else Decimal("0"),
+                    payment_method_id=payment_method_id,
                     pedido_id=pedido_id,
                     usuario_id=pedido.usuario_id
                 )

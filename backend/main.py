@@ -15,8 +15,7 @@ from app.Modules.Pagos.pagoRouter import router as pago_router
 from app.Modules.MercadoPago.mercadoPagoRouter import router as mercadopago_router
 from app.Modules.Pedidos.pedidoRouter import router as pedido_router
 from app.Modules.Reportes.reporteRouter import router as reporte_router
-from seed import seed_admin
-from seed import seed_data
+from seed import seed_admin, seed_users, seed_data
 
 # Importar modelos para que SQLModel los registre en metadata
 from app.Modules.Categoria.categoria import Categoria  # noqa: F401
@@ -46,6 +45,7 @@ from slowapi import _rate_limit_exceeded_handler
 async def lifespan(_: fastapi.FastAPI):
     create_db_and_tables()
     seed_admin()
+    seed_users()
     seed_data()
     yield
 

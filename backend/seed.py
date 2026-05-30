@@ -35,36 +35,23 @@ def seed_admin():
             session.add(admin_user)
             session.commit()
 def seed_users():
+    usuarios_data = [
+        {"nombre": "Stock", "apellido": "Sistema", "email": "stock@foodstore.com", "rol": UserRole.STOCK},
+        {"nombre": "Pedidos", "apellido": "Sistema", "email": "pedidos@foodstore.com", "rol": UserRole.PEDIDOS},
+        {"nombre": "Cliente", "apellido": "Sistema", "email": "client@foodstore.com", "rol": UserRole.CLIENT},
+    ]
     with Session(engine) as session:
-        stock = Usuario(
-                nombre="Stock",
-                apellido="Sistema",
-                email="stock@foodstore.com",
-                password_hash=get_password_hash("admin123"),
-                rol=UserRole.STOCK,
-                is_active=True
-            )
-        session.add(stock)
-        session.commit()
-        pedidos = Usuario(
-                nombre="Pedidos",
-                apellido="Sistema",
-                email="pedidos@foodstore.com",
-                password_hash=get_password_hash("admin123"),
-                rol=UserRole.PEDIDOS,
-                is_active=True
-            )
-        session.add(pedidos)
-        session.commit()
-        client = Usuario(
-                nombre="Cliente",
-                apellido="Sistema",
-                email="client@foodstore.com",
-                password_hash=get_password_hash("admin123"),
-                rol=UserRole.CLIENT,
-                is_active=True
-            )
-        session.add(client)
+        for data in usuarios_data:
+            existe = session.exec(select(Usuario).where(Usuario.email == data["email"])).first()
+            if not existe:
+                session.add(Usuario(
+                    nombre=data["nombre"],
+                    apellido=data["apellido"],
+                    email=data["email"],
+                    password_hash=get_password_hash("admin123"),
+                    rol=data["rol"],
+                    is_active=True
+                ))
         session.commit()
 
 

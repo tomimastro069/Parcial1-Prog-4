@@ -29,6 +29,7 @@ export default function PerfilPage() {
   // Edit user profile data
   const [editName, setEditName] = useState('');
   const [editLastName, setEditLastName] = useState('');
+  const [editCelular, setEditCelular] = useState('');
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [selectedAddressToEdit, setSelectedAddressToEdit] = useState<Direccion | undefined>(undefined);
@@ -36,6 +37,7 @@ export default function PerfilPage() {
   useEffect(() => {
     if (user?.nombre) setEditName(user.nombre);
     if (user?.apellido) setEditLastName(user.apellido);
+    if (user?.celular) setEditCelular(user.celular);
   }, [user]);
 
   const deleteAddressMutation = useMutation({
@@ -86,6 +88,7 @@ export default function PerfilPage() {
                     onClick={() => {
                       setEditName(user?.nombre || '');
                       setEditLastName(user?.apellido || '');
+                      setEditCelular(user?.celular || '');
                       setIsEditingProfile(false);
                     }}
                     className="text-gray-500 text-sm hover:underline font-semibold"
@@ -146,6 +149,23 @@ export default function PerfilPage() {
                 <p className="text-gray-800 font-medium text-lg truncate" title={user?.email}>{user?.email}</p>
                 {isEditingProfile && (
                   <p className="text-xs text-gray-400 mt-1">El email no se puede modificar.</p>
+                )}
+              </div>
+
+              <div className="border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm relative">
+                <span className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Celular</span>
+                {isEditingProfile ? (
+                  <input
+                    type="tel"
+                    value={editCelular}
+                    placeholder="+54 9 11 1234-5678"
+                    onChange={(e) => setEditCelular(e.target.value)}
+                    className="w-full border-b-2 border-[#2E75B6] bg-transparent focus:outline-none text-gray-800 py-1 font-medium text-lg"
+                  />
+                ) : (
+                  <p className="text-gray-800 font-medium text-lg">
+                    {user?.celular || <span className="text-gray-400 text-sm">Sin celular</span>}
+                  </p>
                 )}
               </div>
 

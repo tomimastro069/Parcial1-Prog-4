@@ -15,13 +15,14 @@ import { useAuthStore } from '../../store/authStore';
 import { ConfirmModal } from '../../components/ConfirmModal';
 import logoRestaurante from '../../assets/restaurante.png';
 
+// roles que pueden ver cada item del nav
 const navItems = [
-  { to: '/admin/dashboard', label: 'Dashboard', icon: HomeIcon, end: true },
-  { to: '/admin/productos', label: 'Productos', icon: ShoppingBagIcon },
-  { to: '/admin/categorias', label: 'Categorías', icon: TagIcon },
-  { to: '/admin/ingredientes', label: 'Ingredientes', icon: BeakerIcon },
-  { to: '/admin/pedidos', label: 'Gestor de Pedidos', icon: ClipboardDocumentListIcon },
-  { to: '/admin/usuarios', label: 'Gestor de Usuarios', icon: UsersIcon },
+  { to: '/admin/dashboard',   label: 'Dashboard',          icon: HomeIcon,                 roles: ['ADMIN'] },
+  { to: '/admin/productos',   label: 'Productos',           icon: ShoppingBagIcon,          roles: ['ADMIN', 'STOCK'] },
+  { to: '/admin/categorias',  label: 'Categorías',          icon: TagIcon,                  roles: ['ADMIN'] },
+  { to: '/admin/ingredientes',label: 'Ingredientes',        icon: BeakerIcon,               roles: ['ADMIN', 'STOCK'] },
+  { to: '/admin/pedidos',     label: 'Gestor de Pedidos',   icon: ClipboardDocumentListIcon,roles: ['ADMIN', 'PEDIDOS'] },
+  { to: '/admin/usuarios',    label: 'Gestor de Usuarios',  icon: UsersIcon,                roles: ['ADMIN'] },
 ];
 
 export default function AdminLayout() {
@@ -29,8 +30,11 @@ export default function AdminLayout() {
   const toggleSidebar = useUIStore((s) => s.toggleSidebar);
   const closeSidebar = useUIStore((s) => s.closeSidebar);
   const usuario = useAuthStore((s) => s.usuario);
+  const hasRole = useAuthStore((s) => s.hasRole);
   const logout = useAuthStore((s) => s.logout);
   const navigate = useNavigate();
+
+  const visibleNav = navItems.filter(item => item.roles.some(r => hasRole(r)));
 
   const handleLogout = async () => {
     await logout();
@@ -69,7 +73,7 @@ export default function AdminLayout() {
 
         {/* Nav */}
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {navItems.map((item) => (
+          {visibleNav.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}

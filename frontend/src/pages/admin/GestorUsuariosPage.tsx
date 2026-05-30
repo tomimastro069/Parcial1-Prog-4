@@ -18,7 +18,7 @@ export default function GestorUsuariosPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState({ nombre: '', apellido: '', email: '', password: '', rol: 'CLIENT' });
+  const [form, setForm] = useState({ nombre: '', apellido: '', email: '', celular: '', password: '', rol: 'CLIENT' });
   const size = 15;
 
   const searchDebounced = useDebounce(search, 400);
@@ -43,7 +43,7 @@ export default function GestorUsuariosPage() {
       toast.success('Usuario creado');
       queryClient.invalidateQueries({ queryKey: ['usuarios'] });
       setShowModal(false);
-      setForm({ nombre: '', apellido: '', email: '', password: '', rol: 'CLIENT' });
+      setForm({ nombre: '', apellido: '', email: '', celular: '', password: '', rol: 'CLIENT' });
     },
     onError: (e: any) => toast.error(e.response?.data?.detail || 'Error al crear usuario'),
   });
@@ -182,6 +182,7 @@ export default function GestorUsuariosPage() {
                 { label: 'Nombre', key: 'nombre', type: 'text' },
                 { label: 'Apellido', key: 'apellido', type: 'text' },
                 { label: 'Email', key: 'email', type: 'email' },
+                { label: 'Celular (opcional)', key: 'celular', type: 'tel' },
                 { label: 'Contraseña', key: 'password', type: 'password' },
               ].map(({ label, key, type }) => (
                 <div key={key}>

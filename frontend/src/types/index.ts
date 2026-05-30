@@ -5,6 +5,7 @@ export interface UserResponse {
   nombre: string;
   apellido: string;
   email: string;
+  celular?: string | null;
   roles: string[];
   created_at: string;
 }
@@ -19,6 +20,7 @@ export interface RegisterRequest {
   apellido: string;
   email: string;
   password: string;
+  celular?: string;
 }
 
 export interface TokenResponse {
