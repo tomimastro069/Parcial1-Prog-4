@@ -13,6 +13,7 @@ import ProductosAdminPage from '../pages/admin/ProductosAdminPage';
 import CheckoutPage from '../pages/store/CheckoutPage';
 import MisPedidosPage from '../pages/store/MisPedidosPage';
 import GestorPedidosPage from '../pages/admin/GestorPedidosPage';
+import GestorUsuariosPage from '../pages/admin/GestorUsuariosPage';
 import PerfilPage from '../pages/store/PerfilPage';
 import CheckoutSuccess from '../pages/checkout/CheckoutSuccess';
 import CheckoutFailure from '../pages/checkout/CheckoutFailure';
@@ -58,6 +59,7 @@ export const router = createBrowserRouter([
           { path: 'ingredientes', element: <IngredientesAdminPage /> },
           { path: 'categorias', element: <CategoriasAdminPage /> },
           { path: 'pedidos', element: <GestorPedidosPage /> },
+          { path: 'usuarios', element: <GestorUsuariosPage /> },
         ],
       },
     ],

@@ -122,7 +122,7 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
       isOpen={isOpen}
       onClose={onClose}
       title={editando ? 'Editar producto' : 'Nuevo producto'}
-      size="md"
+      size="lg"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Nombre */}

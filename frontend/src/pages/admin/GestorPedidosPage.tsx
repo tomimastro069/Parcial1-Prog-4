@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getTodosPedidos, updateEstadoPedido } from '../../api/pedidosApi';
 import { useAuthStore } from '../../store/authStore';
+import { useDebounce } from '../../hooks/useDebounce';
 import Modal from '../../components/Modal';
 import toast from 'react-hot-toast';
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
@@ -47,6 +48,7 @@ export default function GestorPedidosPage() {
   const size = 10;
   const [exportando, setExportando] = useState(false);
   const [filtroEstado, setFiltroEstado] = useState<string | undefined>(undefined);
+  const [busquedaId, setBusquedaId] = useState('');
 
   const handleExportar = async () => {
     setExportando(true);
@@ -69,9 +71,12 @@ export default function GestorPedidosPage() {
 
   // ── Server State ────────────────────────────────────────────────────────────
   // useQuery para el listado de pedidos (invalidado tras cada cambio)
+  const busquedaIdDebounced = useDebounce(busquedaId, 400);
+  const pedidoIdBusqueda = busquedaIdDebounced ? Number(busquedaIdDebounced) : undefined;
+
   const { data: pedidosData, isLoading } = useQuery({
-    queryKey: ['todosPedidos', page, filtroEstado],
-    queryFn: () => getTodosPedidos(page, size, filtroEstado),
+    queryKey: ['todosPedidos', page, filtroEstado, pedidoIdBusqueda],
+    queryFn: () => getTodosPedidos(page, size, filtroEstado, pedidoIdBusqueda),
   });
 
   // useMutation para actualizar estado — invalida la caché al completar
@@ -116,14 +121,6 @@ export default function GestorPedidosPage() {
   };
 
   // ── Render ──────────────────────────────────────────────────────────────────
-  if (isLoading) {
-    return (
-      <div className="p-8 text-center">
-        <div className="inline-block w-6 h-6 border-2 border-[#1F3864] border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -141,6 +138,17 @@ export default function GestorPedidosPage() {
           <ArrowDownTrayIcon className="w-4 h-4" />
           {exportando ? 'Exportando...' : 'Excel'}
         </button>
+      </div>
+
+      {/* Buscador por ID */}
+      <div className="mb-4">
+        <input
+          type="number"
+          placeholder="Buscar por N° de pedido..."
+          value={busquedaId}
+          onChange={e => { setBusquedaId(e.target.value); setPage(1); }}
+          className="w-48 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F3864]/30 focus:border-[#1F3864]"
+        />
       </div>
 
       {/* Filtro por estado */}
@@ -172,13 +180,21 @@ export default function GestorPedidosPage() {
 
       {/* Lista de pedidos tipo "kanban card" */}
       <div className="space-y-3">
-        {pedidosData?.items.length === 0 && (
-          <div className="bg-white rounded-xl border border-gray-200 p-10 text-center text-gray-400">
-            No hay pedidos registrados.
+        {isLoading && (
+          <div className="flex justify-center py-10">
+            <div className="w-6 h-6 border-2 border-[#1F3864] border-t-transparent rounded-full animate-spin" />
           </div>
         )}
+        {(() => {
+          const items = pedidosData?.items ?? [];
 
-        {pedidosData?.items.map((pedido) => {
+          if (items.length === 0) return (
+            <div className="bg-white rounded-xl border border-gray-200 p-10 text-center text-gray-400">
+              {busquedaId ? `No se encontró el pedido #${busquedaId}.` : 'No hay pedidos registrados.'}
+            </div>
+          );
+
+          return items.map((pedido) => {
           const estadoInfo = ESTADO_DISPLAY[pedido.estado_codigo] ?? {
             label: pedido.estado_codigo,
             badgeClass: 'bg-gray-100 text-gray-700',
@@ -258,7 +274,8 @@ export default function GestorPedidosPage() {
               </div>
             </div>
           );
-        })}
+        });
+        })()}
       </div>
 
       {/* Paginación */}

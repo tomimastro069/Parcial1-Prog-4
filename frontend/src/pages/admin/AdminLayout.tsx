@@ -7,7 +7,8 @@ import {
   Bars3Icon,
   XMarkIcon,
   ArrowRightOnRectangleIcon,
-  ClipboardDocumentListIcon
+  ClipboardDocumentListIcon,
+  UsersIcon
 } from '@heroicons/react/24/outline';
 import { useUIStore } from '../../store/uiStore';
 import { useAuthStore } from '../../store/authStore';
@@ -20,6 +21,7 @@ const navItems = [
   { to: '/admin/categorias', label: 'Categorías', icon: TagIcon },
   { to: '/admin/ingredientes', label: 'Ingredientes', icon: BeakerIcon },
   { to: '/admin/pedidos', label: 'Gestor de Pedidos', icon: ClipboardDocumentListIcon },
+  { to: '/admin/usuarios', label: 'Gestor de Usuarios', icon: UsersIcon },
 ];
 
 export default function AdminLayout() {
@@ -47,7 +49,7 @@ export default function AdminLayout() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-[#1F3864] flex flex-col transition-transform duration-200 lg:translate-x-0 ${
+        className={`fixed lg:sticky lg:top-0 lg:h-screen inset-y-0 left-0 z-50 w-64 bg-[#1F3864] flex flex-col transition-transform duration-200 lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >

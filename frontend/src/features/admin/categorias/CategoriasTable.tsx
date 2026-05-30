@@ -39,7 +39,7 @@ export function CategoriasTable() {
   const isAdmin = hasRole('ADMIN');
 
   // Vista: tabla o árbol
-  const [vista, setVista] = useState<Vista>('tabla');
+  const [vista, setVista] = useState<Vista>('arbol');
   const [exportando, setExportando] = useState(false);
 
   // Leer página de la URL

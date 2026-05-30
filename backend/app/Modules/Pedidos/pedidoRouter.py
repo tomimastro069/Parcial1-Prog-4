@@ -36,16 +36,17 @@ def get_pedidos(
     service: Annotated[PedidoService, Depends(get_pedido_service)],
     page: int = 1,
     size: int = 12,
-    estado: str | None = None
+    estado: str | None = None,
+    pedido_id: int | None = None
 ):
     """
     Retorna pedidos.
     Si el usuario es ADMIN o PEDIDOS, puede ver todos.
     Si es CLIENT, solo ve sus propios pedidos.
-    Opcionalmente filtra por estado_codigo.
+    Opcionalmente filtra por estado_codigo o pedido_id exacto.
     """
     if current_user.rol in [UserRole.ADMIN, UserRole.PEDIDOS]:
-        return service.get_all_paginated(page=page, size=size, estado_codigo=estado)
+        return service.get_all_paginated(page=page, size=size, estado_codigo=estado, pedido_id=pedido_id)
     else:
         return service.get_user_pedidos(current_user.id, page=page, size=size)
 
