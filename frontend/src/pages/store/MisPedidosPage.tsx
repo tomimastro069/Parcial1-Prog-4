@@ -1,11 +1,25 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getMisPedidos } from '../../api/pedidosApi';
+import { crearPreferenciaMP } from '../../api/mercadopagoApi';
+import toast from 'react-hot-toast';
 
 
 export default function MisPedidosPage() {
   const [page, setPage] = useState(1);
+  const [pagandoId, setPagandoId] = useState<number | null>(null);
   const size = 12;
+
+  const handlePagarMP = async (pedidoId: number) => {
+    setPagandoId(pedidoId);
+    try {
+      const pref = await crearPreferenciaMP(pedidoId);
+      window.location.href = pref.init_point;
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || 'Error al conectar con Mercado Pago');
+      setPagandoId(null);
+    }
+  };
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['misPedidos', page],
@@ -47,9 +61,27 @@ export default function MisPedidosPage() {
                       {pedido.estado_codigo}
                     </span>
                   </div>
-                  <div className="text-right">
-                    <span className="text-sm text-gray-500">Total</span>
-                    <p className="text-lg font-bold text-gray-900">${pedido.total.toFixed(2)}</p>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <span className="text-sm text-gray-500">Total</span>
+                      <p className="text-lg font-bold text-gray-900">${pedido.total.toFixed(2)}</p>
+                    </div>
+                    {pedido.estado_codigo === 'PENDIENTE' && pedido.forma_pago_codigo === 'MERCADOPAGO' && (
+                      <button
+                        onClick={() => handlePagarMP(pedido.id)}
+                        disabled={pagandoId === pedido.id}
+                        className="flex items-center gap-2 px-4 py-2 bg-[#009ee3] hover:bg-[#007db8] text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-60 shadow-sm"
+                      >
+                        {pagandoId === pedido.id ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            Redirigiendo...
+                          </>
+                        ) : (
+                          <>💳 Pagar con MP</>
+                        )}
+                      </button>
+                    )}
                   </div>
                 </div>
                 

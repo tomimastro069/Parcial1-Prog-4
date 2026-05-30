@@ -6,6 +6,7 @@ import { getMisDirecciones } from '../../api/direccionesApi';
 import AddressFormModal from '../../components/AddressFormModal';
 import { getFormasPago } from '../../api/pagosApi';
 import { createPedido } from '../../api/pedidosApi';
+import MercadoPagoRedirectModal from '../../components/MercadoPagoRedirectModal';
 import toast from 'react-hot-toast';
 
 export default function CheckoutPage() {
@@ -20,6 +21,7 @@ export default function CheckoutPage() {
   const [notas, setNotas] = useState('');
 
   const [showAddressModal, setShowAddressModal] = useState(false);
+  const [showMercadoPagoModal, setShowMercadoPagoModal] = useState(false);
 
   useEffect(() => {
     useCartStore.getState().fetchCostoEnvio();
@@ -42,14 +44,14 @@ export default function CheckoutPage() {
       clearCart();
 
       if (data.forma_pago_codigo === 'MERCADOPAGO') {
-        toast.loading('Redirigiendo a Mercado Pago...');
+        setShowMercadoPagoModal(true);
         try {
           const { crearPreferenciaMP } = await import('../../api/mercadopagoApi');
           const pref = await crearPreferenciaMP(data.id);
           window.location.href = pref.init_point;
         } catch (err: any) {
           const msg = err.response?.data?.detail || 'Error al conectar con Mercado Pago';
-          toast.dismiss();
+          setShowMercadoPagoModal(false);
           toast.error(msg);
           navigate('/store/mis-pedidos');
         }
@@ -248,6 +250,8 @@ export default function CheckoutPage() {
         onClose={() => setShowAddressModal(false)}
         onSuccess={(newDir) => setSelectedDireccion(newDir.id)}
       />
+
+      <MercadoPagoRedirectModal isOpen={showMercadoPagoModal} />
     </div>
   );
 }

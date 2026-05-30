@@ -24,8 +24,9 @@ function App() {
             background: '#ffffff',
             color: '#111827',
             border: '1px solid #e5e7eb',
-            borderRadius: '6px',
-            fontSize: '14px',
+            borderRadius: '8px',
+            fontSize: '18px',
+            padding: '20px',
             boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
           },
         }}
