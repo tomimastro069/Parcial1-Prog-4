@@ -1,4 +1,5 @@
 from sqlmodel import Session, select
+from sqlalchemy import desc
 from typing import Optional, List
 from sqlalchemy.orm import selectinload
 from app.Core.UnitOfWork.BaseRepository import BaseRepository
@@ -32,5 +33,5 @@ class PedidoRepository(BaseRepository[Pedido]):
         from sqlmodel import func
         total = self.session.exec(select(func.count()).select_from(statement.subquery())).one()
         
-        items = self.session.exec(statement_with_options.offset(offset).limit(limit)).all()
+        items = self.session.exec(statement_with_options.order_by(desc(self.model.id)).offset(offset).limit(limit)).all()
         return list(items), total

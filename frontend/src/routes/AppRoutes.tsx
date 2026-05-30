@@ -14,11 +14,17 @@ import CheckoutPage from '../pages/store/CheckoutPage';
 import MisPedidosPage from '../pages/store/MisPedidosPage';
 import GestorPedidosPage from '../pages/admin/GestorPedidosPage';
 import PerfilPage from '../pages/store/PerfilPage';
+import CheckoutSuccess from '../pages/checkout/CheckoutSuccess';
+import CheckoutFailure from '../pages/checkout/CheckoutFailure';
+import CheckoutPending from '../pages/checkout/CheckoutPending';
 
 export const router = createBrowserRouter([
   // ─── Rutas públicas ────────────────────────────────────────────────────────
   { path: '/login', element: <LoginPage /> },
   { path: '/register', element: <RegisterPage /> },
+  { path: '/checkout/success', element: <CheckoutSuccess /> },
+  { path: '/checkout/failure', element: <CheckoutFailure /> },
+  { path: '/checkout/pending', element: <CheckoutPending /> },
 
   // ─── Rutas de cliente (rol CLIENT o cualquier autenticado) ─────────────────
   {

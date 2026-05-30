@@ -6,6 +6,7 @@ from app.Core.UnitOfWork.unit_of_work import UnitOfWork
 from app.Modules.Usuarios.usuario import Usuario
 from app.Modules.MercadoPago.mercadoPagoSchema import PreferenciaRequest, PreferenciaResponse
 from app.Modules.MercadoPago.mercadoPagoService import MercadoPagoService
+from fastapi import Request
 
 router = APIRouter()
 
@@ -26,22 +27,23 @@ def crear_preferencia(
     return res
 
 @router.post("/webhook", status_code=status.HTTP_200_OK)
-def webhook(
+async def webhook(
+    request: Request,
     background_tasks: BackgroundTasks,
     service: Annotated[MercadoPagoService, Depends(get_mp_service)],
-    data: dict = Query(None),
     id: str | None = Query(None),
-    topic: str | None = Query(None)
+    topic: str | None = Query(None),
+    type: str | None = Query(None),
 ):
-    """
-    Webhook público para notificaciones instantáneas de Mercado Pago (IPN / Webhook).
-    """
-    payment_id = None
-    if id and topic == "payment":
-        payment_id = id
-    elif data and data.get("id"):
-        payment_id = data.get("id")
-    
+    payload = await request.json()
+
+    payment_id = (
+        id
+        if topic == "payment"
+        else payload.get("data", {}).get("id")
+        or payload.get("id")
+    )
+
     if payment_id:
         background_tasks.add_task(service.procesar_webhook, payment_id)
 

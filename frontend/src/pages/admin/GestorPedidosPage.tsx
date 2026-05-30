@@ -201,7 +201,16 @@ export default function GestorPedidosPage() {
                 </div>
                 <div className="flex items-center gap-4 text-xs text-gray-500">
                   <span>{new Date(pedido.created_at).toLocaleString('es-AR')}</span>
-                  <span className="font-bold text-gray-900 text-sm">${pedido.total.toFixed(2)}</span>
+                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                    pedido.forma_pago_codigo === 'MERCADOPAGO'
+                      ? 'bg-blue-100 text-blue-700'
+                      : pedido.forma_pago_codigo === 'EFECTIVO'
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-gray-100 text-gray-600'
+                  }`}>
+                    {pedido.forma_pago_codigo === 'MERCADOPAGO' ? '💳 Mercado Pago' : pedido.forma_pago_codigo === 'EFECTIVO' ? '💵 Efectivo' : pedido.forma_pago_codigo}
+                  </span>
+                  <span className="font-bold text-gray-900 text-base">${pedido.total.toFixed(2)}</span>
                 </div>
               </div>
 

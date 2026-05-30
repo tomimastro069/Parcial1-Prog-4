@@ -41,8 +41,8 @@ class MercadoPagoService:
                 )
 
             # Armar la preferencia con Mercado Pago
-            ngrok_url = get_ngrok_url()
-            base_url = ngrok_url if ngrok_url else "http://localhost:8000"
+            backend_url = settings.BACKEND_URL or get_ngrok_url() or "http://localhost:8000"
+            frontend_url = settings.FRONTEND_URL
 
             preference_data = {
                 "items": [
@@ -54,22 +54,33 @@ class MercadoPagoService:
                     }
                 ],
                 "back_urls": {
-                    "success": f"{base_url}/api/v1/mercadopago/success",
-                    "failure": f"{base_url}/api/v1/mercadopago/failure",
-                    "pending": f"{base_url}/api/v1/mercadopago/pending"
+                    "success": f"{backend_url}/api/v1/mercadopago/success",
+                    "failure": f"{backend_url}/api/v1/mercadopago/failure",
+                    "pending": f"{backend_url}/api/v1/mercadopago/pending"
                 },
-                "auto_return": "approved",
-                "notification_url": f"{base_url}/api/v1/mercadopago/webhook",
+                "notification_url": f"{backend_url}/api/v1/mercadopago/webhook",
                 "external_reference": str(pedido.id)
             }
 
+            # auto_return funciona porque back_urls usan URL pública (https)
+            if backend_url.startswith("https://"):
+                preference_data["auto_return"] = "approved"
+
             try:
                 preference_response = sdk.preference().create(preference_data)
+                if preference_response.get("status") not in (200, 201):
+                    error_detail = preference_response.get("response", {})
+                    raise HTTPException(
+                        status_code=status.HTTP_502_BAD_GATEWAY,
+                        detail=f"Mercado Pago rechazó la preferencia: {error_detail}"
+                    )
                 preference = preference_response["response"]
                 return {
                     "preference_id": preference["id"],
                     "init_point": preference["init_point"]
                 }
+            except HTTPException:
+                raise
             except Exception as e:
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

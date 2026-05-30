@@ -37,16 +37,33 @@ export default function CheckoutPage() {
 
   const createMutation = useMutation({
     mutationFn: createPedido,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       toast.success(`Pedido #${data.id} creado con éxito!`);
       clearCart();
-      navigate('/store/mis-pedidos');
+
+      if (data.forma_pago_codigo === 'MERCADOPAGO') {
+        toast.loading('Redirigiendo a Mercado Pago...');
+        try {
+          const { crearPreferenciaMP } = await import('../../api/mercadopagoApi');
+          const pref = await crearPreferenciaMP(data.id);
+          window.location.href = pref.init_point;
+        } catch (err: any) {
+          const msg = err.response?.data?.detail || 'Error al conectar con Mercado Pago';
+          toast.dismiss();
+          toast.error(msg);
+          navigate('/store/mis-pedidos');
+        }
+      } else {
+        navigate('/store/mis-pedidos');
+      }
     },
     onError: (error: any) => {
       const msg = error.response?.data?.detail || 'Error al procesar el pedido';
       toast.error(msg);
     }
   });
+
+  const costoEnvioValor = useCartStore(s => s.costoEnvioValor);
 
   if (items.length === 0) {
     return (
@@ -58,8 +75,6 @@ export default function CheckoutPage() {
       </div>
     );
   }
-
-  const costoEnvioValor = useCartStore(s => s.costoEnvioValor);
   const costoEnvio = selectedDireccion ? costoEnvioValor : 0;
   const total = subtotal + costoEnvio;
 
@@ -86,153 +101,153 @@ export default function CheckoutPage() {
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Finalizar Compra</h1>
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Seccion Detalles del Usuario */}
-          <div className="col-span-2 space-y-6" style={{ animation: 'slideUp 0.3s ease-out' }}>
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Seccion Detalles del Usuario */}
+        <div className="col-span-2 space-y-6" style={{ animation: 'slideUp 0.3s ease-out' }}>
 
-            {/* Direcciones */}
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800">Tipo de Entrega</h2>
-              <div className="space-y-4">
-                <label className="flex items-center space-x-3 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="entrega"
-                    className="form-radio text-[#D32F2F]"
-                    checked={selectedDireccion === null}
-                    onChange={() => {
-                      setSelectedDireccion(null);
-                      setSelectedFormaPago('');
-                    }}
-                  />
-                  <span>Retiro en local</span>
-                </label>
+          {/* Direcciones */}
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">Tipo de Entrega</h2>
+            <div className="space-y-4">
+              <label className="flex items-center space-x-3 cursor-pointer">
+                <input
+                  type="radio"
+                  name="entrega"
+                  className="form-radio text-[#D32F2F]"
+                  checked={selectedDireccion === null}
+                  onChange={() => {
+                    setSelectedDireccion(null);
+                    setSelectedFormaPago('');
+                  }}
+                />
+                <span>Retiro en local</span>
+              </label>
 
-                {isLoadingDirs ? (
-                  <p className="text-sm text-gray-500">Cargando direcciones...</p>
-                ) : (
-                  <>
-                    {direcciones?.map(dir => (
-                      <label key={dir.id} className="flex items-center space-x-3 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="entrega"
-                          className="form-radio text-[#D32F2F]"
-                          checked={selectedDireccion === dir.id}
-                          onChange={() => {
-                            setSelectedDireccion(dir.id);
-                            setSelectedFormaPago('');
-                          }}
-                        />
-                        <span>
-                          Envío a: {dir.alias ? `[${dir.alias}] ` : ''}{dir.linea1}, {dir.ciudad}
-                        </span>
-                      </label>
-                    ))}
-                    <button
-                      type="button"
-                      onClick={() => setShowAddressModal(true)}
-                      className="text-sm text-[#D32F2F] hover:underline font-medium mt-2 block"
-                    >
-                      + Añadir nueva dirección
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Forma de Pago */}
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800">Forma de Pago</h2>
-              {isLoadingPagos ? (
-                <p className="text-sm text-gray-500">Cargando formas de pago...</p>
+              {isLoadingDirs ? (
+                <p className="text-sm text-gray-500">Cargando direcciones...</p>
               ) : (
-                <div className="space-y-4">
-                  {formasPago?.filter(f => f.habilitado).filter(f => {
-                    // Si es envío a domicilio, no permitir efectivo
-                    if (selectedDireccion !== null && f.codigo === 'EFECTIVO') return false;
-                    return true;
-                  }).map(forma => (
-                    <label key={forma.codigo} className="flex items-center space-x-3 cursor-pointer">
+                <>
+                  {direcciones?.map(dir => (
+                    <label key={dir.id} className="flex items-center space-x-3 cursor-pointer">
                       <input
                         type="radio"
-                        name="pago"
+                        name="entrega"
                         className="form-radio text-[#D32F2F]"
-                        value={forma.codigo}
-                        checked={selectedFormaPago === forma.codigo}
-                        onChange={(e) => setSelectedFormaPago(e.target.value)}
+                        checked={selectedDireccion === dir.id}
+                        onChange={() => {
+                          setSelectedDireccion(dir.id);
+                          setSelectedFormaPago('');
+                        }}
                       />
-                      <span>{forma.descripcion}</span>
+                      <span>
+                        Envío a: {dir.alias ? `[${dir.alias}] ` : ''}{dir.linea1}, {dir.ciudad}
+                      </span>
                     </label>
                   ))}
-                </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddressModal(true)}
+                    className="text-sm text-[#D32F2F] hover:underline font-medium mt-2 block"
+                  >
+                    + Añadir nueva dirección
+                  </button>
+                </>
               )}
             </div>
-
-            {/* Notas */}
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800">Notas para el Pedido (Opcional)</h2>
-              <textarea
-                className="w-full border border-gray-300 rounded p-3 focus:ring-[#D32F2F] focus:border-[#D32F2F]"
-                rows={3}
-                placeholder="Aclaraciones, punto de referencia..."
-                value={notas}
-                onChange={e => setNotas(e.target.value)}
-              />
-            </div>
-
           </div>
 
-          {/* Resumen del pedido */}
-          <div className="col-span-1">
-            <div className="bg-white p-6 rounded-lg shadow sticky top-6">
-              <h2 className="text-xl font-semibold mb-4 text-gray-800">Resumen</h2>
-
-              <div className="max-h-60 overflow-y-auto mb-4 border-b pb-4 space-y-3">
-                {items.map((item, idx) => (
-                  <div key={idx} className="flex justify-between text-sm">
-                    <span className="text-gray-600 font-medium">
-                      {item.cantidad}x {item.nombre}
-                    </span>
-                    <span className="text-gray-900 font-semibold">
-                      ${(item.precio * item.cantidad).toFixed(2)}
-                    </span>
-                  </div>
+          {/* Forma de Pago */}
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">Forma de Pago</h2>
+            {isLoadingPagos ? (
+              <p className="text-sm text-gray-500">Cargando formas de pago...</p>
+            ) : (
+              <div className="space-y-4">
+                {formasPago?.filter(f => f.habilitado).filter(f => {
+                  // Si es envío a domicilio, no permitir efectivo
+                  if (selectedDireccion !== null && f.codigo === 'EFECTIVO') return false;
+                  return true;
+                }).map(forma => (
+                  <label key={forma.codigo} className="flex items-center space-x-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="pago"
+                      className="form-radio text-[#D32F2F]"
+                      value={forma.codigo}
+                      checked={selectedFormaPago === forma.codigo}
+                      onChange={(e) => setSelectedFormaPago(e.target.value)}
+                    />
+                    <span>{forma.descripcion}</span>
+                  </label>
                 ))}
               </div>
-
-              <div className="space-y-2 text-sm text-gray-600 mb-4 border-b pb-4">
-                <div className="flex justify-between">
-                  <span>Subtotal ({itemCount} ítems)</span>
-                  <span>${subtotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Costo de envío</span>
-                  <span>${costoEnvio.toFixed(2)}</span>
-                </div>
-              </div>
-
-              <div className="flex justify-between text-lg font-bold text-gray-900 mb-6">
-                <span>Total</span>
-                <span>${total.toFixed(2)}</span>
-              </div>
-
-              <button
-                type="submit"
-                disabled={createMutation.isPending}
-                className="w-full bg-[#D32F2F] hover:bg-red-800 text-white py-3 rounded-lg font-semibold shadow-md transition-colors disabled:opacity-50"
-              >
-                {createMutation.isPending ? 'Procesando...' : 'Confirmar Pedido'}
-              </button>
-            </div>
+            )}
           </div>
-        </form>
 
-        <AddressFormModal 
-          isOpen={showAddressModal} 
-          onClose={() => setShowAddressModal(false)} 
-          onSuccess={(newDir) => setSelectedDireccion(newDir.id)} 
-        />
-      </div>
-    );
-  }
+          {/* Notas */}
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">Notas para el Pedido (Opcional)</h2>
+            <textarea
+              className="w-full border border-gray-300 rounded p-3 focus:ring-[#D32F2F] focus:border-[#D32F2F]"
+              rows={3}
+              placeholder="Aclaraciones, punto de referencia..."
+              value={notas}
+              onChange={e => setNotas(e.target.value)}
+            />
+          </div>
+
+        </div>
+
+        {/* Resumen del pedido */}
+        <div className="col-span-1">
+          <div className="bg-white p-6 rounded-lg shadow sticky top-6">
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">Resumen</h2>
+
+            <div className="max-h-60 overflow-y-auto mb-4 border-b pb-4 space-y-3">
+              {items.map((item, idx) => (
+                <div key={idx} className="flex justify-between text-sm">
+                  <span className="text-gray-600 font-medium">
+                    {item.cantidad}x {item.nombre}
+                  </span>
+                  <span className="text-gray-900 font-semibold">
+                    ${(item.precio * item.cantidad).toFixed(2)}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="space-y-2 text-sm text-gray-600 mb-4 border-b pb-4">
+              <div className="flex justify-between">
+                <span>Subtotal ({itemCount} ítems)</span>
+                <span>${subtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Costo de envío</span>
+                <span>${costoEnvio.toFixed(2)}</span>
+              </div>
+            </div>
+
+            <div className="flex justify-between text-lg font-bold text-gray-900 mb-6">
+              <span>Total</span>
+              <span>${total.toFixed(2)}</span>
+            </div>
+
+            <button
+              type="submit"
+              disabled={createMutation.isPending}
+              className="w-full bg-[#D32F2F] hover:bg-red-800 text-white py-3 rounded-lg font-semibold shadow-md transition-colors disabled:opacity-50"
+            >
+              {createMutation.isPending ? 'Procesando...' : 'Confirmar Pedido'}
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <AddressFormModal
+        isOpen={showAddressModal}
+        onClose={() => setShowAddressModal(false)}
+        onSuccess={(newDir) => setSelectedDireccion(newDir.id)}
+      />
+    </div>
+  );
+}
