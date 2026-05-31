@@ -14,6 +14,7 @@ import CheckoutPage from '../pages/store/CheckoutPage';
 import MisPedidosPage from '../pages/store/MisPedidosPage';
 import GestorPedidosPage from '../pages/admin/GestorPedidosPage';
 import GestorUsuariosPage from '../pages/admin/GestorUsuariosPage';
+import GestorPagosPage from '../pages/admin/GestorPagosPage';
 import PerfilPage from '../pages/store/PerfilPage';
 import CheckoutSuccess from '../pages/checkout/CheckoutSuccess';
 import CheckoutFailure from '../pages/checkout/CheckoutFailure';
@@ -107,6 +108,14 @@ export const router = createBrowserRouter([
             element: (
               <ProtectedRoute requiredRoles={['ADMIN']} redirectTo="/admin/pedidos">
                 <GestorUsuariosPage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: 'pagos',
+            element: (
+              <ProtectedRoute requiredRoles={['ADMIN', 'PEDIDOS']} redirectTo="/admin/productos">
+                <GestorPagosPage />
               </ProtectedRoute>
             ),
           },

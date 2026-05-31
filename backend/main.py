@@ -36,6 +36,7 @@ from app.Modules.Pedidos.Model.historialEstadoPedido import HistorialEstadoPedid
 from app.Modules.Ajustes.Model.ajuste import Ajuste  # noqa: F401
 from app.Modules.Ajustes.ajusteRouter import router as ajuste_router
 from app.Modules.Usuarios.usuarioRouter import router as usuario_router
+from app.Modules.MercadoPago.mercadoPagoAdminRouter import router as pagos_admin_router
 
 from app.Core.Config.rate_limit import limiter
 from slowapi.errors import RateLimitExceeded
@@ -82,6 +83,7 @@ app.include_router(pedido_router, prefix="/api/v1/pedidos", tags=["pedidos"])
 app.include_router(ajuste_router, prefix="/api/v1/ajustes", tags=["ajustes"])
 app.include_router(reporte_router, prefix="/api/v1/reportes", tags=["reportes"])
 app.include_router(usuario_router, prefix="/api/v1/usuarios", tags=["usuarios"])
+app.include_router(pagos_admin_router, prefix="/api/v1/admin/pagos", tags=["pagos-admin"])
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True, reload_excludes=[".venv"])

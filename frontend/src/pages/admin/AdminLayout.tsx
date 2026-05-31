@@ -8,7 +8,8 @@ import {
   XMarkIcon,
   ArrowRightOnRectangleIcon,
   ClipboardDocumentListIcon,
-  UsersIcon
+  UsersIcon,
+  CreditCardIcon
 } from '@heroicons/react/24/outline';
 import { useUIStore } from '../../store/uiStore';
 import { useAuthStore } from '../../store/authStore';
@@ -23,6 +24,7 @@ const navItems = [
   { to: '/admin/ingredientes',label: 'Ingredientes',        icon: BeakerIcon,               roles: ['ADMIN', 'STOCK'] },
   { to: '/admin/pedidos',     label: 'Gestor de Pedidos',   icon: ClipboardDocumentListIcon,roles: ['ADMIN', 'PEDIDOS'] },
   { to: '/admin/usuarios',    label: 'Gestor de Usuarios',  icon: UsersIcon,                roles: ['ADMIN'] },
+  { to: '/admin/pagos',       label: 'Pagos MP',            icon: CreditCardIcon,           roles: ['ADMIN', 'PEDIDOS'] },
 ];
 
 export default function AdminLayout() {
