@@ -3,3 +3,5 @@ CHECKLIST.md
 .agent/
 .github/
 .opencode/
+.env
+__pycache__/
