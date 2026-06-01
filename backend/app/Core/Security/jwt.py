@@ -45,3 +45,6 @@ def decode_token(token: str):
         return payload
     except JWTError:
         return None
+#header hash rapido general 
+#payload todo lo importante del usuario 
+# firma clave secreta para verificar la integridad 

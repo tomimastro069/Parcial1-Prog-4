@@ -155,4 +155,4 @@ class MercadoPagoService:
                     )
                     self.uow.session.add(historial)
             
-            self.uow.commit()
+            
