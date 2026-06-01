@@ -315,7 +315,7 @@ def seed_productos(session, cats, ings):
         ),
         (
             "Empanada de Jamón y Queso", 320, "Empanada con jamón cocido y queso derretido",
-            "https://images.unsplash.com/photo-1556909172-54557c7e4fb7?w=800",
+            "https://images.unsplash.com/photo-1549889450-0e0fb9c1d668?q=80&w=876&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
             False, ["Empanadas"],
             [
                 ("Masa de empanada", 1, False),
@@ -346,7 +346,7 @@ def seed_productos(session, cats, ings):
         ),
         (
             "Mousse de Chocolate", 650, "Mousse esponjosa con crema y chocolate",
-            "https://images.unsplash.com/photo-1511715282680-fbf93a50e721?w=800",
+            "https://images.unsplash.com/photo-1603032305813-be7441bc1037?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
             False, ["Postres"],
             [
                 ("Chocolate", 80, False),
@@ -363,7 +363,7 @@ def seed_productos(session, cats, ings):
         ),
         (
             "Agua con Gas 500ml", 350, "Agua mineral con gas",
-            "https://images.unsplash.com/photo-1560023907-5f339617ea30?w=800",
+            "https://images.unsplash.com/photo-1638688569176-5b6db19f9d2a?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
             True, ["Bebidas"],
             []
         ),
