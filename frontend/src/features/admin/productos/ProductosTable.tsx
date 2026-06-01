@@ -126,12 +126,12 @@ export function ProductosTable() {
 
   const handleFiltroChange = (nuevo: Filtro) => {
     setFiltro(nuevo);
-    setSearchParams({ page: '1' });
+    setSearchParams(prev => { prev.set('page', '1'); return prev; });
   };
 
   const handleCategoriaChange = (id: number | null) => {
     setCategoriaId(id);
-    setSearchParams({ page: '1' });
+    setSearchParams(prev => { prev.set('page', '1'); return prev; });
   };
 
   return (
@@ -335,7 +335,10 @@ export function ProductosTable() {
             <Pagination
               currentPage={page}
               totalPages={totalPages}
-              onPageChange={(newPage) => setSearchParams({ page: String(newPage) })}
+              onPageChange={(newPage) => setSearchParams(prev => {
+                prev.set('page', String(newPage));
+                return prev;
+              })}
             />
           </div>
         )}

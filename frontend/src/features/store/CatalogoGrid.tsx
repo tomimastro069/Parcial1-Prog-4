@@ -22,10 +22,10 @@ export function CatalogoGrid() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setSearch(searchInput);
-      setSearchParams({ page: '1' });
+      setSearchParams(prev => { prev.set('page', '1'); return prev; });
     }, 300);
     return () => clearTimeout(timer);
-  }, [searchInput, setSearchParams]);
+  }, [searchInput]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { data, isLoading, isError, refetch } = useProductos({
     page,
@@ -40,7 +40,7 @@ export function CatalogoGrid() {
 
   const handleCategoriaChange = useCallback((id: number | null) => {
     setCategoriaId(id);
-    setSearchParams({ page: '1' });
+    setSearchParams(prev => { prev.set('page', '1'); return prev; });
   }, [setSearchParams]);
 
   const productos = data?.items ?? [];
@@ -152,7 +152,7 @@ export function CatalogoGrid() {
         <div className="flex items-center justify-center gap-1 pt-2">
           <button
             disabled={page === 1}
-            onClick={() => setSearchParams({ page: String(page - 1) })}
+            onClick={() => setSearchParams(prev => { prev.set('page', String(page - 1)); return prev; })}
             className="px-3 py-1.5 rounded-lg text-sm border border-gray-300 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             ‹
@@ -163,7 +163,7 @@ export function CatalogoGrid() {
             return (
               <button
                 key={pageNum}
-                onClick={() => setSearchParams({ page: String(pageNum) })}
+                onClick={() => setSearchParams(prev => { prev.set('page', String(pageNum)); return prev; })}
                 className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${page === pageNum
                   ? 'bg-[#2E75B6] border-[#2E75B6] text-white'
                   : 'border-gray-300 hover:bg-gray-50'
@@ -176,7 +176,7 @@ export function CatalogoGrid() {
 
           <button
             disabled={page === totalPages}
-            onClick={() => setSearchParams({ page: String(page + 1) })}
+            onClick={() => setSearchParams(prev => { prev.set('page', String(page + 1)); return prev; })}
             className="px-3 py-1.5 rounded-lg text-sm border border-gray-300 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             ›
