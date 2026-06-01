@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Modal from '../../../components/Modal';
 import { Button } from '../../../components/Button';
 import { useCreateProducto, useUpdateProducto } from '../../../hooks/useProductos';
 import { useCategorias } from '../../../hooks/useCategorias';
 import { useIngredientes } from '../../../hooks/useIngredientes';
+import { uploadImagen, deleteImagen } from '../../../api/imagenesApi';
 import type { ProductoRead, ProductoIngredienteInput } from '../../../types';
 
 interface Props {
@@ -26,6 +27,10 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
   const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState<number[]>([]);
   const [ingredientesSeleccionados, setIngredientesSeleccionados] = useState<ProductoIngredienteInput[]>([]);
   const [esTerminado, setEsTerminado] = useState(false);
+  const [imagenUrl, setImagenUrl] = useState<string | null>(null);
+  const [imagenPublicId, setImagenPublicId] = useState<string | null>(null);
+  const [subiendoImagen, setSubiendoImagen] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [errors, setErrors] = useState<{ nombre?: string; precio?: string; ingredientes?: string }>({});
   const [busquedaCategoria, setBusquedaCategoria] = useState('');
   const [mostrarDropdown, setMostrarDropdown] = useState(false);
@@ -45,9 +50,13 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
         editando.ingredientes.map((i) => ({ ingrediente_id: i.id, cantidad: i.cantidad }))
       );
       setEsTerminado(editando.es_terminado);
+      setImagenUrl(editando.imagen_url ?? null);
+      setImagenPublicId(null); // el public_id no se guarda en BD, solo se usa al subir
     } else {
       setNombre('');
       setPrecio('');
+      setImagenUrl(null);
+      setImagenPublicId(null);
       setDescripcion('');
       setCategoriasSeleccionadas([]);
       setIngredientesSeleccionados([]);
@@ -105,6 +114,7 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
       es_terminado: esTerminado,
       categorias: categoriasSeleccionadas,
       ingredientes: esTerminado ? [] : ingredientesSeleccionados,
+      imagen_url: imagenUrl ?? undefined,
     };
 
     if (editando) {
@@ -116,6 +126,30 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
   };
 
   const isPending = crear.isPending || actualizar.isPending;
+
+  const handleImagenChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setSubiendoImagen(true);
+    try {
+      const resultado = await uploadImagen(file);
+      setImagenUrl(resultado.url);
+      setImagenPublicId(resultado.public_id);
+    } catch {
+      alert('Error al subir la imagen. Verificá que el backend esté corriendo con cloudinary instalado.');
+    } finally {
+      setSubiendoImagen(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleEliminarImagen = async () => {
+    if (imagenPublicId) {
+      try { await deleteImagen(imagenPublicId); } catch { /* si falla el delete en cloudinary igual limpiamos */ }
+    }
+    setImagenUrl(null);
+    setImagenPublicId(null);
+  };
 
   return (
     <Modal
@@ -353,6 +387,45 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
           {errors.ingredientes && !esTerminado && (
             <p className="mt-1 text-xs text-red-600">{errors.ingredientes}</p>
           )}
+        </div>
+
+        {/* Imagen */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">Imagen del producto</label>
+          <div className="flex items-center gap-4">
+            {imagenUrl ? (
+              <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200 shrink-0">
+                <img src={imagenUrl} alt="preview" className="w-full h-full object-cover" />
+                <button
+                  type="button"
+                  onClick={handleEliminarImagen}
+                  className="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600"
+                >✕</button>
+              </div>
+            ) : (
+              <div className="w-20 h-20 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-xs text-center shrink-0">
+                Sin imagen
+              </div>
+            )}
+            <div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={handleImagenChange}
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={subiendoImagen}
+                className="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
+              >
+                {subiendoImagen ? 'Subiendo...' : imagenUrl ? 'Cambiar imagen' : 'Subir imagen'}
+              </button>
+              <p className="text-xs text-gray-400 mt-1">JPG, PNG o WEBP · Máx 5MB</p>
+            </div>
+          </div>
         </div>
 
         <div className="flex justify-end gap-3 pt-2">

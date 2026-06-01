@@ -59,7 +59,7 @@ class ProductoService:
             nombre=p.nombre,
             precio=float(p.precio_base),
             descripcion=p.descripcion,
-            imagen_url=None,
+            imagen_url=p.imagenes_url[0] if p.imagenes_url else None,
             is_active=p.is_active,
             es_terminado=p.es_terminado,
             categorias=categorias,
@@ -128,10 +128,11 @@ class ProductoService:
             self._validar_ingredientes(data.ingredientes)
 
             p = Producto(
-                nombre=data.nombre, 
-                precio_base=Decimal(str(data.precio)), 
+                nombre=data.nombre,
+                precio_base=Decimal(str(data.precio)),
                 descripcion=data.descripcion,
-                es_terminado=data.es_terminado
+                es_terminado=data.es_terminado,
+                imagenes_url=[data.imagen_url] if data.imagen_url else None,
             )
             self.uow.productos.add(p)
 
@@ -170,12 +171,15 @@ class ProductoService:
                 )
 
             # Actualizar campos básicos
-            campos_base = data.model_dump(exclude_unset=True, exclude={"categorias", "ingredientes"})
+            campos_base = data.model_dump(exclude_unset=True, exclude={"categorias", "ingredientes", "imagen_url"})
             for key, val in campos_base.items():
                 if key == "precio":
                     p.precio_base = Decimal(str(val))
                 else:
                     setattr(p, key, val)
+
+            if data.imagen_url is not None:
+                p.imagenes_url = [data.imagen_url]
 
             # Sincronizar categorías
             if data.categorias is not None:
