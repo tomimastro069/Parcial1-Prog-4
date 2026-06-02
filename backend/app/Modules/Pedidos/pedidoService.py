@@ -165,6 +165,13 @@ class PedidoService:
             )
             self.uow.pedidos.add(p)
 
+            # Obtener índice de ganancia una sola vez
+            ajuste_indice = self.uow.ajustes.get_by_clave("indice_ganancia")
+            try:
+                indice_ganancia = float(ajuste_indice.valor) if ajuste_indice else 1.5
+            except (ValueError, AttributeError):
+                indice_ganancia = 1.5
+
             for det in data.detalles:
                 producto = self.uow.productos.get(det.producto_id)
                 if not producto or not producto.is_active or not producto.disponible:
@@ -172,8 +179,19 @@ class PedidoService:
                         status_code=status.HTTP_400_BAD_REQUEST,
                         detail=f"El producto con ID {det.producto_id} no es válido o no está disponible."
                     )
-                
-                precio_unitario = producto.precio_base
+
+                # Calcular precio real igual que ProductoService._calcular_precio
+                if producto.es_terminado:
+                    precio_unitario = Decimal(str(round(float(producto.precio_base) * indice_ganancia, 2)))
+                else:
+                    pis = self.uow.productos.list_ingredientes_rel(producto.id)
+                    costo_total = 0.0
+                    for pi in pis:
+                        ing = self.uow.ingredientes.get(pi.ingrediente_id)
+                        if ing:
+                            costo_total += float(ing.precio_unitario) * float(pi.cantidad)
+                    precio_unitario = Decimal(str(round(costo_total * indice_ganancia, 2)))
+
                 subtotal_detalle = precio_unitario * det.cantidad
                 subtotal_total += subtotal_detalle
                 
