@@ -130,44 +130,49 @@ def seed_ingredientes(session, unidades):
     print("Verificando ingredientes...")
 
     data = [
-        # nombre,               unidad,       descripcion,                  es_alergeno
-        ("Carne vacuna",        "gramo",      "Medallón de carne",          False),
-        ("Lechuga",             "gramo",      "Lechuga fresca",             False),
-        ("Tomate",              "gramo",      "Tomate perita",              False),
-        ("Queso Cheddar",       "gramo",      "Queso cheddar",              True),
-        ("Pan de burger",       "pieza",      "Pan brioche",                True),
-        ("Harina",              "gramo",      "Harina 0000",                True),
-        ("Salsa de tomate",     "mililitro",  "Salsa pomodoro",             False),
-        ("Muzarella",           "gramo",      "Queso muzarella",            True),
-        ("Albahaca",            "gramo",      "Albahaca fresca",            False),
-        ("Pepperoni",           "gramo",      "Pepperoni ahumado",          False),
-        ("Jamón",               "gramo",      "Jamón cocido",               False),
-        ("Cebolla",             "gramo",      "Cebolla blanca",             False),
-        ("Panceta",             "gramo",      "Panceta ahumada",            False),
-        ("Huevo",               "pieza",      "Huevo de gallina",           True),
-        ("Masa de empanada",    "pieza",      "Disco de empanada",          True),
-        ("Chocolate",           "gramo",      "Chocolate negro 70%",        True),
-        ("Crema",               "mililitro",  "Crema de leche",             True),
-        ("Pan de miga",         "pieza",      "Pan de miga blanco",         True),
-        ("Mayonesa",            "gramo",      "Mayonesa",                   True),
-        ("Agua con gas",        "mililitro",  "Agua mineral con gas",       False),
-        ("Jugo de naranja",     "mililitro",  "Jugo de naranja natural",    False),
+        # nombre,               unidad,          descripcion,               es_alergeno, precio_unitario
+        # Sólidos → precio por KILOGRAMO, cantidades en recetas en KG
+        ("Carne vacuna",        "kilogramo",     "Medallón de carne",       False,       3500.0),
+        ("Lechuga",             "kilogramo",     "Lechuga fresca",          False,       800.0),
+        ("Tomate",              "kilogramo",     "Tomate perita",           False,       600.0),
+        ("Queso Cheddar",       "kilogramo",     "Queso cheddar",           True,        5000.0),
+        ("Harina",              "kilogramo",     "Harina 0000",             True,        400.0),
+        ("Muzarella",           "kilogramo",     "Queso muzarella",         True,        4500.0),
+        ("Albahaca",            "kilogramo",     "Albahaca fresca",         False,       2000.0),
+        ("Pepperoni",           "kilogramo",     "Pepperoni ahumado",       False,       6000.0),
+        ("Jamón",               "kilogramo",     "Jamón cocido",            False,       4000.0),
+        ("Cebolla",             "kilogramo",     "Cebolla blanca",          False,       500.0),
+        ("Panceta",             "kilogramo",     "Panceta ahumada",         False,       5500.0),
+        ("Chocolate",           "kilogramo",     "Chocolate negro 70%",     True,        8000.0),
+        ("Mayonesa",            "kilogramo",     "Mayonesa",                True,        1800.0),
+        # Líquidos → precio por LITRO, cantidades en recetas en litros
+        ("Salsa de tomate",     "litro",         "Salsa pomodoro",          False,       1200.0),
+        ("Crema",               "litro",         "Crema de leche",          True,        2000.0),
+        ("Agua con gas",        "litro",         "Agua mineral con gas",    False,       500.0),
+        ("Jugo de naranja",     "litro",         "Jugo de naranja natural", False,       800.0),
+        # Por pieza → precio por unidad
+        ("Pan de burger",       "pieza",         "Pan brioche",             True,        350.0),
+        ("Huevo",               "pieza",         "Huevo de gallina",        True,        100.0),
+        ("Masa de empanada",    "pieza",         "Disco de empanada",       True,        50.0),
+        ("Pan de miga",         "pieza",         "Pan de miga blanco",      True,        80.0),
     ]
 
     dict_ings = {}
 
-    for nombre, tipo_unidad, desc, es_alergeno in data:
+    for nombre, tipo_unidad, desc, es_alergeno, precio_unitario in data:
         unidad = unidades.get(tipo_unidad)
         ing = session.exec(
             select(Ingrediente).where(Ingrediente.nombre == nombre)
         ).first()
 
         if not ing:
+            from decimal import Decimal
             ing = Ingrediente(
                 nombre=nombre,
                 descripcion=desc,
                 es_alergeno=es_alergeno,
-                unidad_medida_id=unidad.id if unidad else None
+                unidad_medida_id=unidad.id if unidad else None,
+                precio_unitario=Decimal(str(precio_unitario))
             )
             session.add(ing)
             session.commit()
@@ -190,9 +195,10 @@ def _agregar_producto(session, nombre, precio, descripcion, imagen_url, es_termi
     if existe:
         return
 
+    from decimal import Decimal
     p = Producto(
         nombre=nombre,
-        precio_base=precio,
+        precio_base=Decimal(str(precio)) if precio is not None else Decimal("0"),
         descripcion=descripcion,
         imagenes_url=[imagen_url] if imagen_url else None,
         es_terminado=es_terminado,
@@ -229,150 +235,152 @@ def _agregar_producto(session, nombre, precio, descripcion, imagen_url, es_termi
 def seed_productos(session, cats, ings):
     print("Verificando productos...")
 
+    # Cantidades en KG para sólidos, litros para líquidos, unidades para piezas
+    # precio=None → se calcula desde ingredientes; precio=número → producto terminado con costo base fijo
     productos = [
         # --- HAMBURGUESAS ---
         (
-            "Burger Clásica", 1200, "Hamburguesa de carne vacuna con lechuga, tomate y queso cheddar",
+            "Burger Clásica", None, "Hamburguesa de carne vacuna con lechuga, tomate y queso cheddar",
             "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800",
             False, ["Hamburguesas"],
             [
-                ("Carne vacuna", 180, False),
+                ("Carne vacuna", 0.180, False),
                 ("Pan de burger", 1, False),
-                ("Lechuga", 20, True),
-                ("Tomate", 30, True),
-                ("Queso Cheddar", 30, True),
+                ("Lechuga", 0.020, True),
+                ("Tomate", 0.030, True),
+                ("Queso Cheddar", 0.030, True),
             ]
         ),
         (
-            "Burger BBQ", 1450, "Hamburguesa con panceta crocante y cebolla caramelizada",
+            "Burger BBQ", None, "Hamburguesa con panceta crocante y cebolla caramelizada",
             "https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=800",
             False, ["Hamburguesas"],
             [
-                ("Carne vacuna", 200, False),
+                ("Carne vacuna", 0.200, False),
                 ("Pan de burger", 1, False),
-                ("Panceta", 40, True),
-                ("Cebolla", 30, True),
-                ("Queso Cheddar", 30, True),
+                ("Panceta", 0.040, True),
+                ("Cebolla", 0.030, True),
+                ("Queso Cheddar", 0.030, True),
             ]
         ),
         (
-            "Doble Burger", 1800, "Doble medallón de carne con doble queso",
+            "Doble Burger", None, "Doble medallón de carne con doble queso",
             "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=800",
             False, ["Hamburguesas"],
             [
-                ("Carne vacuna", 360, False),
+                ("Carne vacuna", 0.360, False),
                 ("Pan de burger", 1, False),
-                ("Queso Cheddar", 60, True),
-                ("Lechuga", 20, True),
-                ("Tomate", 30, True),
+                ("Queso Cheddar", 0.060, True),
+                ("Lechuga", 0.020, True),
+                ("Tomate", 0.030, True),
             ]
         ),
         # --- PIZZAS ---
         (
-            "Pizza Margherita", 1500, "Pizza clásica con salsa de tomate, muzarella y albahaca",
+            "Pizza Margherita", None, "Pizza clásica con salsa de tomate, muzarella y albahaca",
             "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=800",
             False, ["Pizzas"],
             [
-                ("Harina", 250, False),
-                ("Salsa de tomate", 100, False),
-                ("Muzarella", 200, True),
-                ("Albahaca", 5, True),
+                ("Harina", 0.250, False),
+                ("Salsa de tomate", 0.100, False),
+                ("Muzarella", 0.200, True),
+                ("Albahaca", 0.005, True),
             ]
         ),
         (
-            "Pizza Pepperoni", 1700, "Pizza con pepperoni y muzarella extra",
+            "Pizza Pepperoni", None, "Pizza con pepperoni y muzarella extra",
             "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=800",
             False, ["Pizzas"],
             [
-                ("Harina", 250, False),
-                ("Salsa de tomate", 100, False),
-                ("Muzarella", 200, True),
-                ("Pepperoni", 80, True),
+                ("Harina", 0.250, False),
+                ("Salsa de tomate", 0.100, False),
+                ("Muzarella", 0.200, True),
+                ("Pepperoni", 0.080, True),
             ]
         ),
         (
-            "Pizza Jamón y Morrones", 1600, "Pizza con jamón y morrones asados",
+            "Pizza Jamón y Morrones", None, "Pizza con jamón y morrones asados",
             "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800",
             False, ["Pizzas"],
             [
-                ("Harina", 250, False),
-                ("Salsa de tomate", 100, False),
-                ("Muzarella", 180, True),
-                ("Jamón", 80, True),
+                ("Harina", 0.250, False),
+                ("Salsa de tomate", 0.100, False),
+                ("Muzarella", 0.180, True),
+                ("Jamón", 0.080, True),
             ]
         ),
         # --- EMPANADAS ---
         (
-            "Empanada de Carne", 350, "Empanada jugosa de carne cortada a cuchillo",
+            "Empanada de Carne", None, "Empanada jugosa de carne cortada a cuchillo",
             "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=800",
             False, ["Empanadas"],
             [
                 ("Masa de empanada", 1, False),
-                ("Carne vacuna", 80, False),
-                ("Cebolla", 20, True),
+                ("Carne vacuna", 0.080, False),
+                ("Cebolla", 0.020, True),
                 ("Huevo", 1, True),
             ]
         ),
         (
-            "Empanada de Jamón y Queso", 320, "Empanada con jamón cocido y queso derretido",
+            "Empanada de Jamón y Queso", None, "Empanada con jamón cocido y queso derretido",
             "https://images.unsplash.com/photo-1549889450-0e0fb9c1d668?q=80&w=876&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
             False, ["Empanadas"],
             [
                 ("Masa de empanada", 1, False),
-                ("Jamón", 50, False),
-                ("Muzarella", 40, True),
+                ("Jamón", 0.050, False),
+                ("Muzarella", 0.040, True),
             ]
         ),
         # --- SANDWICHES ---
         (
-            "Sandwich de Jamón y Queso", 800, "Sandwich en pan de miga con jamón, queso y mayonesa",
+            "Sandwich de Jamón y Queso", None, "Sandwich en pan de miga con jamón, queso y mayonesa",
             "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=800",
             False, ["Sandwiches"],
             [
                 ("Pan de miga", 2, False),
-                ("Jamón", 60, True),
-                ("Muzarella", 40, True),
-                ("Mayonesa", 20, True),
-                ("Tomate", 30, True),
-                ("Lechuga", 15, True),
+                ("Jamón", 0.060, True),
+                ("Muzarella", 0.040, True),
+                ("Mayonesa", 0.020, True),
+                ("Tomate", 0.030, True),
+                ("Lechuga", 0.015, True),
             ]
         ),
-        # --- POSTRES ---
+        # --- POSTRES (terminados = costo base fijo) ---
         (
-            "Brownie de Chocolate", 700, "Brownie húmedo con chocolate negro 70%",
+            "Brownie de Chocolate", 500, "Brownie húmedo con chocolate negro 70%",
             "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=800",
             True, ["Postres"],
             []
         ),
         (
-            "Mousse de Chocolate", 650, "Mousse esponjosa con crema y chocolate",
+            "Mousse de Chocolate", None, "Mousse esponjosa con crema y chocolate",
             "https://images.unsplash.com/photo-1603032305813-be7441bc1037?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
             False, ["Postres"],
             [
-                ("Chocolate", 80, False),
-                ("Crema", 100, False),
+                ("Chocolate", 0.080, False),
+                ("Crema", 0.100, False),
                 ("Huevo", 2, False),
             ]
         ),
-        # --- BEBIDAS ---
+        # --- BEBIDAS (terminadas = costo base fijo) ---
         (
-            "Coca Cola 500ml", 500, "Gaseosa Coca Cola botella personal",
+            "Coca Cola 500ml", 350, "Gaseosa Coca Cola botella personal",
             "https://images.unsplash.com/photo-1716800586014-fea19e9453fb?q=80&w=417&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
             True, ["Bebidas"],
             []
         ),
         (
-            "Agua con Gas 500ml", 350, "Agua mineral con gas",
+            "Agua con Gas 500ml", 180, "Agua mineral con gas",
             "https://images.unsplash.com/photo-1638688569176-5b6db19f9d2a?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
             True, ["Bebidas"],
             []
         ),
         (
-            "Jugo de Naranja Natural", 600, "Jugo exprimido al momento",
+            "Jugo de Naranja Natural", None, "Jugo exprimido al momento",
             "https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=800",
             False, ["Bebidas"],
             [
-                ("Jugo de naranja", 300, False),
+                ("Jugo de naranja", 0.300, False),
             ]
         ),
     ]
@@ -431,13 +439,13 @@ def seed_ajustes(session):
     from app.Modules.Ajustes.Model.ajuste import Ajuste
     costo_envio = session.exec(select(Ajuste).where(Ajuste.clave == "costo_envio")).first()
     if not costo_envio:
-        costo_envio = Ajuste(
-            clave="costo_envio",
-            valor="50.00",
-            descripcion="Costo de envío para los pedidos"
-        )
-        session.add(costo_envio)
-        session.commit()
+        session.add(Ajuste(clave="costo_envio", valor="50.00", descripcion="Costo de envío para los pedidos"))
+
+    indice = session.exec(select(Ajuste).where(Ajuste.clave == "indice_ganancia")).first()
+    if not indice:
+        session.add(Ajuste(clave="indice_ganancia", valor="1.5", descripcion="Multiplicador de ganancia sobre el costo de ingredientes (ej: 1.5 = 50% de ganancia)"))
+
+    session.commit()
 
 # -----------------------------
 # MAIN SEED

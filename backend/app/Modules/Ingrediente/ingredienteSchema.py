@@ -8,6 +8,7 @@ class IngredienteCreate(SQLModel):
     unidad_medida_id: int
     descripcion: Optional[str] = None
     es_alergeno: bool = False
+    precio_unitario: float = 0.0
 
 
 class IngredienteRead(SQLModel):
@@ -17,6 +18,7 @@ class IngredienteRead(SQLModel):
     unidad: str
     descripcion: Optional[str] = None
     es_alergeno: bool = False
+    precio_unitario: float = 0.0
     is_active: bool = True
 
 
@@ -25,3 +27,4 @@ class IngredienteUpdate(SQLModel):
     unidad_medida_id: Optional[int] = None
     descripcion: Optional[str] = None
     es_alergeno: Optional[bool] = None
+    precio_unitario: Optional[float] = None

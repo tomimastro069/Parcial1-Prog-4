@@ -25,6 +25,7 @@ class IngredienteService:
             unidad=unidad_simbolo,
             descripcion=c.descripcion,
             es_alergeno=c.es_alergeno,
+            precio_unitario=float(c.precio_unitario),
             is_active=c.is_active
         )
 
@@ -63,11 +64,13 @@ class IngredienteService:
 
     def create(self, data: IngredienteCreate, user_id: int) -> IngredienteRead:
         with self.uow:
+            from decimal import Decimal
             ing = Ingrediente(
                 nombre=data.nombre,
                 descripcion=data.descripcion,
                 es_alergeno=data.es_alergeno,
-                unidad_medida_id=data.unidad_medida_id
+                unidad_medida_id=data.unidad_medida_id,
+                precio_unitario=Decimal(str(data.precio_unitario))
             )
             self.uow.ingredientes.add(ing)
             

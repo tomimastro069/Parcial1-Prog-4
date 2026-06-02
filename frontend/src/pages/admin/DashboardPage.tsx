@@ -52,14 +52,23 @@ export default function DashboardPage() {
     queryFn: () => getAjuste('costo_envio'),
   });
 
+  const { data: indiceGananciaData, refetch: refetchIndice } = useQuery({
+    queryKey: ['ajusteIndiceGanancia'],
+    queryFn: () => getAjuste('indice_ganancia'),
+  });
+
   const [inputCosto, setInputCosto] = useState<string>('');
   const [guardandoCosto, setGuardandoCosto] = useState(false);
+  const [inputIndice, setInputIndice] = useState<string>('');
+  const [guardandoIndice, setGuardandoIndice] = useState(false);
 
   useEffect(() => {
-    if (costoEnvioData) {
-      setInputCosto(costoEnvioData.valor);
-    }
+    if (costoEnvioData) setInputCosto(costoEnvioData.valor);
   }, [costoEnvioData]);
+
+  useEffect(() => {
+    if (indiceGananciaData) setInputIndice(indiceGananciaData.valor);
+  }, [indiceGananciaData]);
 
   const { data: productosData } = useQuery({
     queryKey: ['dashboardProductos'],
@@ -197,9 +206,9 @@ export default function DashboardPage() {
       )}
 
       {/* ── Ajustes de Envío ──────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {/* Costo de Envío Card */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm transition-all hover:shadow-md">
+        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm transition-all hover:shadow-md flex flex-col">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2.5 bg-blue-50 text-blue-600 rounded-lg">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -212,7 +221,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="flex-1 flex flex-col gap-4">
             <div>
               <label htmlFor="costo-envio" className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
                 Valor del Envío ($)
@@ -238,6 +247,7 @@ export default function DashboardPage() {
             <button
               type="button"
               disabled={guardandoCosto || inputCosto === ''}
+              style={{ marginTop: 'auto' }}
               onClick={async () => {
                 setGuardandoCosto(true);
                 const toastId = toast.loading('Guardando costo de envío...');
@@ -255,6 +265,104 @@ export default function DashboardPage() {
               className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50"
             >
               {guardandoCosto ? 'Guardando...' : 'Actualizar Costo'}
+            </button>
+          </div>
+        </div>
+
+        {/* Índice de Ganancia Card */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm transition-all hover:shadow-md">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2.5 bg-green-50 text-green-600 rounded-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18 9 11.25l4.306 4.306a11.95 11.95 0 0 1 5.814-5.518l2.74-1.22m0 0-5.94-2.281m5.94 2.28-2.28 5.941" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-gray-900">Índice de Ganancia</h2>
+              <p className="text-xs text-gray-500">Multiplicador sobre el costo de ingredientes</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  Ganancia sobre el costo
+                </label>
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl font-bold text-green-600">
+                    {inputIndice ? `${((parseFloat(inputIndice) - 1) * 100).toFixed(0)}%` : '—'}
+                  </span>
+                  <span className="text-xs text-gray-400">
+                    (×{inputIndice || '—'})
+                  </span>
+                </div>
+              </div>
+
+              {/* Slider estilo YouTube */}
+              <div className="relative py-2">
+                <input
+                  type="range"
+                  min="1"
+                  max="4"
+                  step="0.05"
+                  value={inputIndice || '1'}
+                  onChange={(e) => setInputIndice(parseFloat(e.target.value).toFixed(2))}
+                  className="w-full h-2 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-green-600 [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-green-600 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer"
+                  style={{
+                    background: `linear-gradient(to right, #16a34a ${((parseFloat(inputIndice || '1') - 1) / 3) * 100}%, #e5e7eb ${((parseFloat(inputIndice || '1') - 1) / 3) * 100}%)`
+                  }}
+                />
+                <div className="flex justify-between text-xs text-gray-400 mt-1">
+                  <span>0%</span>
+                  <span>50%</span>
+                  <span>100%</span>
+                  <span>150%</span>
+                  <span>200%</span>
+                  <span>300%</span>
+                </div>
+              </div>
+
+              {/* Input numérico manual */}
+              <div className="flex items-center gap-2 mt-2">
+                <span className="text-xs text-gray-500">Ajuste fino:</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="1"
+                  max="10"
+                  className="w-24 rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-green-500 focus:ring-green-500 focus:outline-none"
+                  value={inputIndice}
+                  onChange={(e) => setInputIndice(e.target.value)}
+                />
+                <span className="text-xs text-gray-400">× multiplicador</span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              disabled={guardandoIndice || inputIndice === ''}
+              onClick={async () => {
+                const val = parseFloat(inputIndice);
+                if (isNaN(val) || val < 1) {
+                  toast.error('El índice debe ser mayor o igual a 1');
+                  return;
+                }
+                setGuardandoIndice(true);
+                const toastId = toast.loading('Guardando índice de ganancia...');
+                try {
+                  await updateAjuste('indice_ganancia', inputIndice);
+                  await refetchIndice();
+                  toast.success('Índice de ganancia actualizado', { id: toastId });
+                } catch (error: any) {
+                  toast.error(error.response?.data?.detail || 'Error al actualizar', { id: toastId });
+                } finally {
+                  setGuardandoIndice(false);
+                }
+              }}
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors disabled:opacity-50"
+            >
+              {guardandoIndice ? 'Guardando...' : 'Actualizar Índice'}
             </button>
           </div>
         </div>

@@ -19,6 +19,27 @@ class ProductoService:
     def __init__(self, uow: UnitOfWork):
         self.uow = uow
 
+    def _get_indice_ganancia(self) -> float:
+        ajuste = self.uow.ajustes.get_by_clave("indice_ganancia")
+        try:
+            return float(ajuste.valor) if ajuste else 1.5
+        except (ValueError, AttributeError):
+            return 1.5
+
+    def _calcular_precio(self, p: Producto, pis: list) -> float:
+        """Calcula el precio de venta al vuelo."""
+        if p.es_terminado:
+            # Producto terminado: precio_base × indice_ganancia
+            return round(float(p.precio_base) * self._get_indice_ganancia(), 2)
+        else:
+            # Producto elaborado: Σ(precio_unitario_ing × cantidad) × indice_ganancia
+            costo_total = 0.0
+            for pi in pis:
+                ing = self.uow.ingredientes.get(pi.ingrediente_id)
+                if ing:
+                    costo_total += float(ing.precio_unitario) * float(pi.cantidad)
+            return round(costo_total * self._get_indice_ganancia(), 2)
+
     def _build_read(self, p: Producto) -> ProductoRead:
         """Construye el schema de lectura con datos de categorías e ingredientes."""
         pcs = self.uow.productos.list_categorias_rel(p.id)
@@ -54,10 +75,12 @@ class ProductoService:
                 )
                 ingredientes.append(ingrediente_read)
 
+        precio_calculado = self._calcular_precio(p, pis)
+
         return ProductoRead(
             id=p.id,
             nombre=p.nombre,
-            precio=float(p.precio_base),
+            precio=precio_calculado,
             descripcion=p.descripcion,
             imagen_url=p.imagenes_url[0] if p.imagenes_url else None,
             is_active=p.is_active,
@@ -127,9 +150,16 @@ class ProductoService:
             self._validar_categorias(data.categorias)
             self._validar_ingredientes(data.ingredientes)
 
+            if data.es_terminado and not data.precio_base:
+                from fastapi import HTTPException, status as http_status
+                raise HTTPException(
+                    status_code=http_status.HTTP_400_BAD_REQUEST,
+                    detail="Los productos terminados requieren un precio base."
+                )
+
             p = Producto(
                 nombre=data.nombre,
-                precio_base=Decimal(str(data.precio)),
+                precio_base=Decimal(str(data.precio_base)) if data.precio_base else Decimal("0"),
                 descripcion=data.descripcion,
                 es_terminado=data.es_terminado,
                 imagenes_url=[data.imagen_url] if data.imagen_url else None,
@@ -173,7 +203,7 @@ class ProductoService:
             # Actualizar campos básicos
             campos_base = data.model_dump(exclude_unset=True, exclude={"categorias", "ingredientes", "imagen_url"})
             for key, val in campos_base.items():
-                if key == "precio":
+                if key == "precio_base" and val is not None:
                     p.precio_base = Decimal(str(val))
                 else:
                     setattr(p, key, val)

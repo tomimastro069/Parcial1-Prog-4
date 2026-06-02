@@ -20,6 +20,7 @@ export function IngredienteModal({ isOpen, onClose, editando }: Props) {
   const [descripcion, setDescripcion] = useState('');
   const [esAlergeno, setEsAlergeno] = useState(false);
   const [unidadMedidaId, setUnidadMedidaId] = useState<number | ''>('');
+  const [precioUnitario, setPrecioUnitario] = useState('');
   const [errors, setErrors] = useState<{ nombre?: string; unidad?: string }>({});
 
   useEffect(() => {
@@ -28,11 +29,13 @@ export function IngredienteModal({ isOpen, onClose, editando }: Props) {
       setDescripcion(editando.descripcion ?? '');
       setEsAlergeno(editando.es_alergeno);
       setUnidadMedidaId(editando.unidad_medida_id ?? '');
+      setPrecioUnitario(String(editando.precio_unitario ?? ''));
     } else {
       setNombre('');
       setDescripcion('');
       setEsAlergeno(false);
       setUnidadMedidaId('');
+      setPrecioUnitario('');
     }
     setErrors({});
   }, [editando, isOpen]);
@@ -54,6 +57,7 @@ export function IngredienteModal({ isOpen, onClose, editando }: Props) {
       descripcion: descripcion.trim() || null,
       es_alergeno: esAlergeno,
       unidad_medida_id: Number(unidadMedidaId),
+      precio_unitario: precioUnitario ? parseFloat(precioUnitario) : 0,
     };
 
     if (editando) {
@@ -109,6 +113,26 @@ export function IngredienteModal({ isOpen, onClose, editando }: Props) {
           {errors.unidad && (
             <p className="mt-1 text-xs text-red-600">{errors.unidad}</p>
           )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            Precio por unidad
+            {unidadMedidaId && (
+              <span className="text-gray-400 font-normal ml-1">
+                ($ por {unidades.find(u => u.id === unidadMedidaId)?.simbolo ?? 'unidad'})
+              </span>
+            )}
+          </label>
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            value={precioUnitario}
+            onChange={(e) => setPrecioUnitario(e.target.value)}
+            placeholder="0.00"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-[#2E75B6] focus:ring-2 focus:ring-[#2E75B6]/20 focus:outline-none"
+          />
         </div>
 
         <div>

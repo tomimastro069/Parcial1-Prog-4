@@ -1,6 +1,7 @@
 from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional, List, TYPE_CHECKING
 from datetime import datetime
+from decimal import Decimal
 
 if TYPE_CHECKING:
     from app.Modules.Producto.Model.productoIngrediente import ProductoIngrediente
@@ -12,6 +13,7 @@ class Ingrediente(SQLModel, table=True):
     descripcion: Optional[str] = Field(default=None, max_length=500)
     es_alergeno: bool = Field(default=False)
     stock_actual: float = Field(default=0.0, ge=0)
+    precio_unitario: Decimal = Field(default=Decimal("0.00"), ge=0, description="Costo por unidad de medida (ej: precio por kg)")
     is_active: bool = Field(default=True)  # borrado lógico
 
     created_at: datetime = Field(

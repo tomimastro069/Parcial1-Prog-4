@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import Modal from '../../../components/Modal';
 import { Button } from '../../../components/Button';
 import { useCreateProducto, useUpdateProducto } from '../../../hooks/useProductos';
-import { useCategorias } from '../../../hooks/useCategorias';
-import { useIngredientes } from '../../../hooks/useIngredientes';
+import { useCategorias, useCreateCategoria } from '../../../hooks/useCategorias';
+import { useIngredientes, useCreateIngrediente } from '../../../hooks/useIngredientes';
+import { useUnidades } from '../../../hooks/useUnidades';
 import { uploadImagen, deleteImagen } from '../../../api/imagenesApi';
 import type { ProductoRead, ProductoIngredienteInput } from '../../../types';
 
@@ -16,13 +17,16 @@ interface Props {
 export function ProductoModal({ isOpen, onClose, editando }: Props) {
   const crear = useCreateProducto();
   const actualizar = useUpdateProducto();
+  const crearCategoria = useCreateCategoria();
+  const crearIngrediente = useCreateIngrediente();
   const { data: catData } = useCategorias({ size: 1000 });
   const { data: ingData, isLoading: loadingIngredientes } = useIngredientes({ size: 1000 });
+  const { data: unidades = [] } = useUnidades();
   const categorias: { id: number; nombre: string }[] = (catData as any)?.items ?? [];
   const ingredientes: { id: number; nombre: string; unidad?: string; es_alergeno: boolean }[] = (ingData as any)?.items ?? [];
 
   const [nombre, setNombre] = useState('');
-  const [precio, setPrecio] = useState('');
+  const [precioBase, setPrecioBase] = useState(''); // solo para productos terminados
   const [descripcion, setDescripcion] = useState('');
   const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState<number[]>([]);
   const [ingredientesSeleccionados, setIngredientesSeleccionados] = useState<ProductoIngredienteInput[]>([]);
@@ -35,6 +39,14 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
   const [busquedaCategoria, setBusquedaCategoria] = useState('');
   const [mostrarDropdown, setMostrarDropdown] = useState(false);
   const [busquedaIngrediente, setBusquedaIngrediente] = useState('');
+  const [cantidadesRaw, setCantidadesRaw] = useState<Record<number, string>>({});
+
+  // Mini-form nueva categoría
+  const [creandoCategoria, setCreandoCategoria] = useState(false);
+
+  // Mini-form nuevo ingrediente
+  const [creandoIngrediente, setCreandoIngrediente] = useState(false);
+  const [nuevoIngUnidad, setNuevoIngUnidad] = useState<number | ''>('');
 
   const ingredientesFiltrados = ingredientes.filter((ing) =>
     ing.nombre.toLowerCase().includes(busquedaIngrediente.toLowerCase())
@@ -43,7 +55,7 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
   useEffect(() => {
     if (editando) {
       setNombre(editando.nombre);
-      setPrecio(String(editando.precio));
+      setPrecioBase(''); // el precio base real no viene en el read, viene calculado
       setDescripcion(editando.descripcion ?? '');
       setCategoriasSeleccionadas(editando.categorias.map((c) => c.id));
       setIngredientesSeleccionados(
@@ -54,7 +66,7 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
       setImagenPublicId(null); // el public_id no se guarda en BD, solo se usa al subir
     } else {
       setNombre('');
-      setPrecio('');
+      setPrecioBase('');
       setImagenUrl(null);
       setImagenPublicId(null);
       setDescripcion('');
@@ -65,15 +77,20 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
     setErrors({});
     setBusquedaCategoria('');
     setBusquedaIngrediente('');
+    setCantidadesRaw({});
+    setCreandoCategoria(false);
+    setCreandoIngrediente(false);
+    setNuevoIngUnidad('');
   }, [editando, isOpen]);
 
   const validate = () => {
     const e: { nombre?: string; precio?: string; ingredientes?: string } = {};
     if (!nombre.trim() || nombre.length < 2) e.nombre = 'Mínimo 2 caracteres';
-    const p = parseFloat(precio);
-    if (!precio || isNaN(p) || p <= 0) e.precio = 'Debe ser mayor a 0';
 
-    if (!esTerminado && ingredientesSeleccionados.length === 0) {
+    if (esTerminado) {
+      const p = parseFloat(precioBase);
+      if (!precioBase || isNaN(p) || p <= 0) e.precio = 'El costo base debe ser mayor a 0';
+    } else if (ingredientesSeleccionados.length === 0) {
       e.ingredientes = 'Debe tener al menos un ingrediente si no es un producto terminado';
     }
 
@@ -92,7 +109,7 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
       if (prev.find((i) => i.ingrediente_id === id)) {
         return prev.filter((i) => i.ingrediente_id !== id);
       }
-      return [...prev, { ingrediente_id: id, cantidad: 1 }];
+      return [...prev, { ingrediente_id: id, cantidad: 0 }];
     });
     setBusquedaIngrediente('');
   };
@@ -109,7 +126,7 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
 
     const data = {
       nombre: nombre.trim(),
-      precio: parseFloat(precio),
+      precio_base: esTerminado && precioBase ? parseFloat(precioBase) : undefined,
       descripcion: descripcion.trim() || null,
       es_terminado: esTerminado,
       categorias: categoriasSeleccionadas,
@@ -173,21 +190,31 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
           {errors.nombre && <p className="mt-1 text-xs text-red-600">{errors.nombre}</p>}
         </div>
 
-        {/* Precio */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">
-            Precio <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="number"
-            min="0.01"
-            step="0.01"
-            value={precio}
-            onChange={(e) => setPrecio(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-[#2E75B6] focus:ring-2 focus:ring-[#2E75B6]/20 focus:outline-none"
-          />
-          {errors.precio && <p className="mt-1 text-xs text-red-600">{errors.precio}</p>}
-        </div>
+        {/* Precio — solo para terminados */}
+        {esTerminado && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Costo base <span className="text-red-500">*</span>
+              <span className="text-gray-400 font-normal ml-1">(el precio de venta se calcula con el índice de ganancia)</span>
+            </label>
+            <input
+              type="number"
+              min="0.01"
+              step="0.01"
+              value={precioBase}
+              onChange={(e) => setPrecioBase(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-[#2E75B6] focus:ring-2 focus:ring-[#2E75B6]/20 focus:outline-none"
+            />
+            {errors.precio && <p className="mt-1 text-xs text-red-600">{errors.precio}</p>}
+          </div>
+        )}
+
+        {/* Para productos elaborados: info de precio calculado */}
+        {!esTerminado && (
+          <div className="p-3 bg-blue-50 rounded-lg border border-blue-100 text-xs text-blue-700">
+            💡 El precio de venta se calcula automáticamente: <strong>suma del costo de ingredientes × índice de ganancia</strong>. Configurá el precio unitario de cada ingrediente desde la pestaña Ingredientes.
+          </div>
+        )}
 
         {/* Descripción */}
         <div>
@@ -320,70 +347,90 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
             Ingredientes {!esTerminado && <span className="text-red-500">*</span>}
           </label>
 
-          {/* Buscador de ingredientes */}
-          {!esTerminado && ingredientes && ingredientes.length > 0 && (
-            <div className="mb-2">
-              <input
-                type="text"
-                placeholder="Buscar ingredientes..."
-                value={busquedaIngrediente}
-                onChange={(e) => setBusquedaIngrediente(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') e.preventDefault();
-                }}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#2E75B6] focus:ring-2 focus:ring-[#2E75B6]/20 focus:outline-none"
-              />
+          {/* SECCIÓN 1: Ingredientes ya seleccionados con sus cantidades */}
+          {ingredientesSeleccionados.length > 0 && (
+            <div className="mb-3 border border-[#2E75B6]/20 rounded-lg bg-[#2E75B6]/5 p-2 space-y-1.5">
+              {ingredientesSeleccionados.map((sel) => {
+                const ing = ingredientes.find(i => i.id === sel.ingrediente_id);
+                if (!ing) return null;
+                return (
+                  <div key={sel.ingrediente_id} className="flex items-center gap-2 bg-white rounded-lg px-2 py-1.5 border border-[#2E75B6]/20">
+                    <span className="flex-1 text-xs font-medium text-[#2E75B6]">
+                      {ing.nombre}
+                      {ing.unidad && <span className="text-gray-400 ml-1">({ing.unidad})</span>}
+                    </span>
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      placeholder="ej: 0.180"
+                      value={cantidadesRaw[ing.id] ?? (sel.cantidad === 0 ? '' : String(sel.cantidad))}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(',', '.');
+                        if (raw === '' || /^[0-9]*\.?[0-9]*$/.test(raw)) {
+                          setCantidadesRaw(prev => ({ ...prev, [ing.id]: raw }));
+                          const num = parseFloat(raw);
+                          if (!isNaN(num)) setCantidad(ing.id, num);
+                        }
+                      }}
+                      onBlur={(e) => {
+                        const raw = e.target.value.replace(',', '.');
+                        const v = parseFloat(raw);
+                        if (!v || v <= 0) {
+                          setCantidad(ing.id, 1);
+                          setCantidadesRaw(prev => ({ ...prev, [ing.id]: '1' }));
+                        }
+                      }}
+                      className="w-24 rounded border border-gray-300 px-2 py-1 text-xs focus:border-[#2E75B6] focus:outline-none text-center"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => toggleIngrediente(ing.id)}
+                      className="text-red-400 hover:text-red-600 text-xs px-1.5 py-1 rounded hover:bg-red-50 transition-colors"
+                      title="Quitar ingrediente"
+                    >✕</button>
+                  </div>
+                );
+              })}
             </div>
           )}
 
-          <div className={`max-h-48 overflow-y-auto border rounded-lg p-2 ${errors.ingredientes ? 'border-red-300 bg-red-50/20' : 'border-gray-200'}`}>
-            {loadingIngredientes ? (
-              <p className="text-xs text-gray-400 py-2 text-center">Cargando ingredientes...</p>
-            ) : !ingredientes || ingredientes.length === 0 ? (
-              <p className="text-xs text-gray-400 py-2 text-center">
-                No hay ingredientes disponibles. Crealos desde la pestaña Ingredientes.
-              </p>
-            ) : ingredientesFiltrados.length === 0 ? (
-              <p className="text-xs text-gray-400 py-2 text-center">
-                No se encontraron ingredientes que coincidan
-              </p>
-            ) : (
-              <div className="space-y-1.5">
-                {ingredientesFiltrados.map((ing) => {
-                  const sel = ingredientesSeleccionados.find((i) => i.ingrediente_id === ing.id);
-                  return (
-                    <div key={ing.id} className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => toggleIngrediente(ing.id)}
-                        disabled={esTerminado}
-                        className={`flex-1 text-left px-2 py-1.5 rounded text-xs font-medium border transition-colors ${sel
-                          ? 'bg-[#2E75B6]/10 text-[#2E75B6] border-[#2E75B6]/30'
-                          : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
-                          }`}
-                      >
-                        {ing.nombre}
-                        {ing.unidad && <span className="text-gray-400 ml-1">({ing.unidad})</span>}
-                      </button>
-                      {sel && (
-                        <div className="flex items-center gap-1">
-                          <span className="text-xs text-gray-400">Cant.</span>
-                          <input
-                            type="number"
-                            min="0.1"
-                            step="0.1"
-                            value={sel.cantidad}
-                            onChange={(e) => setCantidad(ing.id, parseFloat(e.target.value) || 1)}
-                            className="w-16 rounded border border-gray-300 px-2 py-1 text-xs focus:border-[#2E75B6] focus:outline-none"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+          {/* SECCIÓN 2: Buscador para agregar ingredientes */}
+          {!esTerminado && (
+            <div>
+              <input
+                type="text"
+                placeholder="Buscar y agregar ingrediente..."
+                value={busquedaIngrediente}
+                onChange={(e) => setBusquedaIngrediente(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-[#2E75B6] focus:ring-2 focus:ring-[#2E75B6]/20 focus:outline-none mb-1"
+              />
+              {busquedaIngrediente && (
+                <div className="border border-gray-200 rounded-lg max-h-36 overflow-y-auto">
+                  {loadingIngredientes ? (
+                    <p className="text-xs text-gray-400 py-2 text-center">Cargando...</p>
+                  ) : ingredientesFiltrados.filter(i => !ingredientesSeleccionados.find(s => s.ingrediente_id === i.id)).length === 0 ? (
+                    <p className="text-xs text-gray-400 py-2 text-center">No se encontraron ingredientes</p>
+                  ) : (
+                    ingredientesFiltrados
+                      .filter(i => !ingredientesSeleccionados.find(s => s.ingrediente_id === i.id))
+                      .map((ing) => (
+                        <button
+                          key={ing.id}
+                          type="button"
+                          onClick={() => toggleIngrediente(ing.id)}
+                          className="w-full text-left px-3 py-2 text-xs hover:bg-[#2E75B6]/5 hover:text-[#2E75B6] border-b last:border-b-0 border-gray-100 transition-colors"
+                        >
+                          {ing.nombre}
+                          {ing.unidad && <span className="text-gray-400 ml-1">({ing.unidad})</span>}
+                        </button>
+                      ))
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
           {errors.ingredientes && !esTerminado && (
             <p className="mt-1 text-xs text-red-600">{errors.ingredientes}</p>
           )}

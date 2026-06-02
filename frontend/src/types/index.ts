@@ -61,6 +61,7 @@ export interface Ingrediente {
   unidad?: string;
   descripcion: string | null;
   es_alergeno: boolean;
+  precio_unitario: number;
   is_active: boolean;
 }
 

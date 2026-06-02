@@ -24,7 +24,7 @@ const navItems = [
   { to: '/admin/ingredientes',label: 'Ingredientes',        icon: BeakerIcon,               roles: ['ADMIN', 'STOCK'] },
   { to: '/admin/pedidos',     label: 'Gestor de Pedidos',   icon: ClipboardDocumentListIcon,roles: ['ADMIN', 'PEDIDOS'] },
   { to: '/admin/usuarios',    label: 'Gestor de Usuarios',  icon: UsersIcon,                roles: ['ADMIN'] },
-  { to: '/admin/pagos',       label: 'Pagos MP',            icon: CreditCardIcon,           roles: ['ADMIN', 'PEDIDOS'] },
+  { to: '/admin/pagos', label: 'Pagos MP', icon: CreditCardIcon, roles: ['ADMIN', 'PEDIDOS'] },
 ];
 
 export default function AdminLayout() {

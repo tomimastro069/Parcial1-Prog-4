@@ -54,10 +54,11 @@ export default function Modal({
 
       {/* Modal Box */}
       <div
-        className={`relative w-full ${sizeClasses[size]} bg-white border border-gray-200 rounded-lg shadow-xl`}
+        className={`relative w-full ${sizeClasses[size]} bg-white border border-gray-200 rounded-lg shadow-xl flex flex-col max-h-[90vh]`}
         style={{ animation: 'slideUp 0.2s ease-out' }}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+        {/* Header fijo */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 shrink-0">
           <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
           <button
             onClick={onClose}
@@ -67,7 +68,8 @@ export default function Modal({
           </button>
         </div>
 
-        <div className="px-6 py-5">{children}</div>
+        {/* Contenido scrolleable */}
+        <div className="px-6 py-5 overflow-y-auto">{children}</div>
       </div>
     </div>
   );

@@ -30,7 +30,8 @@ class ProductoIngredienteInput(SQLModel):
 
 class ProductoCreate(SQLModel):
     nombre: Annotated[str, Field(min_length=2, max_length=100)]
-    precio: Annotated[float, Field(gt=0)]
+    precio_base: Annotated[Optional[float], Field(gt=0)] = None
+    # Solo obligatorio si es_terminado=True. Para productos elaborados se calcula desde ingredientes.
     descripcion: Annotated[Optional[str], Field(max_length=500)] = None
     imagen_url: Optional[str] = None
     es_terminado: bool = False
@@ -52,7 +53,8 @@ class ProductoRead(SQLModel):
 
 class ProductoUpdate(SQLModel):
     nombre: Annotated[Optional[str], Field(min_length=2, max_length=100)] = None
-    precio: Annotated[Optional[float], Field(gt=0)] = None
+    precio_base: Annotated[Optional[float], Field(gt=0)] = None
+    # Solo relevante para productos terminados.
     descripcion: Annotated[Optional[str], Field(max_length=500)] = None
     imagen_url: Optional[str] = None
     es_terminado: Optional[bool] = None
