@@ -26,20 +26,38 @@ class IngredienteService:
             descripcion=c.descripcion,
             es_alergeno=c.es_alergeno,
             precio_unitario=float(c.precio_unitario),
+            stock_actual=float(c.stock_actual),
             is_active=c.is_active
         )
 
-    def get_all(self, page: int = 1, size: int = 10, search: str | None = None, is_active: bool | None = None) -> PaginatedResponse[IngredienteRead]:
+    def get_all(self, page: int = 1, size: int = 10, search: str | None = None, is_active: bool | None = None, sin_stock: bool | None = None) -> PaginatedResponse[IngredienteRead]:
         with self.uow:
+            from sqlmodel import select as sel
+            from app.Modules.Ingrediente.ingrediente import Ingrediente as IngModel
             page = max(1, page)
             offset = max(0, (page - 1) * size)
-            
-            ings_db, total = self.uow.ingredientes.search(
-                search_term=search,
-                offset=offset,
-                limit=size,
-                is_active=is_active
-            )
+
+            if sin_stock is not None:
+                from sqlmodel import func, select as sel2
+                stmt = sel(IngModel)
+                if is_active is not None:
+                    stmt = stmt.where(IngModel.is_active == is_active)
+                if search:
+                    stmt = stmt.where(IngModel.nombre.ilike(f"%{search}%"))
+                if sin_stock:
+                    stmt = stmt.where(IngModel.stock_actual <= 0)
+                else:
+                    stmt = stmt.where(IngModel.stock_actual > 0)
+                from sqlmodel import func as sqlfunc
+                total = self.uow.session.exec(sel2(sqlfunc.count()).select_from(stmt.subquery())).one()
+                ings_db = self.uow.session.exec(stmt.offset(offset).limit(size)).all()
+            else:
+                ings_db, total = self.uow.ingredientes.search(
+                    search_term=search,
+                    offset=offset,
+                    limit=size,
+                    is_active=is_active
+                )
 
             items = [self._build_read(c) for c in ings_db]
             pages = max(1, (total + size - 1) // size)
@@ -127,8 +145,10 @@ class IngredienteService:
                 metadata_info={"id": ing.id}
             ))
 
-            self.uow.ingredientes.clear_productos_rel(ing_id)
+            # NO borramos la relación con productos — la receta queda intacta
+            # El ingrediente inactivo ya bloquea el stock en _calcular_stock
             ing.is_active = False
+            ing.stock_actual = 0.0  # forzar stock a 0 al inactivar
 
     def activar(self, ing_id: int, user_id: int) -> IngredienteRead:
         with self.uow:

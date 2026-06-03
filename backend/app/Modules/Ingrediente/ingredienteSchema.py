@@ -19,6 +19,7 @@ class IngredienteRead(SQLModel):
     descripcion: Optional[str] = None
     es_alergeno: bool = False
     precio_unitario: float = 0.0
+    stock_actual: float = 0.0
     is_active: bool = True
 
 
@@ -28,3 +29,4 @@ class IngredienteUpdate(SQLModel):
     descripcion: Optional[str] = None
     es_alergeno: Optional[bool] = None
     precio_unitario: Optional[float] = None
+    stock_actual: Optional[float] = None

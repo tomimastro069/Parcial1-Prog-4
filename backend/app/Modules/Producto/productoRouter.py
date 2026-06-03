@@ -1,5 +1,9 @@
 from fastapi import APIRouter, Depends, Path, Query, status
+from pydantic import BaseModel
 from typing import Annotated, Optional
+
+class AjustarStockBody(BaseModel):
+    cantidad: int  # positivo = agregar, negativo = quitar
 
 from app.Modules.Producto.productoSchema import ProductoCreate, ProductoRead, ProductoUpdate
 from app.Modules.Producto.productoService import ProductoService
@@ -64,6 +68,18 @@ def activar_producto(
 ):
     service = ProductoService(uow)
     return service.activar(producto_id, current_user.id)
+
+
+@router.patch("/{producto_id}/stock", response_model=ProductoRead)
+def ajustar_stock(
+    producto_id: Annotated[int, Path(gt=0)],
+    body: AjustarStockBody,
+    uow=Depends(get_uow),
+    current_user: Usuario = Depends(role_required([UserRole.ADMIN, UserRole.STOCK]))
+):
+    """Suma o resta stock a un producto terminado."""
+    service = ProductoService(uow)
+    return service.ajustar_stock(producto_id, body.cantidad, current_user.id)
 
 
 @router.delete("/{producto_id}", status_code=status.HTTP_204_NO_CONTENT)

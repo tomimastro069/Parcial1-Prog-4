@@ -26,6 +26,26 @@ class ProductoService:
         except (ValueError, AttributeError):
             return 1.5
 
+    def _calcular_stock(self, p: Producto, pis: list) -> int:
+        """Calcula cuántas unidades se pueden fabricar según el stock de ingredientes."""
+        if p.es_terminado:
+            return p.stock_cantidad  # usa el stock manual del producto
+
+        if not pis:
+            return 0
+
+        min_unidades = float('inf')
+        for pi in pis:
+            ing = self.uow.ingredientes.get(pi.ingrediente_id)
+            if not ing or pi.cantidad <= 0:
+                return 0
+            if not ing.is_active:
+                return 0  # ingrediente inactivo = sin stock
+            unidades_posibles = int(ing.stock_actual / pi.cantidad)
+            min_unidades = min(min_unidades, unidades_posibles)
+
+        return int(min_unidades) if min_unidades != float('inf') else 0
+
     def _calcular_precio(self, p: Producto, pis: list) -> float:
         """Calcula el precio de venta al vuelo."""
         if p.es_terminado:
@@ -76,6 +96,7 @@ class ProductoService:
                 ingredientes.append(ingrediente_read)
 
         precio_calculado = self._calcular_precio(p, pis)
+        stock_calculado = self._calcular_stock(p, pis)
 
         return ProductoRead(
             id=p.id,
@@ -85,6 +106,8 @@ class ProductoService:
             imagen_url=p.imagenes_url[0] if p.imagenes_url else None,
             is_active=p.is_active,
             es_terminado=p.es_terminado,
+            disponible=p.disponible and stock_calculado > 0,
+            stock_calculado=stock_calculado,
             categorias=categorias,
             ingredientes=ingredientes,
         )
@@ -267,6 +290,23 @@ class ProductoService:
             self.uow.productos.clear_categorias_rel(producto_id)
             self.uow.productos.clear_ingredientes_rel(producto_id)
             p.is_active = False
+
+    def ajustar_stock(self, producto_id: int, cantidad: int, user_id: int) -> ProductoRead:
+        with self.uow:
+            p = self.uow.productos.get(producto_id)
+            if not p or not p.is_active:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Producto no encontrado")
+            if not p.es_terminado:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Solo productos terminados tienen stock manual")
+            p.stock_cantidad = max(0, p.stock_cantidad + cantidad)
+            self.uow.auditoria.add(Auditoria(
+                user_id=user_id,
+                accion="PRODUCTO_STOCK",
+                modulo="PRODUCTOS",
+                descripcion=f"Stock ajustado en {cantidad:+} para '{p.nombre}'. Nuevo stock: {p.stock_cantidad}",
+                metadata_info={"id": p.id, "ajuste": cantidad, "nuevo_stock": p.stock_cantidad}
+            ))
+            return self._build_read(p)
 
     def activar(self, producto_id: int, user_id: int) -> ProductoRead:
         with self.uow:

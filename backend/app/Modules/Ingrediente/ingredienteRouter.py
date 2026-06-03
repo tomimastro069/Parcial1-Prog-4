@@ -1,7 +1,11 @@
-from fastapi import APIRouter, Depends, Path, Query, status
+from fastapi import APIRouter, Depends, Path, Query, status, Body
 from typing import Annotated
 
 from app.Modules.Ingrediente.ingredienteSchema import IngredienteCreate, IngredienteRead, IngredienteUpdate
+from pydantic import BaseModel
+
+class AgregarStockBody(BaseModel):
+    cantidad: float
 from app.Modules.Ingrediente.ingredienteService import IngredienteService
 from app.Core.dependencies import get_uow
 from app.Core.Security.deps import require_role as role_required
@@ -18,9 +22,10 @@ def listar_ingredientes(
     size: Annotated[int, Query(ge=1, le=1000)] = 10,
     search: Annotated[str | None, Query()] = None,
     is_active: Annotated[bool | None, Query()] = None,
+    sin_stock: Annotated[bool | None, Query()] = None,
 ):
     service = IngredienteService(uow)
-    return service.get_all(page, size, search=search, is_active=is_active)
+    return service.get_all(page, size, search=search, is_active=is_active, sin_stock=sin_stock)
 
 
 @router.get("/{ing_id}", response_model=IngredienteRead)
@@ -63,6 +68,20 @@ def activar_ingrediente(
 ):
     service = IngredienteService(uow)
     return service.activar(ing_id, current_user.id)
+
+
+@router.patch("/{ing_id}/stock", response_model=IngredienteRead)
+def agregar_stock(
+    ing_id: Annotated[int, Path(gt=0)],
+    body: AgregarStockBody,
+    uow=Depends(get_uow),
+    current_user: Usuario = Depends(role_required([UserRole.ADMIN, UserRole.STOCK]))
+):
+    """Suma la cantidad indicada al stock actual del ingrediente."""
+    service = IngredienteService(uow)
+    ing = service.get_by_id(ing_id)
+    nuevo_stock = max(0.0, ing.stock_actual + body.cantidad)
+    return service.update(ing_id, IngredienteUpdate(stock_actual=nuevo_stock), current_user.id)
 
 
 @router.delete("/{ing_id}", status_code=status.HTTP_204_NO_CONTENT)

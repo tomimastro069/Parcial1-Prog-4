@@ -47,6 +47,8 @@ class ProductoRead(SQLModel):
     imagen_url: Optional[str] = None
     is_active: bool = True
     es_terminado: bool = False
+    disponible: bool = True
+    stock_calculado: int = 0  # unidades que se pueden fabricar según stock de ingredientes
     categorias: List[CategoriaEnProducto] = []
     ingredientes: List[IngredienteEnProducto] = []
 

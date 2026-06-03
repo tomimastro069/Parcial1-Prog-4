@@ -181,16 +181,37 @@ class PedidoService:
                     )
 
                 # Calcular precio real igual que ProductoService._calcular_precio
+                pis = self.uow.productos.list_ingredientes_rel(producto.id)
+
                 if producto.es_terminado:
                     precio_unitario = Decimal(str(round(float(producto.precio_base) * indice_ganancia, 2)))
+                    # Descontar stock del producto terminado
+                    if producto.stock_cantidad < det.cantidad:
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=f"Stock insuficiente para '{producto.nombre}'"
+                        )
+                    producto.stock_cantidad -= det.cantidad
                 else:
-                    pis = self.uow.productos.list_ingredientes_rel(producto.id)
                     costo_total = 0.0
                     for pi in pis:
                         ing = self.uow.ingredientes.get(pi.ingrediente_id)
                         if ing:
                             costo_total += float(ing.precio_unitario) * float(pi.cantidad)
                     precio_unitario = Decimal(str(round(costo_total * indice_ganancia, 2)))
+
+                    # Validar y descontar stock de ingredientes
+                    for pi in pis:
+                        ing = self.uow.ingredientes.get(pi.ingrediente_id)
+                        if not ing:
+                            continue
+                        consumo = float(pi.cantidad) * det.cantidad
+                        if ing.stock_actual < consumo:
+                            raise HTTPException(
+                                status_code=status.HTTP_400_BAD_REQUEST,
+                                detail=f"Stock insuficiente del ingrediente '{ing.nombre}' para '{producto.nombre}'"
+                            )
+                        ing.stock_actual = round(ing.stock_actual - consumo, 6)
 
                 subtotal_detalle = precio_unitario * det.cantidad
                 subtotal_total += subtotal_detalle
@@ -255,6 +276,34 @@ class PedidoService:
                 )
 
             estado_desde_codigo = p.estado.codigo
+            estado_desde_orden = p.estado.orden  # orden del estado actual antes de cancelar
+
+            # ── Rollback de stock al cancelar ───────────────────────────────
+            if nuevo_estado.codigo == "CANCELADO":
+                # Estados con orden < 4 (EN_CAMINO=4): aún no salió, se devuelve todo
+                # Estados con orden >= 4: ya salió, solo se devuelven terminados
+                antes_de_camino = estado_desde_orden < 4
+
+                for detalle in p.detalles:
+                    producto = self.uow.productos.get(detalle.producto_id)
+                    if not producto:
+                        continue
+
+                    if producto.es_terminado:
+                        # Terminados: siempre se devuelve stock
+                        producto.stock_cantidad += detalle.cantidad
+
+                    elif antes_de_camino:
+                        # Elaborados: solo si aún no salió a repartir
+                        pis = self.uow.productos.list_ingredientes_rel(producto.id)
+                        for pi in pis:
+                            ing = self.uow.ingredientes.get(pi.ingrediente_id)
+                            if ing:
+                                ing.stock_actual = round(
+                                    ing.stock_actual + float(pi.cantidad) * detalle.cantidad, 6
+                                )
+            # ────────────────────────────────────────────────────────────────
+
             p.estado_codigo = nuevo_estado.codigo
             p.updated_at = datetime.now(timezone.utc)
 
