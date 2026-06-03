@@ -3,6 +3,8 @@ import { ProtectedRoute } from '../features/auth/ProtectedRoute';
 import AdminLayout from '../pages/admin/AdminLayout';
 import LoginPage from '../pages/auth/LoginPage';
 import RegisterPage from '../pages/auth/RegisterPage';
+import LandingPage from '../pages/LandingPage';
+import MenuPublicoPage from '../pages/MenuPublicoPage';
 import StorePage from '../pages/store/StorePage';
 import StoreLayout from '../pages/store/StoreLayout';
 import ProductoDetallePage from '../pages/store/ProductoDetallePage';
@@ -22,6 +24,8 @@ import CheckoutPending from '../pages/checkout/CheckoutPending';
 
 export const router = createBrowserRouter([
   // ─── Rutas públicas ────────────────────────────────────────────────────────
+  { path: '/', element: <LandingPage /> },
+  { path: '/menu', element: <MenuPublicoPage /> },
   { path: '/login', element: <LoginPage /> },
   { path: '/register', element: <RegisterPage /> },
   { path: '/checkout/success', element: <CheckoutSuccess /> },
@@ -125,7 +129,6 @@ export const router = createBrowserRouter([
   },
 
   // ─── Fallback ──────────────────────────────────────────────────────────────
-  { path: '/', element: <Navigate to="/login" replace /> },
   {
     path: '/unauthorized', element: (
       <div className="min-h-screen flex items-center justify-center">
@@ -137,5 +140,5 @@ export const router = createBrowserRouter([
       </div>
     )
   },
-  { path: '*', element: <Navigate to="/login" replace /> },
+  { path: '*', element: <Navigate to="/" replace /> },
 ]);
