@@ -88,9 +88,18 @@ export function useWebSocket() {
           if (isAdmin) toast('📊 Precios actualizados', { duration: 3000 });
           break;
 
+        case 'precio.terminado.actualizado':
+          qc.invalidateQueries({ queryKey: ['productos'] });
+          qc.invalidateQueries({ queryKey: ['productos-admin'] });
+          if (isAdmin) toast('📊 Precio de terminado actualizado', { duration: 3000 });
+          break;
+
         case 'ajuste.actualizado':
           qc.invalidateQueries({ queryKey: ['ajusteCostoEnvio'] });
           qc.invalidateQueries({ queryKey: ['ajusteIndiceGanancia'] });
+          if (data.clave === 'costo_envio') {
+            import('../store/cartStore').then(m => m.useCartStore.getState().fetchCostoEnvio());
+          }
           break;
       }
     }

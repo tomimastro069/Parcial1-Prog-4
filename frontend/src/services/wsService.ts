@@ -7,12 +7,27 @@ import toast from 'react-hot-toast';
 
 const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws';
 
-const ESTADO_LABELS: Record<string, string> = {
-  CONFIRMADO: 'Tu pedido fue confirmado ✅',
-  EN_PREP:    'Tu pedido está en preparación 👨‍🍳',
-  EN_CAMINO:  'Tu pedido está en camino 🛵',
-  ENTREGADO:  'Tu pedido fue entregado 🎉',
-  CANCELADO:  'Tu pedido fue cancelado ❌',
+const ESTADO_TOAST: Record<string, { label: string; style: { background: string; color: string; border: string } }> = {
+  CONFIRMADO: {
+    label: 'Tu pedido fue confirmado',
+    style: { background: '#dbeafe', color: '#1e40af', border: '1px solid #bfdbfe' },
+  },
+  EN_PREP: {
+    label: 'Tu pedido está en preparación',
+    style: { background: '#ffedd5', color: '#9a3412', border: '1px solid #fed7aa' },
+  },
+  EN_CAMINO: {
+    label: 'Tu pedido está en camino',
+    style: { background: '#f3e8ff', color: '#6b21a8', border: '1px solid #e9d5ff' },
+  },
+  ENTREGADO: {
+    label: 'Tu pedido fue entregado',
+    style: { background: '#dcfce7', color: '#166534', border: '1px solid #bbf7d0' },
+  },
+  CANCELADO: {
+    label: 'Tu pedido fue cancelado',
+    style: { background: '#fee2e2', color: '#991b1b', border: '1px solid #fecaca' },
+  },
 };
 
 let ws: WebSocket | null = null;
@@ -77,8 +92,8 @@ function handleEvent(event: string, data: any) {
       qc.invalidateQueries({ queryKey: ['misPedidos'] });
       qc.invalidateQueries({ queryKey: ['dashboardPedidos'] });
       if (miId && data.usuario_id === miId && !isAdmin) {
-        const label = ESTADO_LABELS[data.estado];
-        if (label) toast(label, { duration: 5000, id: `estado-${data.pedido_id}-${data.estado}` });
+        const info = ESTADO_TOAST[data.estado];
+        if (info) toast(info.label, { duration: 5000, id: `estado-${data.pedido_id}-${data.estado}`, style: info.style });
       }
       break;
 
@@ -95,9 +110,19 @@ function handleEvent(event: string, data: any) {
       if (isAdmin) toast('📊 Precios actualizados', { duration: 3000, id: 'precios' });
       break;
 
+    case 'precio.terminado.actualizado':
+      qc.invalidateQueries({ queryKey: ['productos'] });
+      qc.invalidateQueries({ queryKey: ['productos-admin'] });
+      if (isAdmin) toast('📊 Precio de terminado actualizado', { duration: 3000, id: 'precio-terminado' });
+      break;
+
     case 'ajuste.actualizado':
       qc.invalidateQueries({ queryKey: ['ajusteCostoEnvio'] });
       qc.invalidateQueries({ queryKey: ['ajusteIndiceGanancia'] });
+      // Si cambió el costo de envío, actualizar también el cartStore
+      if (data.clave === 'costo_envio') {
+        import('../store/cartStore').then(m => m.useCartStore.getState().fetchCostoEnvio());
+      }
       break;
   }
 }

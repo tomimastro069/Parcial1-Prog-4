@@ -14,6 +14,7 @@ from app.Modules.Producto.productoSchema import (
 from app.Core.UnitOfWork.unit_of_work import UnitOfWork
 from app.Modules.Auditoria.auditoria import Auditoria
 from app.Modules.UnidadMedida.unidadMedida import UnidadMedida
+from app.Core.ws_broadcast import broadcast_sync
 
 class ProductoService:
     def __init__(self, uow: UnitOfWork):
@@ -266,7 +267,7 @@ class ProductoService:
                 descripcion=f"Se actualizó el producto: {p.nombre}",
                 metadata_info={"id": p.id, "cambios": data.model_dump(exclude_unset=True)}
             ))
-
+            broadcast_sync("precio.terminado.actualizado", {"producto_id": p.id})
             return self._build_read(p)
 
     def delete(self, producto_id: int, user_id: int) -> None:
@@ -306,7 +307,9 @@ class ProductoService:
                 descripcion=f"Stock ajustado en {cantidad:+} para '{p.nombre}'. Nuevo stock: {p.stock_cantidad}",
                 metadata_info={"id": p.id, "ajuste": cantidad, "nuevo_stock": p.stock_cantidad}
             ))
+            broadcast_sync("precio.terminado.actualizado", {"producto_id": p.id})
             return self._build_read(p)
+            
 
     def activar(self, producto_id: int, user_id: int) -> ProductoRead:
         with self.uow:
