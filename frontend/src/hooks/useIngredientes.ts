@@ -50,6 +50,19 @@ export function useUpdateIngrediente() {
   });
 }
 
+export function useAgregarStock() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, cantidad }: { id: number; cantidad: number }) =>
+      ingredientesApi.agregarStock(id, cantidad),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: [QK] });
+      toast.success('Stock actualizado');
+    },
+    onError: () => toast.error('Error al actualizar stock'),
+  });
+}
+
 export function useDeleteIngrediente() {
   const qc = useQueryClient();
   return useMutation({

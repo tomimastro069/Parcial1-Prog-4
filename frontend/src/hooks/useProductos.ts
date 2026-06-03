@@ -79,6 +79,19 @@ export function useUpdateProducto() {
   });
 }
 
+export function useAjustarStockProducto() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, cantidad }: { id: number; cantidad: number }) =>
+      productosApi.ajustarStock(id, cantidad),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['productos-admin'], exact: false });
+      toast.success('Stock actualizado');
+    },
+    onError: () => toast.error('Error al actualizar stock'),
+  });
+}
+
 export function useDeleteProducto() {
   const qc = useQueryClient();
   return useMutation({

@@ -8,7 +8,7 @@ import { Button } from '../../../components/Button';
 import { SearchBar } from '../../../components/SearchBar';
 import { TableRowSkeleton } from '../../../components/Skeleton';
 import { IngredienteModal } from './IngredienteModal';
-import { useIngredientes, useDeleteIngrediente, useActivarIngrediente } from '../../../hooks/useIngredientes';
+import { useIngredientes, useDeleteIngrediente, useActivarIngrediente, useAgregarStock } from '../../../hooks/useIngredientes';
 import { useUIStore } from '../../../store/uiStore';
 import { useAuthStore } from '../../../store/authStore';
 import { Pagination } from '../../../components/Pagination';
@@ -37,6 +37,7 @@ export function IngredientesTable() {
   // Leer página de la URL
   const page = parseInt(searchParams.get('page') || '1', 10);
   const [filtro, setFiltro] = useState<Filtro>('todos');
+  const [filtroStock, setFiltroStock] = useState<'todos' | 'con_stock' | 'sin_stock'>('todos');
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
   const { data, isLoading, isError } = useIngredientes({
@@ -44,7 +45,8 @@ export function IngredientesTable() {
     size: PAGE_SIZE,
     is_active: filtroToParam[filtro] ?? undefined,
     search: debouncedSearch || undefined,
-  });
+    sin_stock: filtroStock === 'sin_stock' ? true : filtroStock === 'con_stock' ? false : undefined,
+  } as any);
 
   const responseData = data as any;
   const ingredientesRaw: Ingrediente[] = responseData?.items || [];
@@ -59,6 +61,8 @@ export function IngredientesTable() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editando, setEditando] = useState<Ingrediente | null>(null);
   const [exportando, setExportando] = useState(false);
+  const [stockInputs, setStockInputs] = useState<Record<number, string>>({});
+  const agregarStock = useAgregarStock();
 
   const handleExportar = async () => {
     setExportando(true);
@@ -151,6 +155,21 @@ export function IngredientesTable() {
             </button>
           ))}
         </div>
+        {/* Filtro stock */}
+        <div className="flex gap-2">
+          {(['todos', 'con_stock', 'sin_stock'] as const).map((f) => (
+            <button
+              key={f}
+              onClick={() => { setFiltroStock(f); setSearchParams(prev => { prev.set('page', '1'); return prev; }); }}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${filtroStock === f
+                ? 'bg-[#1F3864] text-white'
+                : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+            >
+              {f === 'todos' ? 'Todo el stock' : f === 'con_stock' ? ' Con stock' : ' Sin stock'}
+            </button>
+          ))}
+        </div>
+
         <SearchBar
           placeholder="Buscar ingredientes..."
           onSearch={(term) => {
@@ -175,6 +194,8 @@ export function IngredientesTable() {
                 <SortableHeader label="Nombre" field="nombre" activeField={sortField as string} dir={sortDir} onSort={(f) => sortToggle(f as keyof Ingrediente)} />
                 <th className="text-left px-4 py-3 font-semibold text-gray-700 hidden md:table-cell">Descripción</th>
                 <th className="text-left px-4 py-3 font-semibold text-gray-700">Alérgeno</th>
+                <th className="text-left px-4 py-3 font-semibold text-gray-700">Stock actual</th>
+                <th className="text-left px-4 py-3 font-semibold text-gray-700 hidden lg:table-cell">Agregar stock</th>
                 <th className="text-left px-4 py-3 font-semibold text-gray-700">Estado</th>
                 <th className="text-right px-4 py-3 font-semibold text-gray-700">Acciones</th>
               </tr>
@@ -192,11 +213,57 @@ export function IngredientesTable() {
                     </td>
                     <td className="px-4 py-3">
                       {ing.es_alergeno ? (
-                        <Badge variant="alergeno">
-                          ⚠️ Alérgeno
-                        </Badge>
+                        <Badge variant="alergeno">! Alérgeno</Badge>
                       ) : (
                         <Badge variant="gray">Sin alérgeno</Badge>
+                      )}
+                    </td>
+                    {/* Stock actual */}
+                    <td className="px-4 py-3">
+                      <span className={`font-semibold text-sm ${(ing.stock_actual ?? 0) <= 0 ? 'text-red-600' : 'text-gray-800'
+                        }`}>
+                        {(ing.stock_actual ?? 0).toFixed(2)}
+                      </span>
+                      <span className="text-xs text-gray-400 ml-1">{ing.unidad}</span>
+                    </td>
+                    {/* Agregar stock */}
+                    <td className="px-4 py-3 hidden lg:table-cell">
+                      {canWrite && ing.is_active && (
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="number"
+                            min="0.001"
+                            step="0.1"
+                            placeholder="cantidad"
+                            value={stockInputs[ing.id] ?? ''}
+                            onChange={e => setStockInputs(prev => ({ ...prev, [ing.id]: e.target.value }))}
+                            className="w-20 rounded border border-gray-300 px-2 py-1 text-xs focus:border-[#2E75B6] focus:outline-none"
+                          />
+                          <button
+                            type="button"
+                            disabled={!stockInputs[ing.id] || agregarStock.isPending}
+                            onClick={() => {
+                              const cant = parseFloat(stockInputs[ing.id]);
+                              if (!cant || cant <= 0) return;
+                              agregarStock.mutate({ id: ing.id, cantidad: cant });
+                              setStockInputs(prev => ({ ...prev, [ing.id]: '' }));
+                            }}
+                            className="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-40 transition-colors"
+                            title="Agregar"
+                          >+</button>
+                          <button
+                            type="button"
+                            disabled={!stockInputs[ing.id] || agregarStock.isPending}
+                            onClick={() => {
+                              const cant = parseFloat(stockInputs[ing.id]);
+                              if (!cant || cant <= 0) return;
+                              agregarStock.mutate({ id: ing.id, cantidad: -cant });
+                              setStockInputs(prev => ({ ...prev, [ing.id]: '' }));
+                            }}
+                            className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-40 transition-colors"
+                            title="Quitar"
+                          >−</button>
+                        </div>
                       )}
                     </td>
                     <td className="px-4 py-3">

@@ -21,4 +21,7 @@ export const ingredientesApi = {
 
   delete: (id: number) =>
     axiosClient.delete(`/api/v1/ingredientes/${id}`),
+
+  agregarStock: (id: number, cantidad: number) =>
+    axiosClient.patch<Ingrediente>(`/api/v1/ingredientes/${id}/stock`, { cantidad }).then((r) => r.data),
 };

@@ -44,7 +44,7 @@ export function ProductoCard({ producto }: ProductoCardProps) {
           )}
 
           {/* Badge sin stock */}
-          {!producto.is_active && (
+          {!producto.disponible && (
             <div className="absolute inset-0 bg-gray-900/40 flex items-center justify-center">
               <Badge variant="sinstock" className="text-sm px-3 py-1">
                 Sin stock
@@ -71,7 +71,7 @@ export function ProductoCard({ producto }: ProductoCardProps) {
           </span>
           <Button
             size="sm"
-            disabled={!producto.is_active}
+            disabled={!producto.disponible}
             onClick={handleAgregar}
             className="gap-1"
           >

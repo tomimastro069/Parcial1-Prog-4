@@ -9,6 +9,7 @@ import { getTodosPedidos } from '../../api/pedidosApi';
 import { productosApi } from '../../api/productosApi';
 import { categoriasApi } from '../../api/categoriasApi';
 import { ingredientesApi } from '../../api/ingredientesApi';
+import { useNavigate } from 'react-router-dom';
 import { getAjuste, updateAjuste } from '../../api/ajustesApi';
 import { useAuthStore } from '../../store/authStore';
 import { descargarExcelDesdeServidor } from '../../utils/exportarExcel';
@@ -39,12 +40,21 @@ const ESTADO_DISPLAY: Record<string, { label: string; badgeClass: string }> = {
 
 export default function DashboardPage() {
   const usuario = useAuthStore((s) => s.usuario);
+  const navigate = useNavigate();
   const [exportando, setExportando] = useState(false);
 
   const { data: pedidosData } = useQuery({
     queryKey: ['dashboardPedidos'],
     queryFn: () => getTodosPedidos(1, 5),
   });
+
+  const { data: sinStockData } = useQuery({
+    queryKey: ['ingredientesSinStock'],
+    queryFn: () => ingredientesApi.list({ size: 100, sin_stock: true } as any),
+    refetchInterval: 60000, // refresca cada 1 min
+  });
+
+  const ingredientesSinStock = (sinStockData as any)?.items ?? [];
 
   // Ajuste de costo de envío
   const { data: costoEnvioData, refetch: refetchCostoEnvio } = useQuery({
@@ -141,6 +151,30 @@ export default function DashboardPage() {
           {exportando ? 'Generando...' : 'Reporte General Excel'}
         </button>
       </div>
+
+      {/* ── Alerta sin stock ──────────────────────────────────────────────── */}
+      {ingredientesSinStock.length > 0 && (
+        <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl px-5 py-4">
+          <span className="text-red-500 text-xl shrink-0"></span>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-red-700">
+              {ingredientesSinStock.length === 1
+                ? '1 ingrediente sin stock'
+                : `${ingredientesSinStock.length} ingredientes sin stock`}
+            </p>
+            <p className="text-xs text-red-500 mt-0.5 truncate">
+              {ingredientesSinStock.slice(0, 5).map((i: any) => i.nombre).join(', ')}
+              {ingredientesSinStock.length > 5 && ` y ${ingredientesSinStock.length - 5} más`}
+            </p>
+          </div>
+          <button
+            onClick={() => navigate('/admin/ingredientes')}
+            className="shrink-0 text-xs font-medium text-red-600 hover:text-red-800 underline"
+          >
+            Ver ingredientes →
+          </button>
+        </div>
+      )}
 
       {/* ── KPIs ──────────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">

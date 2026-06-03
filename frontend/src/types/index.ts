@@ -62,6 +62,7 @@ export interface Ingrediente {
   descripcion: string | null;
   es_alergeno: boolean;
   precio_unitario: number;
+  stock_actual: number;
   is_active: boolean;
 }
 
@@ -148,6 +149,8 @@ export interface Producto {
   precio: number;
   is_active: boolean;
   es_terminado: boolean;
+  disponible: boolean;
+  stock_calculado: number;
   imagen_url?: string | null;
   categorias?: Categoria[];
 }

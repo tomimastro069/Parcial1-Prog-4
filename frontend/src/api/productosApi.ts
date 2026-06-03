@@ -39,4 +39,7 @@ export const productosApi = {
 
   delete: (id: number) =>
     axiosClient.delete(`/api/v1/productos/${id}`),
+
+  ajustarStock: (id: number, cantidad: number) =>
+    axiosClient.patch<ProductoRead>(`/api/v1/productos/${id}/stock`, { cantidad }).then((r) => r.data),
 };
