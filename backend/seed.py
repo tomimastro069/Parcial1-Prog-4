@@ -130,36 +130,36 @@ def seed_ingredientes(session, unidades):
     print("Verificando ingredientes...")
 
     data = [
-        # nombre,               unidad,          descripcion,               es_alergeno, precio_unitario
-        # Sólidos → precio por KILOGRAMO, cantidades en recetas en KG
-        ("Carne vacuna",        "kilogramo",     "Medallón de carne",       False,       3500.0),
-        ("Lechuga",             "kilogramo",     "Lechuga fresca",          False,       800.0),
-        ("Tomate",              "kilogramo",     "Tomate perita",           False,       600.0),
-        ("Queso Cheddar",       "kilogramo",     "Queso cheddar",           True,        5000.0),
-        ("Harina",              "kilogramo",     "Harina 0000",             True,        400.0),
-        ("Muzarella",           "kilogramo",     "Queso muzarella",         True,        4500.0),
-        ("Albahaca",            "kilogramo",     "Albahaca fresca",         False,       2000.0),
-        ("Pepperoni",           "kilogramo",     "Pepperoni ahumado",       False,       6000.0),
-        ("Jamón",               "kilogramo",     "Jamón cocido",            False,       4000.0),
-        ("Cebolla",             "kilogramo",     "Cebolla blanca",          False,       500.0),
-        ("Panceta",             "kilogramo",     "Panceta ahumada",         False,       5500.0),
-        ("Chocolate",           "kilogramo",     "Chocolate negro 70%",     True,        8000.0),
-        ("Mayonesa",            "kilogramo",     "Mayonesa",                True,        1800.0),
-        # Líquidos → precio por LITRO, cantidades en recetas en litros
-        ("Salsa de tomate",     "litro",         "Salsa pomodoro",          False,       1200.0),
-        ("Crema",               "litro",         "Crema de leche",          True,        2000.0),
-        ("Agua con gas",        "litro",         "Agua mineral con gas",    False,       500.0),
-        ("Jugo de naranja",     "litro",         "Jugo de naranja natural", False,       800.0),
-        # Por pieza → precio por unidad
-        ("Pan de burger",       "pieza",         "Pan brioche",             True,        350.0),
-        ("Huevo",               "pieza",         "Huevo de gallina",        True,        100.0),
-        ("Masa de empanada",    "pieza",         "Disco de empanada",       True,        50.0),
-        ("Pan de miga",         "pieza",         "Pan de miga blanco",      True,        80.0),
+        # nombre,               unidad,          descripcion,               es_alergeno, precio_unitario, stock_inicial
+        # Sólidos → kg, stock en kg
+        ("Carne vacuna",        "kilogramo",     "Medallón de carne",       False,       3500.0,  10.0),
+        ("Lechuga",             "kilogramo",     "Lechuga fresca",          False,       800.0,   5.0),
+        ("Tomate",              "kilogramo",     "Tomate perita",           False,       600.0,   8.0),
+        ("Queso Cheddar",       "kilogramo",     "Queso cheddar",           True,        5000.0,  3.0),
+        ("Harina",              "kilogramo",     "Harina 0000",             True,        400.0,   20.0),
+        ("Muzarella",           "kilogramo",     "Queso muzarella",         True,        4500.0,  5.0),
+        ("Albahaca",            "kilogramo",     "Albahaca fresca",         False,       2000.0,  1.0),
+        ("Pepperoni",           "kilogramo",     "Pepperoni ahumado",       False,       6000.0,  3.0),
+        ("Jamón",               "kilogramo",     "Jamón cocido",            False,       4000.0,  4.0),
+        ("Cebolla",             "kilogramo",     "Cebolla blanca",          False,       500.0,   5.0),
+        ("Panceta",             "kilogramo",     "Panceta ahumada",         False,       5500.0,  3.0),
+        ("Chocolate",           "kilogramo",     "Chocolate negro 70%",     True,        8000.0,  2.0),
+        ("Mayonesa",            "kilogramo",     "Mayonesa",                True,        1800.0,  3.0),
+        # Líquidos → litros, stock en litros
+        ("Salsa de tomate",     "litro",         "Salsa pomodoro",          False,       1200.0,  5.0),
+        ("Crema",               "litro",         "Crema de leche",          True,        2000.0,  3.0),
+        ("Agua con gas",        "litro",         "Agua mineral con gas",    False,       500.0,   10.0),
+        ("Jugo de naranja",     "litro",         "Jugo de naranja natural", False,       800.0,   5.0),
+        # Por pieza → stock en unidades
+        ("Pan de burger",       "pieza",         "Pan brioche",             True,        350.0,   50.0),
+        ("Huevo",               "pieza",         "Huevo de gallina",        True,        100.0,   30.0),
+        ("Masa de empanada",    "pieza",         "Disco de empanada",       True,        50.0,    60.0),
+        ("Pan de miga",         "pieza",         "Pan de miga blanco",      True,        80.0,    20.0),
     ]
 
     dict_ings = {}
 
-    for nombre, tipo_unidad, desc, es_alergeno, precio_unitario in data:
+    for nombre, tipo_unidad, desc, es_alergeno, precio_unitario, stock_inicial in data:
         unidad = unidades.get(tipo_unidad)
         ing = session.exec(
             select(Ingrediente).where(Ingrediente.nombre == nombre)
@@ -172,7 +172,8 @@ def seed_ingredientes(session, unidades):
                 descripcion=desc,
                 es_alergeno=es_alergeno,
                 unidad_medida_id=unidad.id if unidad else None,
-                precio_unitario=Decimal(str(precio_unitario))
+                precio_unitario=Decimal(str(precio_unitario)),
+                stock_actual=stock_inicial,
             )
             session.add(ing)
             session.commit()
