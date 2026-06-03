@@ -1,4 +1,5 @@
 from fastapi import HTTPException, status
+from app.Core.ws_broadcast import broadcast_sync
 from app.Core.UnitOfWork.unit_of_work import UnitOfWork
 from app.Modules.Ajustes.Model.ajuste import Ajuste
 from app.Modules.Ajustes.ajusteSchema import AjusteUpdate
@@ -40,4 +41,7 @@ class AjusteService:
             ajuste.valor = data.valor
             self.uow.session.add(ajuste)
             self.uow.session.flush()
+            broadcast_sync("ajuste.actualizado", {"clave": clave, "valor": data.valor})
+            if clave == "indice_ganancia":
+                broadcast_sync("precios.actualizados", {})
             return ajuste

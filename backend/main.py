@@ -36,6 +36,7 @@ from app.Modules.Pedidos.Model.historialEstadoPedido import HistorialEstadoPedid
 from app.Modules.Ajustes.Model.ajuste import Ajuste  # noqa: F401
 from app.Modules.Ajustes.ajusteRouter import router as ajuste_router
 from app.Modules.Usuarios.usuarioRouter import router as usuario_router
+from app.Modules.Websocket.wsRouter import router as ws_router
 from app.Modules.MercadoPago.mercadoPagoAdminRouter import router as pagos_admin_router
 from app.Modules.Imagenes.imagenesRouter import router as imagenes_router
 
@@ -45,6 +46,9 @@ from slowapi import _rate_limit_exceeded_handler
 
 @asynccontextmanager
 async def lifespan(_: fastapi.FastAPI):
+    import asyncio
+    from app.Core.ws_broadcast import set_event_loop
+    set_event_loop(asyncio.get_event_loop())
     create_db_and_tables()
     seed_admin()
     seed_users()
@@ -61,6 +65,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "https://chaste-throng-shelter.ngrok-free.dev",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -85,6 +90,7 @@ app.include_router(ajuste_router, prefix="/api/v1/ajustes", tags=["ajustes"])
 app.include_router(reporte_router, prefix="/api/v1/reportes", tags=["reportes"])
 app.include_router(usuario_router, prefix="/api/v1/usuarios", tags=["usuarios"])
 app.include_router(pagos_admin_router, prefix="/api/v1/admin/pagos", tags=["pagos-admin"])
+app.include_router(ws_router, tags=["websocket"])
 app.include_router(imagenes_router, prefix="/api/v1/imagenes", tags=["imagenes"])
 
 if __name__ == "__main__":

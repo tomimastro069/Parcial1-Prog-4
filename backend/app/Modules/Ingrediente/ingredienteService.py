@@ -1,4 +1,5 @@
 from fastapi import HTTPException, status
+from app.Core.ws_broadcast import broadcast_sync
 from sqlmodel import select
 from app.Modules.Ingrediente.ingrediente import Ingrediente
 from app.Modules.Ingrediente.ingredienteSchema import IngredienteCreate, IngredienteUpdate, IngredienteRead
@@ -125,7 +126,9 @@ class IngredienteService:
                 metadata_info={"id": ing.id, "cambios": cambios}
             ))
 
-            return self._build_read(ing)
+            result = self._build_read(ing)
+            broadcast_sync("stock.actualizado", {"ingrediente_id": ing.id})
+            return result
 
     def delete(self, ing_id: int, user_id: int) -> None:
         with self.uow:

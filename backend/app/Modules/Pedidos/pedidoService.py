@@ -2,6 +2,7 @@ import math
 from decimal import Decimal
 from datetime import datetime, timezone
 from fastapi import HTTPException, status
+from app.Core.ws_broadcast import broadcast_sync
 from app.Core.UnitOfWork.unit_of_work import UnitOfWork
 from app.Modules.Pedidos.Model.pedido import Pedido
 from app.Modules.Pedidos.Model.detallePedido import DetallePedido
@@ -244,7 +245,10 @@ class PedidoService:
             self.uow.session.flush()
 
             p_full = self.uow.pedidos.get_with_relations(p.id)
-            return self._build_read(p_full)
+            result = self._build_read(p_full)
+            broadcast_sync("pedido.nuevo", {"pedido_id": p.id, "total": float(p.total), "usuario_id": p.usuario_id})
+            broadcast_sync("stock.actualizado", {})
+            return result
 
     def cambiar_estado(self, pedido_id: int, data: PedidoUpdateEstado, admin: bool = True, usuario_id: int = None) -> PedidoRead:
         with self.uow:
@@ -318,4 +322,8 @@ class PedidoService:
             self.uow.session.flush()
 
             p_full = self.uow.pedidos.get_with_relations(p.id)
-            return self._build_read(p_full)
+            result = self._build_read(p_full)
+            broadcast_sync("pedido.estado", {"pedido_id": p.id, "estado": nuevo_estado.codigo, "usuario_id": p.usuario_id})
+            if nuevo_estado.codigo == "CANCELADO":
+                broadcast_sync("stock.actualizado", {})
+            return result
