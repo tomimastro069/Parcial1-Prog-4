@@ -82,6 +82,9 @@ function handleEvent(event: string, data: any) {
     case 'pedido.nuevo':
       qc.invalidateQueries({ queryKey: ['todosPedidos'] });
       qc.invalidateQueries({ queryKey: ['dashboardPedidos'] });
+      qc.invalidateQueries({ queryKey: ['dashboardProductos'] });
+      qc.invalidateQueries({ queryKey: ['dashboardCategorias'] });
+      qc.invalidateQueries({ queryKey: ['ingredientesSinStock'] });
       if (isAdmin) {
         toast('🔔 Nuevo pedido recibido', { duration: 4000, id: 'pedido-nuevo' });
       }
@@ -91,6 +94,9 @@ function handleEvent(event: string, data: any) {
       qc.invalidateQueries({ queryKey: ['todosPedidos'] });
       qc.invalidateQueries({ queryKey: ['misPedidos'] });
       qc.invalidateQueries({ queryKey: ['dashboardPedidos'] });
+      qc.invalidateQueries({ queryKey: ['dashboardProductos'] });
+      qc.invalidateQueries({ queryKey: ['dashboardCategorias'] });
+      qc.invalidateQueries({ queryKey: ['ingredientesSinStock'] });
       if (miId && data.usuario_id === miId && !isAdmin) {
         const info = ESTADO_TOAST[data.estado];
         if (info) toast(info.label, { duration: 5000, id: `estado-${data.pedido_id}-${data.estado}`, style: info.style });
@@ -102,17 +108,21 @@ function handleEvent(event: string, data: any) {
       qc.invalidateQueries({ queryKey: ['productos'] });
       qc.invalidateQueries({ queryKey: ['productos-admin'] });
       qc.invalidateQueries({ queryKey: ['ingredientesSinStock'] });
+      qc.invalidateQueries({ queryKey: ['dashboardProductos'] });
+      qc.invalidateQueries({ queryKey: ['dashboardCategorias'] });
       break;
 
     case 'precios.actualizados':
       qc.invalidateQueries({ queryKey: ['productos'] });
       qc.invalidateQueries({ queryKey: ['productos-admin'] });
+      qc.invalidateQueries({ queryKey: ['dashboardProductos'] });
       if (isAdmin) toast('📊 Precios actualizados', { duration: 3000, id: 'precios' });
       break;
 
     case 'precio.terminado.actualizado':
       qc.invalidateQueries({ queryKey: ['productos'] });
       qc.invalidateQueries({ queryKey: ['productos-admin'] });
+      qc.invalidateQueries({ queryKey: ['dashboardProductos'] });
       if (isAdmin) toast('📊 Precio de terminado actualizado', { duration: 3000, id: 'precio-terminado' });
       break;
 
