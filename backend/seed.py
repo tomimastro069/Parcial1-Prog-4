@@ -242,7 +242,7 @@ def seed_productos(session, cats, ings):
         # --- HAMBURGUESAS ---
         (
             "Burger Clásica", None, "Hamburguesa de carne vacuna con lechuga, tomate y queso cheddar",
-            "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800",
+            "https://res.cloudinary.com/dwkdclfwe/image/upload/v1780531833/photo-1568901346375-23c9450c58cd_fixlox.jpg",
             False, ["Hamburguesas"],
             [
                 ("Carne vacuna", 0.180, False),
@@ -254,7 +254,7 @@ def seed_productos(session, cats, ings):
         ),
         (
             "Burger BBQ", None, "Hamburguesa con panceta crocante y cebolla caramelizada",
-            "https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=800",
+            "https://res.cloudinary.com/dwkdclfwe/image/upload/v1780531893/photo-1553979459-d2229ba7433b_vyz1ns.jpg",
             False, ["Hamburguesas"],
             [
                 ("Carne vacuna", 0.200, False),
@@ -266,7 +266,7 @@ def seed_productos(session, cats, ings):
         ),
         (
             "Doble Burger", None, "Doble medallón de carne con doble queso",
-            "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=800",
+            "https://res.cloudinary.com/dwkdclfwe/image/upload/v1780531914/photo-1594212699903-ec8a3eca50f5_dff83f.jpg",
             False, ["Hamburguesas"],
             [
                 ("Carne vacuna", 0.360, False),
@@ -279,7 +279,7 @@ def seed_productos(session, cats, ings):
         # --- PIZZAS ---
         (
             "Pizza Margherita", None, "Pizza clásica con salsa de tomate, muzarella y albahaca",
-            "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=800",
+            "https://res.cloudinary.com/dwkdclfwe/image/upload/v1780532064/photo-1574071318508-1cdbab80d002_pcbie8.jpg",
             False, ["Pizzas"],
             [
                 ("Harina", 0.250, False),
@@ -290,7 +290,7 @@ def seed_productos(session, cats, ings):
         ),
         (
             "Pizza Pepperoni", None, "Pizza con pepperoni y muzarella extra",
-            "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=800",
+            "https://res.cloudinary.com/dwkdclfwe/image/upload/v1780532096/photo-1628840042765-356cda07504e_dwtnn9.jpg",
             False, ["Pizzas"],
             [
                 ("Harina", 0.250, False),
@@ -301,7 +301,7 @@ def seed_productos(session, cats, ings):
         ),
         (
             "Pizza Jamón y Morrones", None, "Pizza con jamón y morrones asados",
-            "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=800",
+            "https://res.cloudinary.com/dwkdclfwe/image/upload/v1780532149/photo-1565299624946-b28f40a0ae38_dqbmtk.jpg",
             False, ["Pizzas"],
             [
                 ("Harina", 0.250, False),
@@ -313,7 +313,7 @@ def seed_productos(session, cats, ings):
         # --- EMPANADAS ---
         (
             "Empanada de Carne", None, "Empanada jugosa de carne cortada a cuchillo",
-            "https://images.unsplash.com/photo-1601050690597-df0568f70950?w=800",
+            "https://res.cloudinary.com/dwkdclfwe/image/upload/v1780532199/photo-1601050690597-df0568f70950_dk9yte.jpg",
             False, ["Empanadas"],
             [
                 ("Masa de empanada", 1, False),
@@ -324,7 +324,7 @@ def seed_productos(session, cats, ings):
         ),
         (
             "Empanada de Jamón y Queso", None, "Empanada con jamón cocido y queso derretido",
-            "https://images.unsplash.com/photo-1549889450-0e0fb9c1d668?q=80&w=876&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            "https://res.cloudinary.com/dwkdclfwe/image/upload/v1780532230/photo-1549889450-0e0fb9c1d668_v17jm2.avif",
             False, ["Empanadas"],
             [
                 ("Masa de empanada", 1, False),
@@ -335,7 +335,7 @@ def seed_productos(session, cats, ings):
         # --- SANDWICHES ---
         (
             "Sandwich de Jamón y Queso", None, "Sandwich en pan de miga con jamón, queso y mayonesa",
-            "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=800",
+            "https://res.cloudinary.com/dwkdclfwe/image/upload/v1780532262/photo-1528735602780-2552fd46c7af_nq5qdk.jpg",
             False, ["Sandwiches"],
             [
                 ("Pan de miga", 2, False),
@@ -349,13 +349,13 @@ def seed_productos(session, cats, ings):
         # --- POSTRES (terminados = costo base fijo) ---
         (
             "Brownie de Chocolate", 500, "Brownie húmedo con chocolate negro 70%",
-            "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=800",
+            "https://res.cloudinary.com/dwkdclfwe/image/upload/v1780532293/photo-1606313564200-e75d5e30476c_hjbfld.jpg",
             True, ["Postres"],
             []
         ),
         (
             "Mousse de Chocolate", None, "Mousse esponjosa con crema y chocolate",
-            "https://images.unsplash.com/photo-1603032305813-be7441bc1037?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            "https://res.cloudinary.com/dwkdclfwe/image/upload/v1780532315/photo-1603032305813-be7441bc1037_vh43xm.avif",
             False, ["Postres"],
             [
                 ("Chocolate", 0.080, False),
@@ -366,19 +366,19 @@ def seed_productos(session, cats, ings):
         # --- BEBIDAS (terminadas = costo base fijo) ---
         (
             "Coca Cola 500ml", 350, "Gaseosa Coca Cola botella personal",
-            "https://images.unsplash.com/photo-1716800586014-fea19e9453fb?q=80&w=417&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            "https://res.cloudinary.com/dwkdclfwe/image/upload/v1780532346/photo-1716800586014-fea19e9453fb_yjowyf.avif",
             True, ["Bebidas"],
             []
         ),
         (
             "Agua con Gas 500ml", 180, "Agua mineral con gas",
-            "https://images.unsplash.com/photo-1638688569176-5b6db19f9d2a?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+            "https://res.cloudinary.com/dwkdclfwe/image/upload/v1780532378/photo-1638688569176-5b6db19f9d2a_fwyikg.avif",
             True, ["Bebidas"],
             []
         ),
         (
             "Jugo de Naranja Natural", None, "Jugo exprimido al momento",
-            "https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=800",
+            "https://res.cloudinary.com/dwkdclfwe/image/upload/v1780532406/photo-1621506289937-a8e4df240d0b_wysyfd.jpg",
             False, ["Bebidas"],
             [
                 ("Jugo de naranja", 0.300, False),
