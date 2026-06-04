@@ -213,7 +213,9 @@ class ProductoService:
                 metadata_info={"id": p.id, "precio": float(p.precio_base)}
             ))
 
-            return self._build_read(p)
+            result = self._build_read(p)
+        broadcast_sync("producto.actualizado", {"producto_id": p.id})
+        return result
 
     def update(self, producto_id: int, data: ProductoUpdate, user_id: int) -> ProductoRead:
         with self.uow:
@@ -268,6 +270,7 @@ class ProductoService:
                 metadata_info={"id": p.id, "cambios": data.model_dump(exclude_unset=True)}
             ))
             broadcast_sync("precio.terminado.actualizado", {"producto_id": p.id})
+            broadcast_sync("producto.actualizado", {"producto_id": p.id})
             return self._build_read(p)
 
     def delete(self, producto_id: int, user_id: int) -> None:
@@ -291,6 +294,8 @@ class ProductoService:
             self.uow.productos.clear_categorias_rel(producto_id)
             self.uow.productos.clear_ingredientes_rel(producto_id)
             p.is_active = False
+
+        broadcast_sync("producto.eliminado", {"producto_id": producto_id})
 
     def ajustar_stock(self, producto_id: int, cantidad: int, user_id: int) -> ProductoRead:
         with self.uow:
@@ -327,4 +332,6 @@ class ProductoService:
                 descripcion=f"Se reactivó el producto: {p.nombre}",
                 metadata_info={"id": p.id}
             ))
-            return self._build_read(p)
+            result = self._build_read(p)
+        broadcast_sync("producto.actualizado", {"producto_id": producto_id})
+        return result

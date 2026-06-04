@@ -126,6 +126,14 @@ function handleEvent(event: string, data: any) {
       if (isAdmin) toast('📊 Precio de terminado actualizado', { duration: 3000, id: 'precio-terminado' });
       break;
 
+    case 'producto.actualizado':
+    case 'producto.eliminado':
+      qc.invalidateQueries({ queryKey: ['productos'] });
+      qc.invalidateQueries({ queryKey: ['productos-admin'] });
+      qc.invalidateQueries({ queryKey: ['dashboardProductos'] });
+      qc.invalidateQueries({ queryKey: ['dashboardCategorias'] });
+      break;
+
     case 'ajuste.actualizado':
       qc.invalidateQueries({ queryKey: ['ajusteCostoEnvio'] });
       qc.invalidateQueries({ queryKey: ['ajusteIndiceGanancia'] });
