@@ -19,13 +19,17 @@ from app.Core.ws_broadcast import broadcast_sync
 class ProductoService:
     def __init__(self, uow: UnitOfWork):
         self.uow = uow
+        self._indice_cache: float | None = None
 
     def _get_indice_ganancia(self) -> float:
+        if self._indice_cache is not None:
+            return self._indice_cache
         ajuste = self.uow.ajustes.get_by_clave("indice_ganancia")
         try:
-            return float(ajuste.valor) if ajuste else 1.5
+            self._indice_cache = float(ajuste.valor) if ajuste else 1.5
         except (ValueError, AttributeError):
-            return 1.5
+            self._indice_cache = 1.5
+        return self._indice_cache
 
     def _calcular_stock(self, p: Producto, pis: list) -> int:
         """Calcula cuántas unidades se pueden fabricar según el stock de ingredientes."""
