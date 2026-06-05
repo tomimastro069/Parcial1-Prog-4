@@ -53,8 +53,24 @@ export function setUserGetters(
   getIsAdmin = isAdmin;
 }
 
+function getToken(): string | null {
+  try {
+    const raw = localStorage.getItem('foodstore-auth');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed?.state?.accessToken || null;
+  } catch { return null; }
+}
+
 function connect() {
-  ws = new WebSocket(WS_URL);
+  const token = getToken();
+  if (!token) {
+    // Sin token no intentamos conectar, reintentamos en 5s por si el usuario se loguea
+    reconnectTimer = setTimeout(connect, 5000);
+    return;
+  }
+
+  ws = new WebSocket(`${WS_URL}?token=${token}`);
 
   ws.onopen = () => console.log('[WS] Conectado');
 
