@@ -48,6 +48,7 @@ class UsuarioService:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No podés cambiar tu propio rol")
             u.rol = nuevo_rol
             u.updated_at = datetime.now(timezone.utc)
+            self.uow.session.flush()
             self.uow.session.refresh(u)
             return self._build_read(u)
 
@@ -78,6 +79,6 @@ class UsuarioService:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No podés desactivarte a vos mismo")
             u.is_active = not u.is_active
             u.updated_at = datetime.now(timezone.utc)
-            
+            self.uow.session.flush()
             self.uow.session.refresh(u)
             return self._build_read(u)

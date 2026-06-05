@@ -7,11 +7,22 @@ import { Button } from '../../components/Button';
 export function LoginForm() {
   const login = useLogin();
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
 
   const form = useForm({
     defaultValues: { email: '', password: '' },
     onSubmit: async ({ value }) => {
-      await login.mutateAsync(value);
+      try {
+        setError('');
+        await login.mutateAsync(value);
+      } catch (e: any) {
+        const detail = e.response?.data?.detail;
+        if (e.response?.status === 403 && detail === 'Usuario inactivo') {
+          setError('Tu cuenta está desactivada. Contactá a un administrador para reactivarla.');
+        } else {
+          setError(typeof detail === 'string' ? detail : 'Credenciales incorrectas');
+        }
+      }
     },
   });
 
@@ -104,6 +115,12 @@ export function LoginForm() {
           </div>
         )}
       </form.Field>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+          {error}
+        </div>
+      )}
 
       <Button
         type="submit"
