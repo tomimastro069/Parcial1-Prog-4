@@ -10,6 +10,7 @@ interface CartState {
   addItem: (item: CartItem) => void;
   removeItem: (productoId: number) => void;
   updateCantidad: (productoId: number, cantidad: number) => void;
+  updateStock: (productoId: number, nuevoStock: number) => void;
   clearCart: () => void;
   fetchCostoEnvio: () => Promise<void>;
 
@@ -28,16 +29,18 @@ export const useCartStore = create<CartState>()(
       addItem: (item) =>
         set((s) => {
           const existing = s.items.find((i) => i.producto_id === item.producto_id);
+          const stock = item.stock ?? Infinity;
           if (existing) {
+            const nuevaCantidad = Math.min(existing.cantidad + item.cantidad, stock);
             return {
               items: s.items.map((i) =>
                 i.producto_id === item.producto_id
-                  ? { ...i, cantidad: i.cantidad + item.cantidad }
+                  ? { ...i, cantidad: nuevaCantidad, stock }
                   : i
               ),
             };
           }
-          return { items: [...s.items, item] };
+          return { items: [...s.items, { ...item, cantidad: Math.min(item.cantidad, stock) }] };
         }),
 
       removeItem: (productoId) =>
@@ -46,8 +49,19 @@ export const useCartStore = create<CartState>()(
       updateCantidad: (productoId, cantidad) =>
         set((s) => ({
           items: s.items.map((i) =>
-            i.producto_id === productoId ? { ...i, cantidad: Math.max(1, cantidad) } : i
+            i.producto_id === productoId
+              ? { ...i, cantidad: Math.max(1, Math.min(cantidad, i.stock ?? Infinity)) }
+              : i
           ),
+        })),
+
+      updateStock: (productoId: number, nuevoStock: number) =>
+        set((s) => ({
+          items: s.items.map((i) =>
+            i.producto_id === productoId
+              ? { ...i, stock: nuevoStock, cantidad: Math.max(1, Math.min(i.cantidad, nuevoStock)) }
+              : i
+          ).filter((i) => i.stock > 0),
         })),
 
       clearCart: () => set({ items: [] }),

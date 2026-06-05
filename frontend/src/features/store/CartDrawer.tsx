@@ -94,10 +94,14 @@ export function CartDrawer() {
                     <span className="text-sm font-medium w-5 text-center">{item.cantidad}</span>
                     <button
                       onClick={() => updateCantidad(item.producto_id, item.cantidad + 1)}
-                      className="w-6 h-6 rounded border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100"
+                      disabled={item.cantidad >= (item.stock ?? Infinity)}
+                      className="w-6 h-6 rounded border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                       +
                     </button>
+                    {item.stock != null && item.cantidad >= item.stock && (
+                      <span className="text-[10px] text-orange-600 font-medium">Máx.</span>
+                    )}
                   </div>
                 </div>
 

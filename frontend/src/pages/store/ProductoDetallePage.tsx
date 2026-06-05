@@ -18,15 +18,25 @@ export default function ProductoDetallePage() {
 
   const [cantidad, setCantidad] = useState(1);
 
+  const items = useCartStore((s) => s.items);
+  const enCarrito = items.find((i) => i.producto_id === producto?.id);
+  const cantidadEnCarrito = enCarrito?.cantidad ?? 0;
+  const stockDisponible = (producto?.stock_calculado ?? 0) - cantidadEnCarrito;
+
   const handleAgregar = () => {
     if (!producto) return;
+    if (cantidad > stockDisponible) {
+      return;
+    }
     addItem({
       producto_id: producto.id,
       nombre: producto.nombre,
       precio: producto.precio,
       cantidad,
+      stock: producto.stock_calculado,
       imagen_url: producto.imagen_url,
     });
+    setCantidad(1);
     openCart();
   };
 
@@ -146,8 +156,9 @@ export default function ProductoDetallePage() {
                 </button>
                 <span className="text-sm font-medium w-6 text-center">{cantidad}</span>
                 <button
-                  onClick={() => setCantidad((c) => c + 1)}
-                  className="text-gray-500 hover:text-gray-700 font-bold w-5 text-center"
+                  onClick={() => setCantidad((c) => Math.min(c + 1, stockDisponible))}
+                  disabled={cantidad >= stockDisponible}
+                  className="text-gray-500 hover:text-gray-700 font-bold w-5 text-center disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   +
                 </button>
@@ -155,13 +166,14 @@ export default function ProductoDetallePage() {
 
               <Button
                 onClick={handleAgregar}
-                disabled={!producto.is_active}
+                disabled={!producto.disponible || stockDisponible <= 0}
                 size="lg"
                 className="flex-1 gap-2"
               >
                 <ShoppingCartIcon className="w-5 h-5" />
-                Agregar al carrito · $
-                {(producto.precio * cantidad).toLocaleString('es-AR')}
+                {stockDisponible <= 0 && cantidadEnCarrito > 0
+                  ? 'Stock máximo en carrito'
+                  : `Agregar al carrito · $${(producto.precio * cantidad).toLocaleString('es-AR')}`}
               </Button>
             </div>
           </div>

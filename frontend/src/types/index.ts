@@ -166,6 +166,7 @@ export interface CartItem {
   nombre: string;
   precio: number;
   cantidad: number;
+  stock: number;
   imagen_url?: string | null;
   personalizacion?: number[];
 }

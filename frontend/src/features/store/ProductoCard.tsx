@@ -13,12 +13,22 @@ interface ProductoCardProps {
 export function ProductoCard({ producto }: ProductoCardProps) {
   const addItem = useCartStore((s) => s.addItem);
 
+  const items = useCartStore((s) => s.items);
+  const enCarrito = items.find((i) => i.producto_id === producto.id);
+  const cantidadEnCarrito = enCarrito?.cantidad ?? 0;
+  const sinStockParaAgregar = cantidadEnCarrito >= producto.stock_calculado;
+
   const handleAgregar = () => {
+    if (sinStockParaAgregar) {
+      toast.error(`Stock máximo alcanzado (${producto.stock_calculado})`);
+      return;
+    }
     addItem({
       producto_id: producto.id,
       nombre: producto.nombre,
       precio: producto.precio,
       cantidad: 1,
+      stock: producto.stock_calculado,
       imagen_url: producto.imagen_url,
     });
     toast.success(`${producto.nombre} agregado al carrito`);

@@ -6,6 +6,7 @@ import { QueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws';
+const API_URL = import.meta.env.VITE_API_URL ?? '';
 
 const ESTADO_TOAST: Record<string, { label: string; style: { background: string; color: string; border: string } }> = {
   CONFIRMADO: {
@@ -72,6 +73,31 @@ function connect() {
   ws.onerror = () => ws?.close();
 }
 
+async function syncCartStock() {
+  try {
+    const { useCartStore } = await import('../store/cartStore');
+    const store = useCartStore.getState();
+    const items = store.items;
+    if (items.length === 0) return;
+
+    // Fetch todos los productos de una para obtener stock actualizado
+    const res = await fetch(`${API_URL}/api/v1/productos/?size=100&is_active=true`);
+    if (!res.ok) return;
+    const data = await res.json();
+    const productos: Record<number, number> = {};
+    for (const p of data.items) {
+      productos[p.id] = p.stock_calculado;
+    }
+
+    for (const item of items) {
+      const nuevoStock = productos[item.producto_id];
+      if (nuevoStock !== undefined && nuevoStock !== item.stock) {
+        store.updateStock(item.producto_id, nuevoStock);
+      }
+    }
+  } catch { }
+}
+
 function handleEvent(event: string, data: any) {
   if (!qc) return;
 
@@ -110,6 +136,8 @@ function handleEvent(event: string, data: any) {
       qc.invalidateQueries({ queryKey: ['ingredientesSinStock'] });
       qc.invalidateQueries({ queryKey: ['dashboardProductos'] });
       qc.invalidateQueries({ queryKey: ['dashboardCategorias'] });
+      // Ajustar cantidades del carrito según nuevo stock
+      syncCartStock();
       break;
 
     case 'precios.actualizados':
