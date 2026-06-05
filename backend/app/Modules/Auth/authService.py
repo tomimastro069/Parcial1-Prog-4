@@ -4,7 +4,7 @@ from fastapi import HTTPException, status
 from app.Core.Security.jwt import get_password_hash, verify_password, create_access_token
 from app.Core.Config.Config import settings
 from app.Modules.Auth.authSchema import LoginRequest, RegisterRequest, TokenResponse
-from app.Modules.Usuarios.usuario import Usuario
+from app.Modules.Usuarios.usuario import Usuario, UserRole
 from app.Modules.Auth.refreshToken import RefreshToken
 from app.Modules.Auditoria.auditoria import Auditoria
 
@@ -33,7 +33,7 @@ class AuthService:
                 email=data.email,
                 celular=data.celular,
                 password_hash=hashed_pass,
-                rol=data.rol
+                rol=UserRole.CLIENT
             )
 
             # 4. Guardamos

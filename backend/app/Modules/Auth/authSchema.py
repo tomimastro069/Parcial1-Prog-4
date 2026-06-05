@@ -12,7 +12,6 @@ class RegisterRequest(BaseModel):
     email: EmailStr
     password: str
     celular: str | None = None
-    rol: UserRole = UserRole.CLIENT
 
 class TokenResponse(BaseModel):
     access_token: str
