@@ -2,6 +2,8 @@
 
 @theme {
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-baskerville: 'Libre Baskerville', serif;
+  --font-inconsolata: 'Inconsolata', monospace;
   --color-navy: #1F3864;
   --color-primary: #2E75B6;
   --color-accent: #4472C4;

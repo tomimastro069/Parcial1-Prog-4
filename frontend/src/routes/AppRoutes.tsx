@@ -3,7 +3,7 @@ import { ProtectedRoute } from '../features/auth/ProtectedRoute';
 import AdminLayout from '../pages/admin/AdminLayout';
 import LoginPage from '../pages/auth/LoginPage';
 import RegisterPage from '../pages/auth/RegisterPage';
-import LandingPage from '../pages/LandingPage';
+import LandingPageVerdadera from '../pages/LandingPageVerdadera';
 import MenuPublicoPage from '../pages/MenuPublicoPage';
 import StorePage from '../pages/store/StorePage';
 import StoreLayout from '../pages/store/StoreLayout';
@@ -24,7 +24,7 @@ import CheckoutPending from '../pages/checkout/CheckoutPending';
 
 export const router = createBrowserRouter([
   // ─── Rutas públicas ────────────────────────────────────────────────────────
-  { path: '/', element: <LandingPage /> },
+  { path: '/', element: <LandingPageVerdadera /> },
   { path: '/menu', element: <MenuPublicoPage /> },
   { path: '/login', element: <LoginPage /> },
   { path: '/register', element: <RegisterPage /> },
