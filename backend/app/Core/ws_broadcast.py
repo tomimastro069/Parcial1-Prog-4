@@ -10,10 +10,16 @@ def set_event_loop(loop: asyncio.AbstractEventLoop):
     _loop = loop
 
 
-def broadcast_sync(event: str, data: dict = {}):
+def broadcast_sync(event: str, data: dict | None = None, room: str | None = None):
+    if data is None:
+        data = {}
     if _loop is None or not _loop.is_running():
         return
     try:
-        asyncio.run_coroutine_threadsafe(manager.broadcast(event, data), _loop)
+        if room:
+            coro = manager.broadcast_room(room, event, data)
+        else:
+            coro = manager.broadcast(event, data)
+        asyncio.run_coroutine_threadsafe(coro, _loop)
     except Exception:
         pass

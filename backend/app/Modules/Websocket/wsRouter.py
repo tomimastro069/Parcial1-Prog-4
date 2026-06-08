@@ -17,7 +17,8 @@ async def websocket_endpoint(websocket: WebSocket):
         await websocket.close(code=4001, reason="Token inválido")
         return
 
-    await manager.connect(websocket)
+    role = payload.get("rol")
+    await manager.connect(websocket, role=role)
     try:
         while True:
             await websocket.receive_text()

@@ -246,7 +246,8 @@ class PedidoService:
 
             p_full = self.uow.pedidos.get_with_relations(p.id)
             result = self._build_read(p_full)
-            broadcast_sync("pedido.nuevo", {"pedido_id": p.id, "total": float(p.total), "usuario_id": p.usuario_id})
+            broadcast_sync("pedido.nuevo", {"pedido_id": p.id, "total": float(p.total), "usuario_id": p.usuario_id}, room="role:admin")
+            broadcast_sync("pedido.nuevo", {"pedido_id": p.id, "total": float(p.total), "usuario_id": p.usuario_id}, room="role:pedidos")
             broadcast_sync("stock.actualizado", {})
             return result
 
