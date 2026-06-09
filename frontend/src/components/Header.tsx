@@ -24,7 +24,7 @@ export default function Header() {
               className="w-[50px] h-[50px] object-contain"
             />
           </span>
-          <span className="font-baskerville font-bold text-coffee text-lg hidden sm:block tracking-[-0.01em]">Casa del Sabor</span>
+          <span className="font-baskerville font-bold text-coffee text-lg hidden sm:block tracking-[-0.01em]">Food Store</span>
         </button>
         <div className="flex items-center gap-3">
           <button onClick={() => navigate('/store')} className="p-2 rounded-lg hover:bg-cream-deep transition-colors">

@@ -25,7 +25,7 @@ export default function MenuPublicoPage() {
     fetch(`${API_URL}/api/v1/categorias/?is_active=true&size=50`)
       .then((r) => r.json())
       .then((data) => setCategorias(data.items ?? []))
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   // Debounce search
@@ -50,7 +50,7 @@ export default function MenuPublicoPage() {
         setProductos(data.items);
         setTotalPages(data.pages);
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoading(false));
   }, [page, search, categoriaId]);
 
@@ -61,7 +61,7 @@ export default function MenuPublicoPage() {
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
             <img src={logoRestaurante} alt="Logo" className="w-10 h-10 rounded-lg object-cover" />
-            <span className="font-baskerville font-bold text-coffee text-xl tracking-[-0.01em]">Casa del Sabor</span>
+            <span className="font-baskerville font-bold text-coffee text-xl tracking-[-0.01em]">Food store</span>
           </Link>
           <div className="flex items-center gap-3">
             <Link
@@ -191,9 +191,8 @@ export default function MenuPublicoPage() {
               <button
                 key={n}
                 onClick={() => setPage(n)}
-                className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${
-                  page === n ? 'bg-walnut border-walnut text-tan' : 'border-line bg-cream-soft hover:bg-cream-deep'
-                }`}
+                className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${page === n ? 'bg-walnut border-walnut text-tan' : 'border-line bg-cream-soft hover:bg-cream-deep'
+                  }`}
               >
                 {n}
               </button>

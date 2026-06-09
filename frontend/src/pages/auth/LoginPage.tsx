@@ -17,7 +17,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <p className="font-baskerville italic text-sand text-sm mb-1">bienvenido a</p>
-          <h1 className="font-baskerville text-4xl font-bold text-tan tracking-[-0.01em]">Casa del Sabor</h1>
+          <h1 className="font-baskerville text-4xl font-bold text-tan tracking-[-0.01em]">Food store</h1>
           <div className="w-10 h-px bg-gold/60 mx-auto my-4" />
           <p className="eyebrow text-[#8B7355]">Sistema de pedidos</p>
         </div>
