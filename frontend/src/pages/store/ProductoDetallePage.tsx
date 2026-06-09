@@ -86,7 +86,7 @@ export default function ProductoDetallePage() {
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
-                <span className="text-6xl">🍔</span>
+                <span className="text-6xl"></span>
               </div>
             )}
           </div>
@@ -133,8 +133,8 @@ export default function ProductoDetallePage() {
                     <span
                       key={ing.id}
                       className={`inline-flex items-center gap-1 text-xs rounded-full px-2.5 py-1 ${ing.es_alergeno
-                          ? 'bg-orange-50 text-orange-700 border border-orange-200'
-                          : 'bg-cream-deep text-clay border border-line'
+                        ? 'bg-orange-50 text-orange-700 border border-orange-200'
+                        : 'bg-cream-deep text-clay border border-line'
                         }`}
                     >
                       {ing.nombre}

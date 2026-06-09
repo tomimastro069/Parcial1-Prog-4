@@ -1,4 +1,4 @@
-# 🍔 FOOD STORE | Especificación Técnica v4.0
+#  FOOD STORE | Especificación Técnica v4.0
 > **Materia:** Programación 4 (TUP)  
 > **Metodología:** Spec-Driven Development (SDD)  
 > **Estado:** Versión Final 4.0 — *Incorpora Auditoría, UoW, MercadoPago y Zustand Completo*
