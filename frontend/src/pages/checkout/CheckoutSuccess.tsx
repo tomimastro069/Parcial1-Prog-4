@@ -15,7 +15,7 @@ export default function CheckoutSuccess() {
         <p className="text-clay mb-8">Tu pedido fue confirmado y está siendo procesado.</p>
         <button
           onClick={() => navigate('/store/mis-pedidos')}
-          className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition-colors"
+          className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-sm font-semibold transition-colors"
         >
           Ver mis pedidos
         </button>

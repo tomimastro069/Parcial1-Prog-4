@@ -66,13 +66,13 @@ export default function MenuPublicoPage() {
           <div className="flex items-center gap-3">
             <Link
               to="/login"
-              className="px-4 py-2 text-sm font-medium text-walnut hover:bg-cream-deep rounded-lg transition-colors"
+              className="px-4 py-2 text-sm font-medium text-walnut hover:bg-cream-deep rounded-sm transition-colors"
             >
               Iniciar sesión
             </Link>
             <Link
               to="/register"
-              className="px-4 py-2 text-sm font-inconsolata font-semibold tracking-[0.08em] uppercase text-tan bg-walnut hover:bg-walnut-soft rounded-lg transition-colors"
+              className="px-4 py-2 text-sm font-inconsolata font-semibold tracking-[0.08em] uppercase text-tan bg-walnut hover:bg-walnut-soft rounded-sm transition-colors"
             >
               Registrarse
             </Link>
@@ -183,7 +183,7 @@ export default function MenuPublicoPage() {
             <button
               disabled={page === 1}
               onClick={() => setPage(page - 1)}
-              className="px-3 py-1.5 rounded-lg text-sm border border-line bg-cream-soft hover:bg-cream-deep disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-3 py-1.5 rounded-sm text-sm border border-line bg-cream-soft hover:bg-cream-deep disabled:opacity-40 disabled:cursor-not-allowed"
             >
               ‹
             </button>
@@ -191,7 +191,7 @@ export default function MenuPublicoPage() {
               <button
                 key={n}
                 onClick={() => setPage(n)}
-                className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${page === n ? 'bg-walnut border-walnut text-tan' : 'border-line bg-cream-soft hover:bg-cream-deep'
+                className={`px-3 py-1.5 rounded-sm text-sm border transition-colors ${page === n ? 'bg-walnut border-walnut text-tan' : 'border-line bg-cream-soft hover:bg-cream-deep'
                   }`}
               >
                 {n}
@@ -200,7 +200,7 @@ export default function MenuPublicoPage() {
             <button
               disabled={page === totalPages}
               onClick={() => setPage(page + 1)}
-              className="px-3 py-1.5 rounded-lg text-sm border border-line bg-cream-soft hover:bg-cream-deep disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-3 py-1.5 rounded-sm text-sm border border-line bg-cream-soft hover:bg-cream-deep disabled:opacity-40 disabled:cursor-not-allowed"
             >
               ›
             </button>

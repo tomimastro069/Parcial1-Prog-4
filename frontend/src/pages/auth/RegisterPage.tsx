@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { RegisterForm } from '../../features/auth/RegisterForm';
 
 export default function RegisterPage() {
@@ -16,6 +17,15 @@ export default function RegisterPage() {
         <div className="bg-cream-soft rounded-2xl shadow-xl p-8 border border-line">
           <h2 className="font-baskerville text-xl font-bold text-coffee mb-6">Crear cuenta</h2>
           <RegisterForm />
+        </div>
+
+        <div className="text-center mt-6">
+          <Link
+            to="/menu"
+            className="inline-flex items-center gap-2 font-inconsolata tracking-[0.08em] uppercase text-sm text-tan/80 hover:text-tan transition-colors"
+          >
+            <span>←</span> Volver al menú
+          </Link>
         </div>
       </div>
     </div>

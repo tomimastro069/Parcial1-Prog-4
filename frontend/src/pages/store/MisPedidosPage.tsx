@@ -71,7 +71,7 @@ export default function MisPedidosPage() {
                       <button
                         onClick={() => handlePagarMP(pedido.id)}
                         disabled={pagandoId === pedido.id}
-                        className="flex items-center gap-2 px-4 py-2 bg-[#009ee3] hover:bg-[#007db8] text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-60 shadow-sm"
+                        className="flex items-center gap-2 px-4 py-2 bg-[#009ee3] hover:bg-[#007db8] text-white text-sm font-semibold rounded-sm transition-colors disabled:opacity-60 shadow-sm"
                       >
                         {pagandoId === pedido.id ? (
                           <>
@@ -117,7 +117,7 @@ export default function MisPedidosPage() {
                 <button
                   disabled={page === 1}
                   onClick={() => setPage(p => p - 1)}
-                  className="px-3 py-1 border border-line bg-cream-soft rounded hover:bg-cream-deep disabled:opacity-50"
+                  className="px-3 py-1 border border-line bg-cream-soft rounded-sm hover:bg-cream-deep disabled:opacity-50"
                 >
                   Anterior
                 </button>
@@ -127,7 +127,7 @@ export default function MisPedidosPage() {
                 <button
                   disabled={page === data.pages}
                   onClick={() => setPage(p => p + 1)}
-                  className="px-3 py-1 border border-line bg-cream-soft rounded hover:bg-cream-deep disabled:opacity-50"
+                  className="px-3 py-1 border border-line bg-cream-soft rounded-sm hover:bg-cream-deep disabled:opacity-50"
                 >
                   Siguiente
                 </button>

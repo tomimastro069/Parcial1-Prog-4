@@ -15,7 +15,7 @@ export default function CheckoutPending() {
         <p className="text-clay mb-8">Tu pago está siendo procesado. Te notificaremos cuando sea confirmado.</p>
         <button
           onClick={() => navigate('/store/mis-pedidos')}
-          className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-3 rounded-lg font-semibold transition-colors"
+          className="w-full bg-yellow-500 hover:bg-yellow-600 text-white py-3 rounded-sm font-semibold transition-colors"
         >
           Ver mis pedidos
         </button>

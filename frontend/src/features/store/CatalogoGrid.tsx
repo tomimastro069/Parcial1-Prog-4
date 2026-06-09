@@ -153,7 +153,7 @@ export function CatalogoGrid() {
           <button
             disabled={page === 1}
             onClick={() => setSearchParams(prev => { prev.set('page', String(page - 1)); return prev; })}
-            className="px-3 py-1.5 rounded-lg text-sm border border-line bg-cream-soft hover:bg-cream-deep disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-3 py-1.5 rounded-sm text-sm border border-line bg-cream-soft hover:bg-cream-deep disabled:opacity-40 disabled:cursor-not-allowed"
           >
             ‹
           </button>
@@ -164,7 +164,7 @@ export function CatalogoGrid() {
               <button
                 key={pageNum}
                 onClick={() => setSearchParams(prev => { prev.set('page', String(pageNum)); return prev; })}
-                className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${page === pageNum
+                className={`px-3 py-1.5 rounded-sm text-sm border transition-colors ${page === pageNum
                   ? 'bg-walnut border-walnut text-tan'
                   : 'border-line bg-cream-soft hover:bg-cream-deep'
                   }`}
@@ -177,7 +177,7 @@ export function CatalogoGrid() {
           <button
             disabled={page === totalPages}
             onClick={() => setSearchParams(prev => { prev.set('page', String(page + 1)); return prev; })}
-            className="px-3 py-1.5 rounded-lg text-sm border border-line bg-cream-soft hover:bg-cream-deep disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-3 py-1.5 rounded-sm text-sm border border-line bg-cream-soft hover:bg-cream-deep disabled:opacity-40 disabled:cursor-not-allowed"
           >
             ›
           </button>

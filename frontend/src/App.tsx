@@ -48,14 +48,16 @@ function AppInner() {
         position="bottom-right"
         toastOptions={{
           duration: 3500,
+          // Contenedor externo invisible: todo el estilo va en el div interno
           style: {
-            background: '#ffffff',
-            color: '#111827',
-            border: '1px solid #e5e7eb',
-            borderRadius: '8px',
+            background: 'transparent',
+            boxShadow: 'none',
+            border: 'none',
+            borderRadius: 0,
+            padding: 0,
+            margin: 0,
+            color: '#1A1510',
             fontSize: '18px',
-            padding: '20px',
-            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
           },
         }}
       >
@@ -65,13 +67,13 @@ function AppInner() {
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
-                padding: '12px 16px',
-                borderRadius: '8px',
-                background: t.style?.background || '#ffffff',
-                color: t.style?.color || '#111827',
-                border: (t.style?.border as string) || '1px solid #e5e7eb',
-                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                gap: '10px',
+                padding: '14px 18px',
+                borderRadius: '18px',
+                background: '#FBF8F0',
+                color: '#1A1510',
+                border: '1px solid #E2D4AE',
+                boxShadow: '0 10px 24px -8px rgb(28 23 16 / 0.22)',
                 fontSize: '18px',
               }}>
                 {icon}
@@ -82,7 +84,7 @@ function AppInner() {
                     background: 'none',
                     border: 'none',
                     cursor: 'pointer',
-                    color: t.style?.color || '#6b7280',
+                    color: t.style?.color || '#7A6848',
                     fontSize: '18px',
                     padding: '0 0 0 8px',
                     opacity: 0.6,

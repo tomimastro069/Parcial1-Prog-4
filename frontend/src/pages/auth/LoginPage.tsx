@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { LoginForm } from '../../features/auth/LoginForm';
 import { useAuthStore } from '../../store/authStore';
 
@@ -26,6 +26,15 @@ export default function LoginPage() {
         <div className="bg-cream-soft rounded-2xl shadow-xl p-8 border border-line">
           <h2 className="font-baskerville text-xl font-bold text-coffee mb-6">Iniciar sesión</h2>
           <LoginForm />
+        </div>
+
+        <div className="text-center mt-6">
+          <Link
+            to="/menu"
+            className="inline-flex items-center gap-2 font-inconsolata tracking-[0.08em] uppercase text-sm text-tan/80 hover:text-tan transition-colors"
+          >
+            <span>←</span> Volver al menú
+          </Link>
         </div>
       </div>
     </div>

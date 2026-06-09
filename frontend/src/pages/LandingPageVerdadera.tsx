@@ -1,8 +1,13 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuthStore } from '../store/authStore'
 
 const LandingPageVerdadera: React.FC = () => {
   const navigate = useNavigate()
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+
+  // Con sesión iniciada → tienda (podés pedir); sin sesión → menú público
+  const irAlMenu = () => navigate(isAuthenticated ? '/store' : '/menu')
 
   return (
     <>
@@ -93,7 +98,7 @@ const LandingPageVerdadera: React.FC = () => {
               Todo lo que querés,<br />directo a tu puerta.
             </p>
 
-            <button onClick={() => navigate('/Menu')} className="cta-btn inline-flex items-center gap-3 bg-[#6B4F28] hover:bg-[#8B6535] text-[#E8D5B0] font-inconsolata font-semibold tracking-[0.18em] uppercase rounded-sm border-none cursor-pointer self-start mb-8 md:mb-10 2xl:mb-14 transition-all duration-[180ms] hover:translate-x-1
+            <button onClick={irAlMenu} className="cta-btn inline-flex items-center gap-3 bg-[#6B4F28] hover:bg-[#8B6535] text-[#E8D5B0] font-inconsolata font-semibold tracking-[0.18em] uppercase rounded-sm border-none cursor-pointer self-start mb-8 md:mb-10 2xl:mb-14 transition-all duration-[180ms] hover:translate-x-1
                                text-[13px] 2xl:text-[16px] px-8 2xl:px-12 h-[50px] md:h-[54px] 2xl:h-[68px]">
               Ver el menú
               <span className="cta-arrow text-base 2xl:text-xl transition-transform duration-[180ms]">→</span>

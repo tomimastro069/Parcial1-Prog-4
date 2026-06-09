@@ -71,7 +71,7 @@ export default function CheckoutPage() {
     return (
       <div className="py-10 flex flex-col items-center justify-center">
         <h2 className="font-baskerville text-2xl font-bold mb-4 text-coffee">Tu carrito está vacío</h2>
-        <button onClick={() => navigate('/store')} className="bg-walnut hover:bg-walnut-soft text-tan px-6 py-2 rounded shadow transition-colors">
+        <button onClick={() => navigate('/store')} className="bg-walnut hover:bg-walnut-soft text-tan px-6 py-2 rounded-sm shadow transition-colors">
           Volver a la tienda
         </button>
       </div>
@@ -238,7 +238,7 @@ export default function CheckoutPage() {
             <button
               type="submit"
               disabled={createMutation.isPending}
-              className="w-full bg-walnut hover:bg-walnut-soft text-tan py-3 rounded-lg font-inconsolata font-semibold tracking-[0.08em] uppercase shadow-md transition-colors disabled:opacity-50"
+              className="w-full bg-walnut hover:bg-walnut-soft text-tan py-3 rounded-sm font-inconsolata font-semibold tracking-[0.08em] uppercase shadow-md transition-colors disabled:opacity-50"
             >
               {createMutation.isPending ? 'Procesando...' : 'Confirmar Pedido'}
             </button>

@@ -16,13 +16,13 @@ export default function CheckoutFailure() {
         <div className="flex flex-col gap-3">
           <button
             onClick={() => navigate('/store/mis-pedidos')}
-            className="w-full bg-walnut hover:bg-walnut-soft text-tan py-3 rounded-lg font-inconsolata font-semibold tracking-[0.08em] uppercase transition-colors"
+            className="w-full bg-walnut hover:bg-walnut-soft text-tan py-3 rounded-sm font-inconsolata font-semibold tracking-[0.08em] uppercase transition-colors"
           >
             Ver mis pedidos
           </button>
           <button
             onClick={() => navigate('/store')}
-            className="w-full border border-line bg-cream hover:bg-cream-deep text-bark py-3 rounded-lg font-semibold transition-colors"
+            className="w-full border border-line bg-cream hover:bg-cream-deep text-bark py-3 rounded-sm font-semibold transition-colors"
           >
             Volver a la tienda
           </button>

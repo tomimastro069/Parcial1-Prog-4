@@ -130,8 +130,8 @@ export default function AddressFormModal({ isOpen, onClose, onSuccess, initialDa
           </label>
 
           <div className="flex justify-end space-x-2 mt-4">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-bark bg-cream-deep rounded hover:bg-line transition-colors">Cancelar</button>
-            <button type="submit" disabled={isPending} className="px-4 py-2 text-tan bg-walnut rounded hover:bg-walnut-soft transition-colors disabled:opacity-50">Guardar</button>
+            <button type="button" onClick={onClose} className="px-4 py-2 text-bark bg-cream-deep rounded-sm hover:bg-line transition-colors">Cancelar</button>
+            <button type="submit" disabled={isPending} className="px-4 py-2 text-tan bg-walnut rounded-sm hover:bg-walnut-soft transition-colors disabled:opacity-50">Guardar</button>
           </div>
         </form>
       </div>
