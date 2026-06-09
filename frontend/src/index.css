@@ -7,6 +7,22 @@
   --color-navy: #1F3864;
   --color-primary: #2E75B6;
   --color-accent: #4472C4;
+
+  /* ── Paleta "Casa del Sabor" (landing) ── */
+  --color-cream: #F2E8D0;       /* fondo de página */
+  --color-cream-soft: #FBF8F0;  /* superficies / cards */
+  --color-cream-deep: #EADFC2;  /* hover cálido */
+  --color-paper: #F7F0DF;
+  --color-espresso: #1C1710;    /* panel más oscuro */
+  --color-coffee: #1A1510;      /* texto de títulos */
+  --color-bark: #3A2E1A;
+  --color-walnut: #6B4F28;      /* botón / acento principal */
+  --color-walnut-soft: #8B6535; /* hover de botón */
+  --color-tan: #E8D5B0;         /* texto claro sobre oscuro */
+  --color-sand: #9A8460;        /* labels / texto tenue */
+  --color-clay: #7A6848;        /* texto de cuerpo cálido */
+  --color-gold: #C4A96A;        /* líneas de acento */
+  --color-line: #E2D4AE;        /* bordes cálidos */
 }
 
 @keyframes fadeIn {
@@ -55,11 +71,31 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
+    background: #d8c9a6;
     border-radius: 4px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    background: #c4a96a;
+  }
+}
+
+@layer components {
+  /* Etiqueta tipo "eyebrow" del landing: mono, mayúsculas, tracking amplio */
+  .eyebrow {
+    font-family: var(--font-inconsolata);
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    color: var(--color-sand);
+    font-size: 0.7rem;
+  }
+
+  /* Textura de papel rayado (panel claro del landing) */
+  .paper-lines {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0px, transparent 33px,
+      rgba(160, 140, 100, 0.1) 33px, rgba(160, 140, 100, 0.1) 34px
+    );
   }
 }

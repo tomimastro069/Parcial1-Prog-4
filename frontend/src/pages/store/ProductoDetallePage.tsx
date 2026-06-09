@@ -54,8 +54,8 @@ export default function ProductoDetallePage() {
   if (isError || !producto) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8 text-center">
-        <p className="text-gray-500">No se encontró el producto.</p>
-        <button onClick={() => navigate('/store')} className="mt-3 text-[#2E75B6] hover:underline">
+        <p className="text-clay">No se encontró el producto.</p>
+        <button onClick={() => navigate('/store')} className="mt-3 text-walnut hover:underline">
           Volver al catálogo
         </button>
       </div>
@@ -68,16 +68,16 @@ export default function ProductoDetallePage() {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
       <button
         onClick={() => navigate('/store')}
-        className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mb-6"
+        className="flex items-center gap-2 text-sm text-sand hover:text-bark mb-6"
       >
         <ArrowLeftIcon className="w-4 h-4" />
         Volver al menú
       </button>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden" style={{ animation: 'slideUp 0.3s ease-out' }}>
+      <div className="bg-cream-soft rounded-2xl shadow-sm border border-line overflow-hidden" style={{ animation: 'slideUp 0.3s ease-out' }}>
         <div className="md:flex">
           {/* Imagen */}
-          <div className="md:w-96 h-64 md:h-auto bg-gray-100 flex-shrink-0">
+          <div className="md:w-96 h-64 md:h-auto bg-cream-deep flex-shrink-0">
             {producto.imagen_url ? (
               <img
                 src={producto.imagen_url}
@@ -94,17 +94,17 @@ export default function ProductoDetallePage() {
           {/* Info */}
           <div className="flex-1 p-6 md:p-8">
             <div className="flex items-start justify-between gap-4">
-              <h1 className="text-2xl font-bold text-[#1F3864]">{producto.nombre}</h1>
+              <h1 className="font-baskerville text-3xl font-bold text-coffee tracking-[-0.01em]">{producto.nombre}</h1>
               {!producto.is_active && (
                 <Badge variant="sinstock">Sin stock</Badge>
               )}
             </div>
 
             {producto.descripcion && (
-              <p className="text-gray-600 mt-2 text-sm leading-relaxed">{producto.descripcion}</p>
+              <p className="font-baskerville italic text-clay mt-3 text-sm leading-relaxed">{producto.descripcion}</p>
             )}
 
-            <div className="mt-4 text-3xl font-bold text-[#2E75B6]">
+            <div className="mt-4 font-baskerville text-3xl font-bold text-walnut">
               ${producto.precio.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
             </div>
 
@@ -127,14 +127,14 @@ export default function ProductoDetallePage() {
             {/* Ingredientes */}
             {producto.ingredientes && producto.ingredientes.length > 0 && (
               <div className="mt-5">
-                <p className="text-sm font-medium text-gray-700 mb-2">Ingredientes</p>
+                <p className="text-sm font-medium text-bark mb-2">Ingredientes</p>
                 <div className="flex flex-wrap gap-1.5">
                   {producto.ingredientes.map((ing) => (
                     <span
                       key={ing.id}
                       className={`inline-flex items-center gap-1 text-xs rounded-full px-2.5 py-1 ${ing.es_alergeno
                           ? 'bg-orange-50 text-orange-700 border border-orange-200'
-                          : 'bg-gray-100 text-gray-600'
+                          : 'bg-cream-deep text-clay border border-line'
                         }`}
                     >
                       {ing.nombre}
@@ -147,24 +147,25 @@ export default function ProductoDetallePage() {
 
             {/* Cantidad y botón */}
             <div className="mt-6 flex items-center gap-4">
-              <div className="flex items-center gap-2 border border-gray-300 rounded-lg px-3 py-2">
+              <div className="flex items-center gap-2 border border-line bg-cream rounded-lg px-3 py-2">
                 <button
                   onClick={() => setCantidad((c) => Math.max(1, c - 1))}
-                  className="text-gray-500 hover:text-gray-700 font-bold w-5 text-center"
+                  className="text-clay hover:text-bark font-bold w-5 text-center"
                 >
                   −
                 </button>
-                <span className="text-sm font-medium w-6 text-center">{cantidad}</span>
+                <span className="text-sm font-medium w-6 text-center text-bark">{cantidad}</span>
                 <button
                   onClick={() => setCantidad((c) => Math.min(c + 1, stockDisponible))}
                   disabled={cantidad >= stockDisponible}
-                  className="text-gray-500 hover:text-gray-700 font-bold w-5 text-center disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="text-clay hover:text-bark font-bold w-5 text-center disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   +
                 </button>
               </div>
 
               <Button
+                variant="brand"
                 onClick={handleAgregar}
                 disabled={!producto.disponible || stockDisponible <= 0}
                 size="lg"

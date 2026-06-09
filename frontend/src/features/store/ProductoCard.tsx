@@ -35,7 +35,7 @@ export function ProductoCard({ producto }: ProductoCardProps) {
   };
 
   return (
-    <div className="group relative bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+    <div className="group relative bg-cream-soft rounded-xl border border-line overflow-hidden hover:shadow-md transition-shadow">
       {/* Imagen */}
       <Link to={`/store/producto/${producto.id}`}>
         <div className="relative h-44 bg-gray-100 overflow-hidden">
@@ -67,19 +67,20 @@ export function ProductoCard({ producto }: ProductoCardProps) {
       {/* Info */}
       <div className="p-4">
         <Link to={`/store/producto/${producto.id}`}>
-          <h3 className="font-semibold text-gray-900 truncate hover:text-[#2E75B6] transition-colors">
+          <h3 className="font-baskerville font-bold text-coffee truncate hover:text-walnut transition-colors">
             {producto.nombre}
           </h3>
         </Link>
         {producto.descripcion && (
-          <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{producto.descripcion}</p>
+          <p className="text-xs text-clay mt-0.5 line-clamp-2">{producto.descripcion}</p>
         )}
 
         <div className="flex items-center justify-between mt-3">
-          <span className="text-lg font-bold text-[#1F3864]">
+          <span className="font-baskerville text-lg font-bold text-walnut">
             ${producto.precio.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
           </span>
           <Button
+            variant="brand"
             size="sm"
             disabled={!producto.disponible}
             onClick={handleAgregar}

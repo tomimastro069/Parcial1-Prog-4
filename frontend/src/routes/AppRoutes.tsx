@@ -131,11 +131,11 @@ export const router = createBrowserRouter([
   // ─── Fallback ──────────────────────────────────────────────────────────────
   {
     path: '/unauthorized', element: (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-cream">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">403</h1>
-          <p className="text-gray-600 mb-4">No tenés permisos para acceder a esta página.</p>
-          <a href="/store" className="text-[#2E75B6] hover:underline">Volver al menú</a>
+          <h1 className="font-baskerville text-5xl font-bold text-coffee mb-2">403</h1>
+          <p className="text-clay mb-4">No tenés permisos para acceder a esta página.</p>
+          <a href="/store" className="text-walnut hover:underline">Volver al menú</a>
         </div>
       </div>
     )

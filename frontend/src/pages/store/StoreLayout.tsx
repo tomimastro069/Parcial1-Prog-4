@@ -5,7 +5,7 @@ import { ConfirmModal } from '../../components/ConfirmModal';
 
 export default function StoreLayout() {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-cream flex flex-col">
       <Header />
       <main className="flex-grow">
         <Outlet />

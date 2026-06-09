@@ -61,7 +61,8 @@ export default function PerfilPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Mi Perfil</h1>
+      <p className="eyebrow mb-2">Tu cuenta</p>
+      <h1 className="font-baskerville text-3xl font-bold text-coffee mb-6 tracking-[-0.01em]">Mi perfil</h1>
 
         {(loadingUser || loadingDirs) ? (
           <div className="text-center py-16 text-gray-500">Cargando datos...</div>
@@ -72,13 +73,13 @@ export default function PerfilPage() {
           </div>
         ) : (<>
           {/* User data */}
-          <section className="bg-white p-6 rounded-lg shadow mb-8">
+          <section className="bg-cream-soft border border-line p-6 rounded-lg shadow-sm mb-8">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold text-gray-800">Datos Personales</h2>
+              <h2 className="font-baskerville text-xl font-bold text-coffee">Datos personales</h2>
               {!isEditingProfile ? (
                 <button
                   onClick={() => setIsEditingProfile(true)}
-                  className="text-[#2E75B6] text-sm hover:underline font-semibold"
+                  className="text-walnut text-sm hover:underline font-semibold"
                 >
                   Editar Perfil
                 </button>
@@ -100,7 +101,7 @@ export default function PerfilPage() {
                       handleNameUpdate();
                       setIsEditingProfile(false);
                     }}
-                    className="text-[#2E75B6] text-sm hover:underline font-semibold"
+                    className="text-walnut text-sm hover:underline font-semibold"
                   >
                     Guardar
                   </button>
@@ -109,70 +110,70 @@ export default function PerfilPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm relative">
-                <span className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Nombre</span>
+              <div className="border border-line rounded-lg p-4 bg-cream shadow-sm relative">
+                <span className="block text-xs font-semibold text-sand uppercase tracking-wider mb-1">Nombre</span>
                 {isEditingProfile ? (
                   <input
                     type="text"
                     value={editName}
                     placeholder="Tu nombre"
                     onChange={(e) => setEditName(e.target.value)}
-                    className="w-full border-b-2 border-[#2E75B6] bg-transparent focus:outline-none text-gray-800 py-1 font-medium text-lg"
+                    className="w-full border-b-2 border-walnut bg-transparent focus:outline-none text-bark py-1 font-medium text-lg"
                     autoFocus
                   />
                 ) : (
-                  <p className="text-gray-800 font-medium text-lg truncate" title={user?.nombre || ''}>
+                  <p className="text-bark font-medium text-lg truncate" title={user?.nombre || ''}>
                     {user?.nombre || 'Sin nombre'}
                   </p>
                 )}
               </div>
 
-              <div className="border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm relative">
-                <span className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Apellido</span>
+              <div className="border border-line rounded-lg p-4 bg-cream shadow-sm relative">
+                <span className="block text-xs font-semibold text-sand uppercase tracking-wider mb-1">Apellido</span>
                 {isEditingProfile ? (
                   <input
                     type="text"
                     value={editLastName}
                     placeholder="Tu apellido"
                     onChange={(e) => setEditLastName(e.target.value)}
-                    className="w-full border-b-2 border-[#2E75B6] bg-transparent focus:outline-none text-gray-800 py-1 font-medium text-lg"
+                    className="w-full border-b-2 border-walnut bg-transparent focus:outline-none text-bark py-1 font-medium text-lg"
                   />
                 ) : (
-                  <p className="text-gray-800 font-medium text-lg truncate" title={user?.apellido || ''}>
+                  <p className="text-bark font-medium text-lg truncate" title={user?.apellido || ''}>
                     {user?.apellido || 'Sin apellido'}
                   </p>
                 )}
               </div>
 
-              <div className="border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm">
-                <span className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Correo Electrónico</span>
-                <p className="text-gray-800 font-medium text-lg truncate" title={user?.email}>{user?.email}</p>
+              <div className="border border-line rounded-lg p-4 bg-cream shadow-sm">
+                <span className="block text-xs font-semibold text-sand uppercase tracking-wider mb-1">Correo Electrónico</span>
+                <p className="text-bark font-medium text-lg truncate" title={user?.email}>{user?.email}</p>
                 {isEditingProfile && (
                   <p className="text-xs text-gray-400 mt-1">El email no se puede modificar.</p>
                 )}
               </div>
 
-              <div className="border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm relative">
-                <span className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Celular</span>
+              <div className="border border-line rounded-lg p-4 bg-cream shadow-sm relative">
+                <span className="block text-xs font-semibold text-sand uppercase tracking-wider mb-1">Celular</span>
                 {isEditingProfile ? (
                   <input
                     type="tel"
                     value={editCelular}
                     placeholder="+54 9 11 1234-5678"
                     onChange={(e) => setEditCelular(e.target.value)}
-                    className="w-full border-b-2 border-[#2E75B6] bg-transparent focus:outline-none text-gray-800 py-1 font-medium text-lg"
+                    className="w-full border-b-2 border-walnut bg-transparent focus:outline-none text-bark py-1 font-medium text-lg"
                   />
                 ) : (
-                  <p className="text-gray-800 font-medium text-lg">
-                    {user?.celular || <span className="text-gray-400 text-sm">Sin celular</span>}
+                  <p className="text-bark font-medium text-lg">
+                    {user?.celular || <span className="text-sand text-sm">Sin celular</span>}
                   </p>
                 )}
               </div>
 
-              <div className="border border-gray-200 rounded-lg p-4 bg-gray-50 shadow-sm">
-                <span className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Rol de Usuario</span>
+              <div className="border border-line rounded-lg p-4 bg-cream shadow-sm">
+                <span className="block text-xs font-semibold text-sand uppercase tracking-wider mb-1">Rol de Usuario</span>
                 <div className="mt-1">
-                  <span className="inline-block bg-[#2E75B6] text-white text-xs px-2 py-1 rounded font-semibold tracking-wide uppercase">
+                  <span className="inline-block bg-walnut text-tan text-xs px-2 py-1 rounded font-semibold tracking-wide uppercase">
                     {user?.roles?.[0]}
                   </span>
                 </div>
@@ -180,8 +181,8 @@ export default function PerfilPage() {
             </div>
           </section>
           {/* Addresses */}
-          <section className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Mis Direcciones</h2>
+          <section className="bg-cream-soft border border-line p-6 rounded-lg shadow-sm">
+            <h2 className="font-baskerville text-xl font-bold text-coffee mb-4">Mis direcciones</h2>
             {errorDirs ? (
               <p className="text-red-500">Error al cargar direcciones.</p>
             ) : direcciones?.length === 0 ? (
@@ -189,28 +190,28 @@ export default function PerfilPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {direcciones?.map((dir) => (
-                  <div key={dir.id} className={`border rounded-lg p-5 relative transition-shadow hover:shadow-md ${dir.es_principal ? 'border-[#2E75B6] bg-blue-50' : 'border-gray-200 bg-white'} shadow-sm flex flex-col justify-between`}>
+                  <div key={dir.id} className={`border rounded-lg p-5 relative transition-shadow hover:shadow-md ${dir.es_principal ? 'border-walnut bg-cream' : 'border-line bg-cream'} shadow-sm flex flex-col justify-between`}>
                     <div>
                       {dir.es_principal && (
-                        <span className="absolute top-3 right-3 text-xs font-semibold text-white bg-[#2E75B6] px-2 py-1 rounded shadow-sm">Principal</span>
+                        <span className="absolute top-3 right-3 text-xs font-semibold text-tan bg-walnut px-2 py-1 rounded shadow-sm">Principal</span>
                       )}
-                      <h3 className="font-bold text-gray-800 text-lg mb-1">{dir.alias || 'Dirección de entrega'}</h3>
-                      <p className="text-gray-700 text-sm mt-2">
+                      <h3 className="font-baskerville font-bold text-coffee text-lg mb-1">{dir.alias || 'Dirección de entrega'}</h3>
+                      <p className="text-bark text-sm mt-2">
                         {dir.linea1} {dir.linea2 && `, ${dir.linea2}`}
                       </p>
-                      <p className="text-gray-600 text-sm">
+                      <p className="text-clay text-sm">
                         {dir.ciudad} {dir.provincia && `, ${dir.provincia}`}
                       </p>
-                      {dir.codigo_postal && <p className="text-gray-500 text-xs mt-1">CP: {dir.codigo_postal}</p>}
+                      {dir.codigo_postal && <p className="text-sand text-xs mt-1">CP: {dir.codigo_postal}</p>}
                     </div>
 
-                    <div className="mt-5 flex space-x-4 border-t pt-3">
+                    <div className="mt-5 flex space-x-4 border-t border-line pt-3">
                       <button
                         onClick={() => {
                           setSelectedAddressToEdit(dir);
                           setShowAddressModal(true);
                         }}
-                        className="text-[#2E75B6] text-sm hover:underline font-semibold"
+                        className="text-walnut text-sm hover:underline font-semibold"
                       >
                         Editar
                       </button>
@@ -225,22 +226,22 @@ export default function PerfilPage() {
                 ))}
               </div>
             )}
-            <div className="mt-6 border-t pt-4">
+            <div className="mt-6 border-t border-line pt-4">
               <button
                 onClick={() => {
                   setSelectedAddressToEdit(undefined);
                   setShowAddressModal(true);
                 }}
-                className="px-5 py-2.5 bg-[#2E75B6] text-white font-medium rounded shadow hover:bg-[#1F3864] transition-colors"
+                className="px-5 py-2.5 bg-walnut text-tan font-inconsolata font-semibold tracking-[0.08em] uppercase text-sm rounded shadow hover:bg-walnut-soft transition-colors"
               >
-                + Añadir Dirección
+                + Añadir dirección
               </button>
             </div>
           </section>
           <div className="mt-6 flex justify-end">
             <button
               onClick={() => navigate('/store')}
-              className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+              className="px-4 py-2 bg-cream-deep text-bark rounded hover:bg-line transition-colors"
             >
               Volver a la tienda
             </button>

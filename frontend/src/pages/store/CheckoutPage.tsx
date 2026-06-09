@@ -70,8 +70,8 @@ export default function CheckoutPage() {
   if (items.length === 0) {
     return (
       <div className="py-10 flex flex-col items-center justify-center">
-        <h2 className="text-2xl font-bold mb-4 text-gray-800">Tu carrito está vacío</h2>
-        <button onClick={() => navigate('/store')} className="bg-[#D32F2F] text-white px-6 py-2 rounded shadow">
+        <h2 className="font-baskerville text-2xl font-bold mb-4 text-coffee">Tu carrito está vacío</h2>
+        <button onClick={() => navigate('/store')} className="bg-walnut hover:bg-walnut-soft text-tan px-6 py-2 rounded shadow transition-colors">
           Volver a la tienda
         </button>
       </div>
@@ -101,21 +101,22 @@ export default function CheckoutPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Finalizar Compra</h1>
+      <p className="eyebrow mb-2">Casi listo</p>
+      <h1 className="font-baskerville text-3xl font-bold text-coffee mb-8 tracking-[-0.01em]">Finalizar compra</h1>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Seccion Detalles del Usuario */}
         <div className="col-span-2 space-y-6" style={{ animation: 'slideUp 0.3s ease-out' }}>
 
           {/* Direcciones */}
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800">Tipo de Entrega</h2>
+          <div className="bg-cream-soft border border-line p-6 rounded-lg shadow-sm">
+            <h2 className="font-baskerville text-xl font-bold mb-4 text-coffee">Tipo de entrega</h2>
             <div className="space-y-4">
               <label className="flex items-center space-x-3 cursor-pointer">
                 <input
                   type="radio"
                   name="entrega"
-                  className="form-radio text-[#D32F2F]"
+                  className="form-radio accent-walnut text-walnut"
                   checked={selectedDireccion === null}
                   onChange={() => {
                     setSelectedDireccion(null);
@@ -134,7 +135,7 @@ export default function CheckoutPage() {
                       <input
                         type="radio"
                         name="entrega"
-                        className="form-radio text-[#D32F2F]"
+                        className="form-radio accent-walnut text-walnut"
                         checked={selectedDireccion === dir.id}
                         onChange={() => {
                           setSelectedDireccion(dir.id);
@@ -149,7 +150,7 @@ export default function CheckoutPage() {
                   <button
                     type="button"
                     onClick={() => setShowAddressModal(true)}
-                    className="text-sm text-[#D32F2F] hover:underline font-medium mt-2 block"
+                    className="text-sm text-walnut hover:underline font-medium mt-2 block"
                   >
                     + Añadir nueva dirección
                   </button>
@@ -159,8 +160,8 @@ export default function CheckoutPage() {
           </div>
 
           {/* Forma de Pago */}
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800">Forma de Pago</h2>
+          <div className="bg-cream-soft border border-line p-6 rounded-lg shadow-sm">
+            <h2 className="font-baskerville text-xl font-bold mb-4 text-coffee">Forma de pago</h2>
             {isLoadingPagos ? (
               <p className="text-sm text-gray-500">Cargando formas de pago...</p>
             ) : (
@@ -174,7 +175,7 @@ export default function CheckoutPage() {
                     <input
                       type="radio"
                       name="pago"
-                      className="form-radio text-[#D32F2F]"
+                      className="form-radio accent-walnut text-walnut"
                       value={forma.codigo}
                       checked={selectedFormaPago === forma.codigo}
                       onChange={(e) => setSelectedFormaPago(e.target.value)}
@@ -187,10 +188,10 @@ export default function CheckoutPage() {
           </div>
 
           {/* Notas */}
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800">Notas para el Pedido (Opcional)</h2>
+          <div className="bg-cream-soft border border-line p-6 rounded-lg shadow-sm">
+            <h2 className="font-baskerville text-xl font-bold mb-4 text-coffee">Notas para el pedido (opcional)</h2>
             <textarea
-              className="w-full border border-gray-300 rounded p-3 focus:ring-[#D32F2F] focus:border-[#D32F2F]"
+              className="w-full border border-line bg-cream rounded p-3 focus:ring-2 focus:ring-walnut/20 focus:border-walnut focus:outline-none"
               rows={3}
               placeholder="Aclaraciones, punto de referencia..."
               value={notas}
@@ -202,23 +203,23 @@ export default function CheckoutPage() {
 
         {/* Resumen del pedido */}
         <div className="col-span-1">
-          <div className="bg-white p-6 rounded-lg shadow sticky top-6">
-            <h2 className="text-xl font-semibold mb-4 text-gray-800">Resumen</h2>
+          <div className="bg-cream-soft border border-line p-6 rounded-lg shadow-sm sticky top-20">
+            <h2 className="font-baskerville text-xl font-bold mb-4 text-coffee">Resumen</h2>
 
-            <div className="max-h-60 overflow-y-auto mb-4 border-b pb-4 space-y-3">
+            <div className="max-h-60 overflow-y-auto mb-4 border-b border-line pb-4 space-y-3">
               {items.map((item, idx) => (
                 <div key={idx} className="flex justify-between text-sm">
-                  <span className="text-gray-600 font-medium">
+                  <span className="text-clay font-medium">
                     {item.cantidad}x {item.nombre}
                   </span>
-                  <span className="text-gray-900 font-semibold">
+                  <span className="text-bark font-semibold">
                     ${(item.precio * item.cantidad).toFixed(2)}
                   </span>
                 </div>
               ))}
             </div>
 
-            <div className="space-y-2 text-sm text-gray-600 mb-4 border-b pb-4">
+            <div className="space-y-2 text-sm text-clay mb-4 border-b border-line pb-4">
               <div className="flex justify-between">
                 <span>Subtotal ({itemCount} ítems)</span>
                 <span>${subtotal.toFixed(2)}</span>
@@ -229,7 +230,7 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            <div className="flex justify-between text-lg font-bold text-gray-900 mb-6">
+            <div className="flex justify-between font-baskerville text-lg font-bold text-coffee mb-6">
               <span>Total</span>
               <span>${total.toFixed(2)}</span>
             </div>
@@ -237,7 +238,7 @@ export default function CheckoutPage() {
             <button
               type="submit"
               disabled={createMutation.isPending}
-              className="w-full bg-[#D32F2F] hover:bg-red-800 text-white py-3 rounded-lg font-semibold shadow-md transition-colors disabled:opacity-50"
+              className="w-full bg-walnut hover:bg-walnut-soft text-tan py-3 rounded-lg font-inconsolata font-semibold tracking-[0.08em] uppercase shadow-md transition-colors disabled:opacity-50"
             >
               {createMutation.isPending ? 'Procesando...' : 'Confirmar Pedido'}
             </button>

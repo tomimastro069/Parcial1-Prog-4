@@ -57,7 +57,7 @@ export function CatalogoGrid() {
             placeholder="Buscar productos..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-gray-300 text-sm focus:border-[#2E75B6] focus:ring-2 focus:ring-[#2E75B6]/20 focus:outline-none"
+            className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-line bg-cream-soft text-sm focus:border-walnut focus:ring-2 focus:ring-walnut/20 focus:outline-none"
           />
         </div>
 
@@ -70,7 +70,7 @@ export function CatalogoGrid() {
               onChange={(e) =>
                 handleCategoriaChange(e.target.value ? Number(e.target.value) : null)
               }
-              className="pl-9 pr-8 py-2.5 rounded-lg border border-gray-300 text-sm focus:border-[#2E75B6] focus:ring-2 focus:ring-[#2E75B6]/20 focus:outline-none bg-white appearance-none cursor-pointer"
+              className="pl-9 pr-8 py-2.5 rounded-lg border border-line text-sm focus:border-walnut focus:ring-2 focus:ring-walnut/20 focus:outline-none bg-cream-soft appearance-none cursor-pointer"
             >
               <option value="">Todas las categorías</option>
               {categorias.map((c) => (
@@ -89,7 +89,7 @@ export function CatalogoGrid() {
           <p className="text-gray-500 mb-3">Error al cargar los productos.</p>
           <button
             onClick={() => refetch()}
-            className="text-sm text-[#2E75B6] hover:underline"
+            className="text-sm text-walnut hover:underline"
           >
             Reintentar
           </button>
@@ -119,7 +119,7 @@ export function CatalogoGrid() {
               d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          <h3 className="text-gray-700 font-medium mb-1">No encontramos productos</h3>
+          <h3 className="font-baskerville text-bark font-bold text-lg mb-1">No encontramos productos</h3>
           <p className="text-sm text-gray-500">
             {search
               ? `No hay resultados para "${search}"`
@@ -131,7 +131,7 @@ export function CatalogoGrid() {
                 setSearchInput('');
                 setCategoriaId(null);
               }}
-              className="mt-3 text-sm text-[#2E75B6] hover:underline"
+              className="mt-3 text-sm text-walnut hover:underline"
             >
               Limpiar filtros
             </button>
@@ -153,7 +153,7 @@ export function CatalogoGrid() {
           <button
             disabled={page === 1}
             onClick={() => setSearchParams(prev => { prev.set('page', String(page - 1)); return prev; })}
-            className="px-3 py-1.5 rounded-lg text-sm border border-gray-300 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-3 py-1.5 rounded-lg text-sm border border-line bg-cream-soft hover:bg-cream-deep disabled:opacity-40 disabled:cursor-not-allowed"
           >
             ‹
           </button>
@@ -165,8 +165,8 @@ export function CatalogoGrid() {
                 key={pageNum}
                 onClick={() => setSearchParams(prev => { prev.set('page', String(pageNum)); return prev; })}
                 className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${page === pageNum
-                  ? 'bg-[#2E75B6] border-[#2E75B6] text-white'
-                  : 'border-gray-300 hover:bg-gray-50'
+                  ? 'bg-walnut border-walnut text-tan'
+                  : 'border-line bg-cream-soft hover:bg-cream-deep'
                   }`}
               >
                 {pageNum}
@@ -177,7 +177,7 @@ export function CatalogoGrid() {
           <button
             disabled={page === totalPages}
             onClick={() => setSearchParams(prev => { prev.set('page', String(page + 1)); return prev; })}
-            className="px-3 py-1.5 rounded-lg text-sm border border-gray-300 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-3 py-1.5 rounded-lg text-sm border border-line bg-cream-soft hover:bg-cream-deep disabled:opacity-40 disabled:cursor-not-allowed"
           >
             ›
           </button>

@@ -55,24 +55,24 @@ export default function MenuPublicoPage() {
   }, [page, search, categoriaId]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-cream">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <header className="bg-cream/95 backdrop-blur border-b border-line sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
             <img src={logoRestaurante} alt="Logo" className="w-10 h-10 rounded-lg object-cover" />
-            <span className="font-bold text-[#1F3864] text-xl">Food Store</span>
+            <span className="font-baskerville font-bold text-coffee text-xl tracking-[-0.01em]">Casa del Sabor</span>
           </Link>
           <div className="flex items-center gap-3">
             <Link
               to="/login"
-              className="px-4 py-2 text-sm font-medium text-[#2E75B6] hover:bg-blue-50 rounded-lg transition-colors"
+              className="px-4 py-2 text-sm font-medium text-walnut hover:bg-cream-deep rounded-lg transition-colors"
             >
               Iniciar sesión
             </Link>
             <Link
               to="/register"
-              className="px-4 py-2 text-sm font-medium text-white bg-[#2E75B6] hover:bg-[#245d94] rounded-lg transition-colors"
+              className="px-4 py-2 text-sm font-inconsolata font-semibold tracking-[0.08em] uppercase text-tan bg-walnut hover:bg-walnut-soft rounded-lg transition-colors"
             >
               Registrarse
             </Link>
@@ -81,7 +81,9 @@ export default function MenuPublicoPage() {
       </header>
 
       <div className="max-w-6xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Nuestro menú</h1>
+        <p className="eyebrow mb-2">Hecho con cuidado</p>
+        <h1 className="font-baskerville text-3xl font-bold text-coffee mb-2 tracking-[-0.01em]">Nuestro menú</h1>
+        <div className="w-10 h-px bg-gold mb-6" />
 
         {/* Búsqueda y filtros */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
@@ -94,7 +96,7 @@ export default function MenuPublicoPage() {
               placeholder="Buscar productos..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-gray-300 text-sm focus:border-[#2E75B6] focus:ring-2 focus:ring-[#2E75B6]/20 focus:outline-none"
+              className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-line bg-cream-soft text-sm focus:border-walnut focus:ring-2 focus:ring-walnut/20 focus:outline-none"
             />
           </div>
           {categorias.length > 0 && (
@@ -104,7 +106,7 @@ export default function MenuPublicoPage() {
                 setCategoriaId(e.target.value ? Number(e.target.value) : null);
                 setPage(1);
               }}
-              className="px-4 py-2.5 rounded-lg border border-gray-300 text-sm focus:border-[#2E75B6] focus:ring-2 focus:ring-[#2E75B6]/20 focus:outline-none bg-white"
+              className="px-4 py-2.5 rounded-lg border border-line text-sm focus:border-walnut focus:ring-2 focus:ring-walnut/20 focus:outline-none bg-cream-soft"
             >
               <option value="">Todas las categorías</option>
               {categorias.map((c) => (
@@ -123,11 +125,11 @@ export default function MenuPublicoPage() {
           </div>
         ) : productos.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-gray-500">No se encontraron productos.</p>
+            <p className="text-clay">No se encontraron productos.</p>
             {(search || categoriaId) && (
               <button
                 onClick={() => { setSearchInput(''); setCategoriaId(null); }}
-                className="mt-3 text-sm text-[#2E75B6] hover:underline"
+                className="mt-3 text-sm text-walnut hover:underline"
               >
                 Limpiar filtros
               </button>
@@ -136,8 +138,8 @@ export default function MenuPublicoPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {productos.map((p) => (
-              <div key={p.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-                <div className="relative h-44 bg-gray-100 overflow-hidden">
+              <div key={p.id} className="bg-cream-soft rounded-xl border border-line overflow-hidden hover:shadow-md transition-shadow">
+                <div className="relative h-44 bg-cream-deep overflow-hidden">
                   {p.imagen_url ? (
                     <img src={p.imagen_url} alt={p.nombre} className="w-full h-full object-cover" />
                   ) : (
@@ -154,17 +156,17 @@ export default function MenuPublicoPage() {
                   )}
                 </div>
                 <div className="p-4">
-                  <h3 className="font-semibold text-gray-900 truncate">{p.nombre}</h3>
+                  <h3 className="font-baskerville font-bold text-coffee truncate">{p.nombre}</h3>
                   {p.descripcion && (
-                    <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{p.descripcion}</p>
+                    <p className="text-xs text-clay mt-0.5 line-clamp-2">{p.descripcion}</p>
                   )}
                   <div className="flex items-center justify-between mt-3">
-                    <span className="text-lg font-bold text-[#1F3864]">
+                    <span className="font-baskerville text-lg font-bold text-walnut">
                       ${p.precio.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                     </span>
                     <Link
                       to="/login"
-                      className="text-xs text-[#2E75B6] hover:underline font-medium"
+                      className="text-xs text-walnut hover:underline font-medium"
                     >
                       Iniciá sesión para pedir
                     </Link>
@@ -181,7 +183,7 @@ export default function MenuPublicoPage() {
             <button
               disabled={page === 1}
               onClick={() => setPage(page - 1)}
-              className="px-3 py-1.5 rounded-lg text-sm border border-gray-300 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-3 py-1.5 rounded-lg text-sm border border-line bg-cream-soft hover:bg-cream-deep disabled:opacity-40 disabled:cursor-not-allowed"
             >
               ‹
             </button>
@@ -190,7 +192,7 @@ export default function MenuPublicoPage() {
                 key={n}
                 onClick={() => setPage(n)}
                 className={`px-3 py-1.5 rounded-lg text-sm border transition-colors ${
-                  page === n ? 'bg-[#2E75B6] border-[#2E75B6] text-white' : 'border-gray-300 hover:bg-gray-50'
+                  page === n ? 'bg-walnut border-walnut text-tan' : 'border-line bg-cream-soft hover:bg-cream-deep'
                 }`}
               >
                 {n}
@@ -199,7 +201,7 @@ export default function MenuPublicoPage() {
             <button
               disabled={page === totalPages}
               onClick={() => setPage(page + 1)}
-              className="px-3 py-1.5 rounded-lg text-sm border border-gray-300 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-3 py-1.5 rounded-lg text-sm border border-line bg-cream-soft hover:bg-cream-deep disabled:opacity-40 disabled:cursor-not-allowed"
             >
               ›
             </button>

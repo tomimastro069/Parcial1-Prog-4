@@ -30,15 +30,15 @@ export function CartDrawer() {
 
       {/* Drawer */}
       <div
-        className={`fixed right-0 top-0 bottom-0 w-full max-w-sm bg-white z-50 flex flex-col shadow-2xl transition-transform duration-300 ease-in-out ${
+        className={`fixed right-0 top-0 bottom-0 w-full max-w-sm bg-cream z-50 flex flex-col shadow-2xl transition-transform duration-300 ease-in-out ${
           cartOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-line">
           <div className="flex items-center gap-2">
-            <ShoppingBagIcon className="w-5 h-5 text-[#2E75B6]" />
-            <h2 className="font-semibold text-gray-900">
+            <ShoppingBagIcon className="w-5 h-5 text-walnut" />
+            <h2 className="font-baskerville font-bold text-coffee">
               Carrito ({items.length})
             </h2>
           </div>
@@ -61,7 +61,7 @@ export function CartDrawer() {
             items.map((item) => (
               <div
                 key={item.producto_id}
-                className="flex gap-3 bg-gray-50 rounded-lg p-3"
+                className="flex gap-3 bg-cream-soft border border-line rounded-lg p-3"
               >
                 {/* Imagen */}
                 <div className="w-14 h-14 rounded-md bg-gray-200 flex-shrink-0 overflow-hidden">
@@ -80,8 +80,8 @@ export function CartDrawer() {
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">{item.nombre}</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-sm font-medium text-bark truncate">{item.nombre}</p>
+                  <p className="text-xs text-sand">
                     ${item.precio.toLocaleString('es-AR')} c/u
                   </p>
                   <div className="flex items-center gap-2 mt-1.5">
@@ -113,7 +113,7 @@ export function CartDrawer() {
                   >
                     <TrashIcon className="w-4 h-4" />
                   </button>
-                  <span className="text-sm font-semibold text-[#1F3864]">
+                  <span className="font-baskerville text-sm font-bold text-walnut">
                     ${(item.precio * item.cantidad).toLocaleString('es-AR')}
                   </span>
                 </div>
@@ -124,17 +124,17 @@ export function CartDrawer() {
 
         {/* Footer con totales */}
         {items.length > 0 && (
-          <div className="border-t border-gray-200 p-4 space-y-4">
+          <div className="border-t border-line p-4 space-y-4">
             <div className="space-y-1.5 text-sm">
-              <div className="flex justify-between text-gray-600">
+              <div className="flex justify-between text-clay">
                 <span>Subtotal</span>
                 <span>${subtotal.toLocaleString('es-AR')}</span>
               </div>
-              <div className="flex justify-between text-gray-600">
+              <div className="flex justify-between text-clay">
                 <span>Costo de envío</span>
                 <span>${costoEnvio.toLocaleString('es-AR')}</span>
               </div>
-              <div className="flex justify-between font-bold text-gray-900 text-base pt-1 border-t border-gray-100">
+              <div className="flex justify-between font-baskerville font-bold text-coffee text-base pt-1 border-t border-line">
                 <span>Total</span>
                 <span>${total.toLocaleString('es-AR')}</span>
               </div>
@@ -142,7 +142,7 @@ export function CartDrawer() {
 
             <div className="space-y-2">
               <Link to="/store/checkout" onClick={closeCart}>
-                <Button className="w-full">Ir al checkout</Button>
+                <Button variant="brand" className="w-full">Ir al checkout</Button>
               </Link>
               <button
                 onClick={() =>
@@ -152,7 +152,7 @@ export function CartDrawer() {
                     clearCart
                   )
                 }
-                className="w-full text-sm text-gray-500 hover:text-gray-700 py-1.5"
+                className="w-full text-sm text-sand hover:text-bark py-1.5"
               >
                 Vaciar carrito
               </button>

@@ -104,19 +104,19 @@ export default function AddressFormModal({ isOpen, onClose, onSuccess, initialDa
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-        <h2 className="text-xl font-bold mb-4">{initialData ? 'Editar Dirección' : 'Nueva Dirección'}</h2>
+      <div className="bg-cream-soft border border-line rounded-lg shadow-lg p-6 w-full max-w-md">
+        <h2 className="font-baskerville text-xl font-bold mb-4 text-coffee">{initialData ? 'Editar dirección' : 'Nueva dirección'}</h2>
         <form onSubmit={handleAddAddress} className="space-y-3">
-          <input type="text" placeholder="Alias (Ej. Casa)(Opcional)" value={newAddress.alias} onChange={e => setNewAddress({ ...newAddress, alias: e.target.value })} className="w-full border rounded p-2" />
-          <input type="text" placeholder="Línea 1 *" value={newAddress.linea1} onChange={e => setNewAddress({ ...newAddress, linea1: e.target.value })} required className="w-full border rounded p-2" />
-          <input type="text" placeholder="Línea 2 (Opcional)" value={newAddress.linea2} onChange={e => setNewAddress({ ...newAddress, linea2: e.target.value })} className="w-full border rounded p-2" />
-          <input type="text" placeholder="Ciudad *" value={newAddress.ciudad} onChange={e => setNewAddress({ ...newAddress, ciudad: e.target.value })} required className="w-full border rounded p-2" />
-          <input type="text" placeholder="Provincia (Opcional)" value={newAddress.provincia} onChange={e => setNewAddress({ ...newAddress, provincia: e.target.value })} className="w-full border rounded p-2" />
-          <input type="text" placeholder="Código Postal (Opcional)" value={newAddress.codigo_postal} onChange={e => setNewAddress({ ...newAddress, codigo_postal: e.target.value })} className="w-full border rounded p-2" />
+          <input type="text" placeholder="Alias (Ej. Casa)(Opcional)" value={newAddress.alias} onChange={e => setNewAddress({ ...newAddress, alias: e.target.value })} className="w-full border border-line bg-cream rounded p-2 focus:ring-2 focus:ring-walnut/20 focus:border-walnut focus:outline-none" />
+          <input type="text" placeholder="Línea 1 *" value={newAddress.linea1} onChange={e => setNewAddress({ ...newAddress, linea1: e.target.value })} required className="w-full border border-line bg-cream rounded p-2 focus:ring-2 focus:ring-walnut/20 focus:border-walnut focus:outline-none" />
+          <input type="text" placeholder="Línea 2 (Opcional)" value={newAddress.linea2} onChange={e => setNewAddress({ ...newAddress, linea2: e.target.value })} className="w-full border border-line bg-cream rounded p-2 focus:ring-2 focus:ring-walnut/20 focus:border-walnut focus:outline-none" />
+          <input type="text" placeholder="Ciudad *" value={newAddress.ciudad} onChange={e => setNewAddress({ ...newAddress, ciudad: e.target.value })} required className="w-full border border-line bg-cream rounded p-2 focus:ring-2 focus:ring-walnut/20 focus:border-walnut focus:outline-none" />
+          <input type="text" placeholder="Provincia (Opcional)" value={newAddress.provincia} onChange={e => setNewAddress({ ...newAddress, provincia: e.target.value })} className="w-full border border-line bg-cream rounded p-2 focus:ring-2 focus:ring-walnut/20 focus:border-walnut focus:outline-none" />
+          <input type="text" placeholder="Código Postal (Opcional)" value={newAddress.codigo_postal} onChange={e => setNewAddress({ ...newAddress, codigo_postal: e.target.value })} className="w-full border border-line bg-cream rounded p-2 focus:ring-2 focus:ring-walnut/20 focus:border-walnut focus:outline-none" />
 
           <div className="grid grid-cols-2 gap-2">
-            <input type="number" step="0.000001" placeholder="Latitud" value={newAddress.latitud} onChange={e => setNewAddress({ ...newAddress, latitud: e.target.value })} className="w-full border rounded p-2" />
-            <input type="number" step="0.000001" placeholder="Longitud" value={newAddress.longitud} onChange={e => setNewAddress({ ...newAddress, longitud: e.target.value })} className="w-full border rounded p-2" />
+            <input type="number" step="0.000001" placeholder="Latitud" value={newAddress.latitud} onChange={e => setNewAddress({ ...newAddress, latitud: e.target.value })} className="w-full border border-line bg-cream rounded p-2 focus:ring-2 focus:ring-walnut/20 focus:border-walnut focus:outline-none" />
+            <input type="number" step="0.000001" placeholder="Longitud" value={newAddress.longitud} onChange={e => setNewAddress({ ...newAddress, longitud: e.target.value })} className="w-full border border-line bg-cream rounded p-2 focus:ring-2 focus:ring-walnut/20 focus:border-walnut focus:outline-none" />
           </div>
 
           <label className="flex items-center space-x-2 mt-2">
@@ -124,14 +124,14 @@ export default function AddressFormModal({ isOpen, onClose, onSuccess, initialDa
               type="checkbox"
               checked={newAddress.es_principal}
               onChange={(e) => setNewAddress({ ...newAddress, es_principal: e.target.checked })}
-              className="form-checkbox h-4 w-4 text-[#2E75B6]"
+              className="form-checkbox h-4 w-4 accent-walnut text-walnut"
             />
-            <span className="text-sm">Dirección principal</span>
+            <span className="text-sm text-clay">Dirección principal</span>
           </label>
 
           <div className="flex justify-end space-x-2 mt-4">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-gray-600 bg-gray-200 rounded hover:bg-gray-300">Cancelar</button>
-            <button type="submit" disabled={isPending} className="px-4 py-2 text-white bg-[#D32F2F] rounded hover:bg-red-800 disabled:opacity-50">Guardar</button>
+            <button type="button" onClick={onClose} className="px-4 py-2 text-bark bg-cream-deep rounded hover:bg-line transition-colors">Cancelar</button>
+            <button type="submit" disabled={isPending} className="px-4 py-2 text-tan bg-walnut rounded hover:bg-walnut-soft transition-colors disabled:opacity-50">Guardar</button>
           </div>
         </form>
       </div>
