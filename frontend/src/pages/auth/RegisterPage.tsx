@@ -6,7 +6,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-tan/10 backdrop-blur mb-4 border border-gold/30">
-            <span className="text-3xl">🍔</span>
+            <span className="text-3xl"></span>
           </div>
           <h1 className="font-baskerville text-4xl font-bold text-tan tracking-[-0.01em]">Food store</h1>
           <div className="w-10 h-px bg-gold/60 mx-auto my-4" />
