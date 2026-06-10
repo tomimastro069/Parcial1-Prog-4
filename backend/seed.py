@@ -265,7 +265,7 @@ def seed_productos(session, cats, ings):
             ]
         ),
         (
-            "Doble Burger", None, "Doble medallón de carne con doble queso",
+            "Doble Burger", None, "Doble medallón de carne con doble queso cheddar clasica",
             "https://res.cloudinary.com/dwkdclfwe/image/upload/v1780531914/photo-1594212699903-ec8a3eca50f5_dff83f.jpg",
             False, ["Hamburguesas"],
             [

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import toast, { Toaster, ToastBar } from 'react-hot-toast';
@@ -19,6 +19,16 @@ const queryClient = new QueryClient({
 initWebSocket(queryClient);
 
 function AppInner() {
+  const [pathname, setPathname] = useState(window.location.pathname);
+
+  useEffect(() => {
+    // Suscribirse a los cambios del router para actualizar el pathname
+    const unsubscribe = router.subscribe((state) => {
+      setPathname(state.location.pathname);
+    });
+    return unsubscribe;
+  }, []);
+
   useEffect(() => {
     // Mantener los getters de usuario sincronizados
     const unsub = useAuthStore.subscribe(() => {
@@ -41,11 +51,14 @@ function AppInner() {
     return () => unsub();
   }, []);
 
+  const isStore = pathname.startsWith('/store');
+  const toastPosition = isStore ? 'bottom-left' : 'bottom-right';
+
   return (
     <>
       <RouterProvider router={router} />
       <Toaster
-        position="bottom-right"
+        position={toastPosition}
         toastOptions={{
           duration: 3500,
           // Contenedor externo invisible: todo el estilo va en el div interno

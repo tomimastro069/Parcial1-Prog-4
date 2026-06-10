@@ -213,7 +213,7 @@ export function IngredientesTable() {
                     </td>
                     <td className="px-4 py-3">
                       {ing.es_alergeno ? (
-                        <Badge variant="alergeno">! Alérgeno</Badge>
+                        <Badge variant="alergeno">Alérgeno</Badge>
                       ) : (
                         <Badge variant="gray">Sin alérgeno</Badge>
                       )}
