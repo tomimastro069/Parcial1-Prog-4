@@ -197,6 +197,9 @@ export default function DashboardPage() {
           <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <h2 className="text-base font-semibold text-gray-900">Últimos pedidos</h2>
             <span className="text-xs text-gray-400">Total: {pedidosData.total}</span>
+            <button onClick={() => navigate('/admin/pedidos')}>
+              <h2 className="text-base font-semibold text-gray-900 cursor-pointer">Ver todos →</h2>
+            </button>
           </div>
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-100">
