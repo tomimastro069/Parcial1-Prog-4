@@ -14,6 +14,7 @@ import { getAjuste, updateAjuste } from '../../api/ajustesApi';
 import { useAuthStore } from '../../store/authStore';
 import { descargarExcelDesdeServidor } from '../../utils/exportarExcel';
 import type { Categoria, ProductoRead, Ingrediente } from '../../types';
+import { ProfitChart } from '../../components/ProfitChart';
 
 // ── Queries de resumen ────────────────────────────────────────────────────────
 
@@ -241,6 +242,9 @@ export default function DashboardPage() {
           </table>
         </div>
       )}
+
+      {/* ── Gráfico de Ganancias ──────────────────────────────────────────── */}
+      <ProfitChart projectedIndice={parseFloat(inputIndice) || 1} />
 
       {/* ── Ajustes de Envío ──────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
