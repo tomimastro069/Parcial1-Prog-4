@@ -15,7 +15,7 @@ export function ProfitChart({ projectedIndice }: { projectedIndice?: number }) {
 
   const { data: pedidosData, isLoading: isLoadingPedidos } = useQuery({
     queryKey: ['todosPedidosAll'],
-    queryFn: () => getTodosPedidos(1, 100), // Get all orders (up to 100 for now to avoid 422)
+    queryFn: () => getTodosPedidos(1, 100),
   });
 
   const { data: productosData, isLoading: isLoadingProductos } = useQuery({
@@ -67,7 +67,6 @@ export function ProfitChart({ projectedIndice }: { projectedIndice?: number }) {
 
       let orderCost = 0;
       let orderRevenue = 0;
-      // Calculate order cost based on products
       if (pedido.detalles && Array.isArray(pedido.detalles)) {
         pedido.detalles.forEach((detalle: any) => {
           const prod = productosData.items.find((p: any) => p.id === detalle.producto_id);
@@ -164,3 +163,6 @@ export function ProfitChart({ projectedIndice }: { projectedIndice?: number }) {
     </div>
   );
 }
+
+
+//libreria utilizada para graficar: recharts
