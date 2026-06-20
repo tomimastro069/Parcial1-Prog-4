@@ -244,7 +244,7 @@ export default function DashboardPage() {
       )}
 
       {/* ── Gráfico de Ganancias ──────────────────────────────────────────── */}
-      <ProfitChart projectedIndice={parseFloat(inputIndice) || 1} />
+      <ProfitChart />
 
       {/* ── Ajustes de Envío ──────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -319,8 +319,8 @@ export default function DashboardPage() {
               </svg>
             </div>
             <div>
-              <h2 className="text-base font-semibold text-gray-900">Índice de Ganancia</h2>
-              <p className="text-xs text-gray-500">Multiplicador sobre el costo de ingredientes</p>
+              <h2 className="text-base font-semibold text-gray-900">Ganancia Recomendada</h2>
+              <p className="text-xs text-gray-500">Sugerido para nuevos productos · no cambia precios ya cargados</p>
             </div>
           </div>
 
@@ -390,11 +390,11 @@ export default function DashboardPage() {
                   return;
                 }
                 setGuardandoIndice(true);
-                const toastId = toast.loading('Guardando índice de ganancia...');
+                const toastId = toast.loading('Guardando ganancia recomendada...');
                 try {
                   await updateAjuste('indice_ganancia', inputIndice);
                   await refetchIndice();
-                  toast.success('Índice de ganancia actualizado', { id: toastId });
+                  toast.success('Ganancia recomendada actualizada', { id: toastId });
                 } catch (error: any) {
                   toast.error(error.response?.data?.detail || 'Error al actualizar', { id: toastId });
                 } finally {
@@ -403,7 +403,7 @@ export default function DashboardPage() {
               }}
               className="w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors disabled:opacity-50"
             >
-              {guardandoIndice ? 'Guardando...' : 'Actualizar Índice'}
+              {guardandoIndice ? 'Guardando...' : 'Actualizar Recomendado'}
             </button>
           </div>
         </div>

@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import Modal from '../../../components/Modal';
 import { Button } from '../../../components/Button';
 import { useCreateProducto, useUpdateProducto } from '../../../hooks/useProductos';
 import { useCategorias } from '../../../hooks/useCategorias';
 import { useIngredientes } from '../../../hooks/useIngredientes';
+import { getAjuste } from '../../../api/ajustesApi';
 import { IngredienteModal } from '../ingredientes/IngredienteModal';
 import { CategoriaModal } from '../categorias/CategoriaModal';
 import { uploadImagen, deleteImagen } from '../../../api/imagenesApi';
@@ -26,7 +28,17 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
   const categorias: { id: number; nombre: string }[] = (catData as any)?.items ?? [];
   const ingredientes: { id: number; nombre: string; unidad?: string; es_alergeno: boolean; precio_unitario?: number }[] = (ingData as any)?.items ?? [];
 
-  const MARGEN_RECOMENDADO = 50; // % de ganancia sugerido por producto
+  // Margen recomendado: se toma del ajuste del dashboard (índice → %). Es solo
+  // una sugerencia para nuevos productos; no afecta precios ya cargados.
+  const { data: indiceData } = useQuery({
+    queryKey: ['ajusteIndiceGanancia'],
+    queryFn: () => getAjuste('indice_ganancia'),
+    staleTime: 60_000,
+  });
+  const MARGEN_RECOMENDADO = indiceData
+    ? Math.max(0, Math.round((parseFloat(indiceData.valor) - 1) * 100))
+    : 50;
+  const MARGEN_MAX = 300; // tope del slider (%)
 
   const [nombre, setNombre] = useState('');
   const [precioBase, setPrecioBase] = useState(''); // solo para productos terminados
@@ -393,7 +405,7 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
                           {ing.unidad && <span className="text-gray-400 ml-1">({ing.unidad})</span>}
                         </span>
                         <span className="block text-[10px] font-normal text-gray-400">
-                          {fmt(precioUnit)} c/u · subtotal <span className="text-gray-600 font-medium">{fmt(subtotal)}</span>
+                          {fmt(precioUnit)} /{ing.unidad || 'u'} · subtotal <span className="text-gray-600 font-medium">{fmt(subtotal)}</span>
                         </span>
                       </span>
                       <input
@@ -510,8 +522,32 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
                   </button>
                 )}
               </div>
+
+              {/* Slider de margen */}
+              <div className="relative pt-3">
+                <input
+                  type="range"
+                  min="0"
+                  max={MARGEN_MAX}
+                  step="1"
+                  value={Math.min(margenNum, MARGEN_MAX)}
+                  onChange={(e) => setMargen(e.target.value)}
+                  className="w-full h-2 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[#2E75B6] [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-[#2E75B6] [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer"
+                  style={{
+                    background: `linear-gradient(to right, #2E75B6 ${(Math.min(margenNum, MARGEN_MAX) / MARGEN_MAX) * 100}%, #e5e7eb ${(Math.min(margenNum, MARGEN_MAX) / MARGEN_MAX) * 100}%)`,
+                  }}
+                />
+                <div className="flex justify-between text-[11px] text-gray-400 mt-1">
+                  <span>0%</span>
+                  <span>100%</span>
+                  <span>200%</span>
+                  <span>{MARGEN_MAX}%</span>
+                </div>
+              </div>
+
               <p className="mt-1 text-[11px] text-gray-500">
-                Recomendado: <strong>{MARGEN_RECOMENDADO}%</strong> de ganancia sobre el costo.
+                Recomendado: <strong>{MARGEN_RECOMENDADO}%</strong> de ganancia sobre el costo
+                <span className="text-gray-400"> (definido en el dashboard)</span>.
               </p>
             </div>
 

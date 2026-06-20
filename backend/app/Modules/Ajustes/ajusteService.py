@@ -42,6 +42,7 @@ class AjusteService:
             self.uow.session.add(ajuste)
             self.uow.session.flush()
             broadcast_sync("ajuste.actualizado", {"clave": clave, "valor": data.valor})
-            if clave == "indice_ganancia":
-                broadcast_sync("precios.actualizados", {})
+            # Nota: cambiar "indice_ganancia" NO reprecia productos. Es solo el
+            # margen recomendado para nuevos productos; cada producto guarda su
+            # propio margen, así que no se emite "precios.actualizados".
             return ajuste

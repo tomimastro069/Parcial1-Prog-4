@@ -444,9 +444,30 @@ def seed_ajustes(session):
 
     indice = session.exec(select(Ajuste).where(Ajuste.clave == "indice_ganancia")).first()
     if not indice:
-        session.add(Ajuste(clave="indice_ganancia", valor="1.5", descripcion="Multiplicador de ganancia sobre el costo de ingredientes (ej: 1.5 = 50% de ganancia)"))
+        indice = Ajuste(clave="indice_ganancia", valor="1.5", descripcion="Margen de ganancia RECOMENDADO para nuevos productos (ej: 1.5 = 50%). No afecta precios ya cargados.")
+        session.add(indice)
 
     session.commit()
+
+    # Backfill: productos sin margen propio adoptan el margen efectivo actual
+    # (derivado del índice) para que su precio NO cambie y queden 100%
+    # individuales. Idempotente: tras la primera corrida ya no quedan NULL.
+    from app.Modules.Producto.Model.producto import Producto
+    from decimal import Decimal
+    try:
+        indice_val = float(indice.valor)
+    except (ValueError, TypeError):
+        indice_val = 1.5
+    margen_equivalente = Decimal(str(round((indice_val - 1) * 100, 2)))
+    sin_margen = session.exec(
+        select(Producto).where(Producto.margen_ganancia == None)  # noqa: E711
+    ).all()
+    for prod in sin_margen:
+        prod.margen_ganancia = margen_equivalente
+        session.add(prod)
+    if sin_margen:
+        print(f"Backfill margen: {len(sin_margen)} producto(s) → {margen_equivalente}%")
+        session.commit()
 
 # -----------------------------
 # MAIN SEED

@@ -16,20 +16,14 @@ from app.Modules.Auditoria.auditoria import Auditoria
 from app.Modules.UnidadMedida.unidadMedida import UnidadMedida
 from app.Core.ws_broadcast import broadcast_sync
 
+# Margen por defecto (%) usado solo si un producto no tiene margen propio.
+# El índice del dashboard es únicamente un valor RECOMENDADO y no se usa para
+# calcular precios: cada producto define su ganancia de forma individual.
+DEFAULT_MARGEN_PCT = 50.0
+
 class ProductoService:
     def __init__(self, uow: UnitOfWork):
         self.uow = uow
-        self._indice_cache: float | None = None
-
-    def _get_indice_ganancia(self) -> float:
-        if self._indice_cache is not None:
-            return self._indice_cache
-        ajuste = self.uow.ajustes.get_by_clave("indice_ganancia")
-        try:
-            self._indice_cache = float(ajuste.valor) if ajuste else 1.5
-        except (ValueError, AttributeError):
-            self._indice_cache = 1.5
-        return self._indice_cache
 
     def _calcular_stock(self, p: Producto, pis: list) -> int:
         """Calcula cuántas unidades se pueden fabricar según el stock de ingredientes."""
@@ -52,11 +46,12 @@ class ProductoService:
         return int(min_unidades) if min_unidades != float('inf') else 0
 
     def _factor_ganancia(self, p: Producto) -> float:
-        """Factor multiplicador del precio. Usa el margen por producto si está
-        definido (porcentaje → 1 + margen/100); si no, el índice global."""
-        if p.margen_ganancia is not None:
-            return 1 + float(p.margen_ganancia) / 100
-        return self._get_indice_ganancia()
+        """Factor multiplicador del precio basado SOLO en el margen individual
+        del producto (porcentaje → 1 + margen/100). Si el producto no tiene
+        margen propio se usa un default fijo; el índice global del dashboard es
+        únicamente recomendado y nunca afecta los precios ya cargados."""
+        margen = float(p.margen_ganancia) if p.margen_ganancia is not None else DEFAULT_MARGEN_PCT
+        return 1 + margen / 100
 
     def _calcular_costo(self, p: Producto, pis: list) -> float:
         """Costo base del producto antes de aplicar el margen."""

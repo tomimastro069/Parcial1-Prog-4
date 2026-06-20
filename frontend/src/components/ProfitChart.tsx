@@ -5,10 +5,9 @@ import {
 } from 'recharts';
 import { getTodosPedidos } from '../api/pedidosApi';
 import { productosApi } from '../api/productosApi';
-import { getAjuste } from '../api/ajustesApi';
 import type { PedidoResponse } from '../api/pedidosApi';
 
-export function ProfitChart({ projectedIndice }: { projectedIndice?: number }) {
+export function ProfitChart() {
   const [groupBy, setGroupBy] = useState<'dia' | 'semana' | 'mes'>('dia');
   const [dateFrom, setDateFrom] = useState<string>('');
   const [dateTo, setDateTo] = useState<string>('');
@@ -23,16 +22,8 @@ export function ProfitChart({ projectedIndice }: { projectedIndice?: number }) {
     queryFn: () => productosApi.listAdmin({ size: 100 }),
   });
 
-  const { data: indiceGananciaData, isLoading: isLoadingIndice } = useQuery({
-    queryKey: ['ajusteIndiceGananciaAll'],
-    queryFn: () => getAjuste('indice_ganancia'),
-  });
-
   const chartData = useMemo(() => {
-    if (!pedidosData?.items || !productosData?.items || !indiceGananciaData) return [];
-
-    const savedIndice = parseFloat(indiceGananciaData.valor) || 1;
-    const currentIndice = projectedIndice || savedIndice;
+    if (!pedidosData?.items || !productosData?.items) return [];
 
     let pedidos = pedidosData.items.filter((p: PedidoResponse) => p.estado_codigo !== 'CANCELADO');
 
@@ -71,17 +62,24 @@ export function ProfitChart({ projectedIndice }: { projectedIndice?: number }) {
         pedido.detalles.forEach((detalle: any) => {
           const prod = productosData.items.find((p: any) => p.id === detalle.producto_id);
           if (prod) {
-            const productCost = prod.precio / savedIndice;
-            const productRevenue = productCost * currentIndice;
-            orderCost += productCost * (detalle.cantidad || 1);
-            orderRevenue += productRevenue * (detalle.cantidad || 1);
+            const cantidad = detalle.cantidad || 1;
+            // Costo y precio reales de cada producto (cada uno con su margen
+            // individual); no depende del índice recomendado del dashboard.
+            const productRevenue = prod.precio;
+            const productCost = prod.costo ?? (
+              prod.margen_ganancia != null
+                ? prod.precio / (1 + prod.margen_ganancia / 100)
+                : prod.precio
+            );
+            orderCost += productCost * cantidad;
+            orderRevenue += productRevenue * cantidad;
           }
         });
       }
 
-      if (orderCost === 0 && pedido.total > 0) {
-        orderCost = pedido.total / savedIndice;
-        orderRevenue = orderCost * currentIndice;
+      if (orderRevenue === 0 && pedido.total > 0) {
+        // Sin detalle de productos: usamos el total del pedido como ingreso.
+        orderRevenue = pedido.total;
       }
 
       groupedData[key].revenue += orderRevenue;
@@ -95,9 +93,9 @@ export function ProfitChart({ projectedIndice }: { projectedIndice?: number }) {
       cost: parseFloat(d.cost.toFixed(2)),
       profit: parseFloat(d.profit.toFixed(2)),
     }));
-  }, [pedidosData, productosData, indiceGananciaData, groupBy, dateFrom, dateTo, projectedIndice]);
+  }, [pedidosData, productosData, groupBy, dateFrom, dateTo]);
 
-  if (isLoadingPedidos || isLoadingProductos || isLoadingIndice) {
+  if (isLoadingPedidos || isLoadingProductos) {
     return <div className="p-4 text-center">Cargando gráfico...</div>;
   }
 
