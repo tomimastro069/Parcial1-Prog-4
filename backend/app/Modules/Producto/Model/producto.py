@@ -35,6 +35,14 @@ class Producto(SQLModel, table=True):
         nullable=False
     )
 
+    # Margen de ganancia POR PRODUCTO, expresado en porcentaje (ej: 50 = +50%).
+    # Si es NULL, el producto usa el índice de ganancia global (ajuste).
+    margen_ganancia: Optional[Decimal] = Field(
+        default=None,
+        ge=0,
+        nullable=True
+    )
+
     # TEXT[]
     imagenes_url: Optional[List[str]] = Field(default=None,sa_column=Column(JSON))
 

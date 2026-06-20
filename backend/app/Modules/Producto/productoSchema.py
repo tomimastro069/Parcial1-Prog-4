@@ -32,6 +32,8 @@ class ProductoCreate(SQLModel):
     nombre: Annotated[str, Field(min_length=2, max_length=100)]
     precio_base: Annotated[Optional[float], Field(gt=0)] = None
     # Solo obligatorio si es_terminado=True. Para productos elaborados se calcula desde ingredientes.
+    margen_ganancia: Annotated[Optional[float], Field(ge=0)] = None
+    # Porcentaje de ganancia por producto (ej: 50 = +50%). Si es None se usa el índice global.
     descripcion: Annotated[Optional[str], Field(max_length=500)] = None
     imagen_url: Optional[str] = None
     es_terminado: bool = False
@@ -43,6 +45,8 @@ class ProductoRead(SQLModel):
     id: int
     nombre: str
     precio: float
+    costo: float = 0  # costo base antes del margen (suma ingredientes o precio_base)
+    margen_ganancia: Optional[float] = None  # porcentaje aplicado (None = índice global)
     descripcion: Optional[str] = None
     imagen_url: Optional[str] = None
     is_active: bool = True
@@ -56,6 +60,7 @@ class ProductoRead(SQLModel):
 class ProductoUpdate(SQLModel):
     nombre: Annotated[Optional[str], Field(min_length=2, max_length=100)] = None
     precio_base: Annotated[Optional[float], Field(gt=0)] = None
+    margen_ganancia: Annotated[Optional[float], Field(ge=0)] = None
     # Solo relevante para productos terminados.
     descripcion: Annotated[Optional[str], Field(max_length=500)] = None
     imagen_url: Optional[str] = None

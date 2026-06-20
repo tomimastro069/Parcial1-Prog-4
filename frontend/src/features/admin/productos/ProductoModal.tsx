@@ -24,10 +24,13 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
   const [modalIngrediente, setModalIngrediente] = useState(false);
   const [modalCategoria, setModalCategoria] = useState(false);
   const categorias: { id: number; nombre: string }[] = (catData as any)?.items ?? [];
-  const ingredientes: { id: number; nombre: string; unidad?: string; es_alergeno: boolean }[] = (ingData as any)?.items ?? [];
+  const ingredientes: { id: number; nombre: string; unidad?: string; es_alergeno: boolean; precio_unitario?: number }[] = (ingData as any)?.items ?? [];
+
+  const MARGEN_RECOMENDADO = 50; // % de ganancia sugerido por producto
 
   const [nombre, setNombre] = useState('');
   const [precioBase, setPrecioBase] = useState(''); // solo para productos terminados
+  const [margen, setMargen] = useState(String(MARGEN_RECOMENDADO)); // % de ganancia por producto
   const [descripcion, setDescripcion] = useState('');
   const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState<number[]>([]);
   const [ingredientesSeleccionados, setIngredientesSeleccionados] = useState<ProductoIngredienteInput[]>([]);
@@ -56,7 +59,8 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
   useEffect(() => {
     if (editando) {
       setNombre(editando.nombre);
-      setPrecioBase(''); // el precio base real no viene en el read, viene calculado
+      setPrecioBase(editando.es_terminado ? String(editando.costo ?? '') : ''); // el costo base de terminados
+      setMargen(String(editando.margen_ganancia ?? MARGEN_RECOMENDADO));
       setDescripcion(editando.descripcion ?? '');
       setCategoriasSeleccionadas(editando.categorias.map((c) => c.id));
       setIngredientesSeleccionados(
@@ -68,6 +72,7 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
     } else {
       setNombre('');
       setPrecioBase('');
+      setMargen(String(MARGEN_RECOMENDADO));
       setImagenUrl(null);
       setImagenPublicId(null);
       setDescripcion('');
@@ -118,6 +123,32 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
     );
   };
 
+  // ── Cálculo de costos y precio de venta (en vivo) ──────────────────────────
+  const fmt = (n: number) =>
+    n.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 2 });
+
+  const margenNum = (() => {
+    const m = parseFloat(margen);
+    return isNaN(m) || m < 0 ? 0 : m;
+  })();
+
+  // Costo de cada ingrediente según la cantidad ingresada
+  const lineasIngrediente = ingredientesSeleccionados.map((sel) => {
+    const ing = ingredientes.find((i) => i.id === sel.ingrediente_id);
+    const precioUnit = ing?.precio_unitario ?? 0;
+    return {
+      id: sel.ingrediente_id,
+      nombre: ing?.nombre ?? '',
+      cantidad: sel.cantidad || 0,
+      precioUnit,
+      subtotal: precioUnit * (sel.cantidad || 0),
+    };
+  });
+
+  const costoIngredientes = lineasIngrediente.reduce((acc, l) => acc + l.subtotal, 0);
+  const costoBase = esTerminado ? parseFloat(precioBase) || 0 : costoIngredientes;
+  const precioVenta = costoBase * (1 + margenNum / 100);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
@@ -125,6 +156,7 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
     const data = {
       nombre: nombre.trim(),
       precio_base: esTerminado && precioBase ? parseFloat(precioBase) : undefined,
+      margen_ganancia: margen === '' ? null : margenNum,
       descripcion: descripcion.trim() || null,
       es_terminado: esTerminado,
       categorias: categoriasSeleccionadas,
@@ -211,7 +243,7 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
           {/* Para productos elaborados: info de precio calculado */}
           {!esTerminado && (
             <div className="p-3 bg-blue-50 rounded-lg border border-blue-100 text-xs text-blue-700">
-              El precio de venta se calcula automáticamente: <strong>suma del costo de ingredientes × índice de ganancia</strong>. Configurá el precio unitario de cada ingrediente desde la pestaña Ingredientes.
+              El precio de venta se calcula automáticamente: <strong>costo de ingredientes + margen de ganancia de este producto</strong>. Configurá el precio unitario de cada ingrediente desde la pestaña Ingredientes.
             </div>
           )}
 
@@ -351,11 +383,18 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
                 {ingredientesSeleccionados.map((sel) => {
                   const ing = ingredientes.find(i => i.id === sel.ingrediente_id);
                   if (!ing) return null;
+                  const precioUnit = ing.precio_unitario ?? 0;
+                  const subtotal = precioUnit * (sel.cantidad || 0);
                   return (
                     <div key={sel.ingrediente_id} className="flex items-center gap-2 bg-white rounded-lg px-2 py-1.5 border border-[#2E75B6]/20">
-                      <span className="flex-1 text-xs font-medium text-[#2E75B6]">
-                        {ing.nombre}
-                        {ing.unidad && <span className="text-gray-400 ml-1">({ing.unidad})</span>}
+                      <span className="flex-1 min-w-0 text-xs font-medium text-[#2E75B6]">
+                        <span className="block truncate">
+                          {ing.nombre}
+                          {ing.unidad && <span className="text-gray-400 ml-1">({ing.unidad})</span>}
+                        </span>
+                        <span className="block text-[10px] font-normal text-gray-400">
+                          {fmt(precioUnit)} c/u · subtotal <span className="text-gray-600 font-medium">{fmt(subtotal)}</span>
+                        </span>
                       </span>
                       <input
                         type="text"
@@ -441,6 +480,56 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
             {errors.ingredientes && !esTerminado && (
               <p className="mt-1 text-xs text-red-600">{errors.ingredientes}</p>
             )}
+          </div>
+
+          {/* Margen de ganancia por producto + resumen de precios */}
+          <div className="rounded-lg border border-[#2E75B6]/20 bg-[#2E75B6]/5 p-3 space-y-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Margen de ganancia de este producto
+              </label>
+              <div className="flex items-center gap-2">
+                <div className="relative w-32">
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={margen}
+                    onChange={(e) => setMargen(e.target.value)}
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 pr-8 text-sm focus:border-[#2E75B6] focus:ring-2 focus:ring-[#2E75B6]/20 focus:outline-none"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">%</span>
+                </div>
+                {margenNum !== MARGEN_RECOMENDADO && (
+                  <button
+                    type="button"
+                    onClick={() => setMargen(String(MARGEN_RECOMENDADO))}
+                    className="text-xs font-medium text-[#2E75B6] hover:underline"
+                  >
+                    Usar recomendado ({MARGEN_RECOMENDADO}%)
+                  </button>
+                )}
+              </div>
+              <p className="mt-1 text-[11px] text-gray-500">
+                Recomendado: <strong>{MARGEN_RECOMENDADO}%</strong> de ganancia sobre el costo.
+              </p>
+            </div>
+
+            {/* Resumen: costo y precio de venta */}
+            <div className="space-y-1 border-t border-[#2E75B6]/15 pt-2.5 text-sm">
+              <div className="flex items-center justify-between text-gray-600">
+                <span>{esTerminado ? 'Costo base' : 'Costo de ingredientes'}</span>
+                <span className="font-medium">{fmt(costoBase)}</span>
+              </div>
+              <div className="flex items-center justify-between text-gray-500">
+                <span>Ganancia ({margenNum}%)</span>
+                <span>{fmt(precioVenta - costoBase)}</span>
+              </div>
+              <div className="flex items-center justify-between pt-1 text-base font-semibold text-[#1F3864]">
+                <span>Precio de venta</span>
+                <span>{fmt(precioVenta)}</span>
+              </div>
+            </div>
           </div>
 
           {/* Imagen */}

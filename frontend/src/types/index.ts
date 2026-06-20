@@ -116,6 +116,8 @@ export interface ProductoRead {
   id: number;
   nombre: string;
   precio: number;
+  costo?: number;
+  margen_ganancia?: number | null;
   descripcion: string | null;
   imagen_url: string | null;
   is_active: boolean;
@@ -126,8 +128,11 @@ export interface ProductoRead {
 
 export interface ProductoCreate {
   nombre: string;
-  precio: number;
+  precio?: number;
+  precio_base?: number;
+  margen_ganancia?: number | null;
   descripcion?: string | null;
+  imagen_url?: string | null;
   es_terminado?: boolean;
   categorias?: number[];
   ingredientes?: ProductoIngredienteInput[];
@@ -136,7 +141,10 @@ export interface ProductoCreate {
 export interface ProductoUpdate {
   nombre?: string;
   precio?: number;
+  precio_base?: number;
+  margen_ganancia?: number | null;
   descripcion?: string | null;
+  imagen_url?: string | null;
   es_terminado?: boolean;
   categorias?: number[];
   ingredientes?: ProductoIngredienteInput[];

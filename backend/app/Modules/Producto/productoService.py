@@ -51,19 +51,27 @@ class ProductoService:
 
         return int(min_unidades) if min_unidades != float('inf') else 0
 
-    def _calcular_precio(self, p: Producto, pis: list) -> float:
-        """Calcula el precio de venta al vuelo."""
+    def _factor_ganancia(self, p: Producto) -> float:
+        """Factor multiplicador del precio. Usa el margen por producto si está
+        definido (porcentaje → 1 + margen/100); si no, el índice global."""
+        if p.margen_ganancia is not None:
+            return 1 + float(p.margen_ganancia) / 100
+        return self._get_indice_ganancia()
+
+    def _calcular_costo(self, p: Producto, pis: list) -> float:
+        """Costo base del producto antes de aplicar el margen."""
         if p.es_terminado:
-            # Producto terminado: precio_base × indice_ganancia
-            return round(float(p.precio_base) * self._get_indice_ganancia(), 2)
-        else:
-            # Producto elaborado: Σ(precio_unitario_ing × cantidad) × indice_ganancia
-            costo_total = 0.0
-            for pi in pis:
-                ing = self.uow.ingredientes.get(pi.ingrediente_id)
-                if ing:
-                    costo_total += float(ing.precio_unitario) * float(pi.cantidad)
-            return round(costo_total * self._get_indice_ganancia(), 2)
+            return round(float(p.precio_base), 2)
+        costo_total = 0.0
+        for pi in pis:
+            ing = self.uow.ingredientes.get(pi.ingrediente_id)
+            if ing:
+                costo_total += float(ing.precio_unitario) * float(pi.cantidad)
+        return round(costo_total, 2)
+
+    def _calcular_precio(self, p: Producto, pis: list) -> float:
+        """Calcula el precio de venta al vuelo: costo × factor de ganancia."""
+        return round(self._calcular_costo(p, pis) * self._factor_ganancia(p), 2)
 
     def _build_read(self, p: Producto) -> ProductoRead:
         """Construye el schema de lectura con datos de categorías e ingredientes."""
@@ -100,6 +108,7 @@ class ProductoService:
                 )
                 ingredientes.append(ingrediente_read)
 
+        costo_calculado = self._calcular_costo(p, pis)
         precio_calculado = self._calcular_precio(p, pis)
         stock_calculado = self._calcular_stock(p, pis)
 
@@ -107,6 +116,8 @@ class ProductoService:
             id=p.id,
             nombre=p.nombre,
             precio=precio_calculado,
+            costo=costo_calculado,
+            margen_ganancia=float(p.margen_ganancia) if p.margen_ganancia is not None else None,
             descripcion=p.descripcion,
             imagen_url=p.imagenes_url[0] if p.imagenes_url else None,
             is_active=p.is_active,
@@ -188,6 +199,7 @@ class ProductoService:
             p = Producto(
                 nombre=data.nombre,
                 precio_base=Decimal(str(data.precio_base)) if data.precio_base else Decimal("0"),
+                margen_ganancia=Decimal(str(data.margen_ganancia)) if data.margen_ganancia is not None else None,
                 descripcion=data.descripcion,
                 es_terminado=data.es_terminado,
                 imagenes_url=[data.imagen_url] if data.imagen_url else None,
@@ -235,6 +247,8 @@ class ProductoService:
             for key, val in campos_base.items():
                 if key == "precio_base" and val is not None:
                     p.precio_base = Decimal(str(val))
+                elif key == "margen_ganancia":
+                    p.margen_ganancia = Decimal(str(val)) if val is not None else None
                 else:
                     setattr(p, key, val)
 
