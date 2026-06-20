@@ -13,3 +13,4 @@ class DireccionRepository(BaseRepository[DireccionEntrega]):
             d.es_principal = False
             self.session.add(d)
         self.session.flush()
+# ------------
