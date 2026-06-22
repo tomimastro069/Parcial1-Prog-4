@@ -3,7 +3,6 @@ from sqlmodel import select, func
 from fastapi import HTTPException, status
 from decimal import Decimal
 from app.Modules.Producto.Model.producto import Producto
-from app.Modules.Producto.Model.productoCategoria import ProductoCategoria
 from app.Modules.Producto.productoSchema import (
     ProductoCreate,
     ProductoUpdate,
@@ -70,16 +69,13 @@ class ProductoService:
 
     def _build_read(self, p: Producto) -> ProductoRead:
         """Construye el schema de lectura con datos de categorías e ingredientes."""
-        pcs = self.uow.productos.list_categorias_rel(p.id)
-        categorias = [
-            CategoriaEnProducto(
+        categoria = None
+        if p.categoria_id and (cat := self.uow.categorias.get(p.categoria_id)):
+            categoria = CategoriaEnProducto(
                 id=cat.id, 
                 nombre=cat.nombre, 
                 full_path=self.uow.categorias.get_full_path(cat.id)
             )
-            for pc in pcs
-            if (cat := self.uow.categorias.get(pc.categoria_id))
-        ]
 
         pis = self.uow.productos.list_ingredientes_rel(p.id)
         ingredientes = []
@@ -119,7 +115,7 @@ class ProductoService:
             es_terminado=p.es_terminado,
             disponible=p.disponible and stock_calculado > 0,
             stock_calculado=stock_calculado,
-            categorias=categorias,
+            categoria=categoria,
             ingredientes=ingredientes,
         )
 
@@ -161,14 +157,13 @@ class ProductoService:
                 )
             return self._build_read(p)
 
-    def _validar_categorias(self, categorias: list[int]) -> None:
-        for cat_id in categorias:
-            cat = self.uow.categorias.get(cat_id)
-            if not cat or not cat.is_active:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"Categoría con id {cat_id} no encontrada",
-                )
+    def _validar_categoria(self, categoria_id: int) -> None:
+        cat = self.uow.categorias.get(categoria_id)
+        if not cat or not cat.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Categoría con id {categoria_id} no encontrada",
+            )
 
     def _validar_ingredientes(self, ingredientes: list) -> None:
         for ing_input in ingredientes:
@@ -181,7 +176,8 @@ class ProductoService:
 
     def create(self, data: ProductoCreate, user_id: int) -> ProductoRead:
         with self.uow:
-            self._validar_categorias(data.categorias)
+            if data.categoria_id:
+                self._validar_categoria(data.categoria_id)
             self._validar_ingredientes(data.ingredientes)
 
             if data.es_terminado and not data.precio_base:
@@ -197,13 +193,10 @@ class ProductoService:
                 margen_ganancia=Decimal(str(data.margen_ganancia)) if data.margen_ganancia is not None else None,
                 descripcion=data.descripcion,
                 es_terminado=data.es_terminado,
+                categoria_id=data.categoria_id,
                 imagenes_url=[data.imagen_url] if data.imagen_url else None,
             )
             self.uow.productos.add(p)
-
-            for cat_id in data.categorias:
-                rel = self.uow.productos.add_categoria_rel(producto_id=p.id, categoria_id=cat_id)
-                p.producto_categorias.append(rel)
 
             for ing_input in data.ingredientes:
                 ing = self.uow.ingredientes.get(ing_input.ingrediente_id)
@@ -238,7 +231,7 @@ class ProductoService:
                 )
 
             # Actualizar campos básicos
-            campos_base = data.model_dump(exclude_unset=True, exclude={"categorias", "ingredientes", "imagen_url"})
+            campos_base = data.model_dump(exclude_unset=True, exclude={"ingredientes", "imagen_url"})
             for key, val in campos_base.items():
                 if key == "precio_base" and val is not None:
                     p.precio_base = Decimal(str(val))
@@ -250,14 +243,10 @@ class ProductoService:
             if data.imagen_url is not None:
                 p.imagenes_url = [data.imagen_url]
 
-            # Sincronizar categorías
-            if data.categorias is not None:
-                self._validar_categorias(data.categorias)
-                self.uow.productos.clear_categorias_rel(producto_id)
-                p.producto_categorias = []
-                for cat_id in data.categorias:
-                    rel = self.uow.productos.add_categoria_rel(producto_id=producto_id, categoria_id=cat_id)
-                    p.producto_categorias.append(rel)
+            # Sincronizar categoría
+            if data.categoria_id is not None:
+                self._validar_categoria(data.categoria_id)
+                p.categoria_id = data.categoria_id
 
             # Sincronizar ingredientes
             if data.ingredientes is not None:
@@ -304,7 +293,6 @@ class ProductoService:
                 metadata_info={"id": p.id}
             ))
 
-            self.uow.productos.clear_categorias_rel(producto_id)
             self.uow.productos.clear_ingredientes_rel(producto_id)
             p.is_active = False
 

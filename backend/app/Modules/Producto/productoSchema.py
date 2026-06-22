@@ -9,6 +9,7 @@ class CategoriaEnProducto(SQLModel):
     """Datos de categoría que se muestran dentro de un producto."""
     id: int
     nombre: str
+    full_path: Optional[str] = None
 
 
 class IngredienteEnProducto(SQLModel):
@@ -37,7 +38,7 @@ class ProductoCreate(SQLModel):
     descripcion: Annotated[Optional[str], Field(max_length=500)] = None
     imagen_url: Optional[str] = None
     es_terminado: bool = False
-    categorias: List[int] = []
+    categoria_id: Optional[int] = None
     ingredientes: List[ProductoIngredienteInput] = []
 
 
@@ -53,7 +54,7 @@ class ProductoRead(SQLModel):
     es_terminado: bool = False
     disponible: bool = True
     stock_calculado: int = 0  # unidades que se pueden fabricar según stock de ingredientes
-    categorias: List[CategoriaEnProducto] = []
+    categoria: Optional[CategoriaEnProducto] = None
     ingredientes: List[IngredienteEnProducto] = []
 
 
@@ -65,7 +66,7 @@ class ProductoUpdate(SQLModel):
     descripcion: Annotated[Optional[str], Field(max_length=500)] = None
     imagen_url: Optional[str] = None
     es_terminado: Optional[bool] = None
-    categorias: Optional[List[int]] = None
+    categoria_id: Optional[int] = None
     ingredientes: Optional[List[ProductoIngredienteInput]] = None
 
 

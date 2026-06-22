@@ -7,7 +7,6 @@ from sqlalchemy.orm import selectinload, joinedload
 
 from app.Core.UnitOfWork.unit_of_work import UnitOfWork
 from app.Modules.Producto.Model.producto import Producto
-from app.Modules.Producto.Model.productoCategoria import ProductoCategoria
 from app.Modules.Producto.Model.productoIngrediente import ProductoIngrediente
 from app.Modules.Categoria.categoria import Categoria
 from app.Modules.Ingrediente.ingrediente import Ingrediente
@@ -93,14 +92,12 @@ class ReporteService:
         )
         with self.uow:
             stmt = select(Producto).options(
-                selectinload(Producto.producto_categorias).joinedload(ProductoCategoria.categoria),
+                selectinload(Producto.categoria),
                 selectinload(Producto.producto_ingredientes).joinedload(ProductoIngrediente.ingrediente)
             ).order_by(Producto.nombre)
             productos = self.uow.session.exec(stmt).all()
             for p in productos:
-                categorias_nombres = [
-                    pc.categoria.nombre for pc in p.producto_categorias if pc.categoria
-                ]
+                categoria_nombre = self.uow.categorias.get_full_path(p.categoria_id) if p.categoria_id else ""
                 ingredientes_nombres = [
                     pi.ingrediente.nombre for pi in p.producto_ingredientes if pi.ingrediente
                 ]
@@ -109,7 +106,7 @@ class ReporteService:
                     p.nombre,
                     float(p.precio_base),
                     p.descripcion or "",
-                    ", ".join(categorias_nombres),
+                    categoria_nombre,
                     ", ".join(ingredientes_nombres),
                     "Sí" if p.es_terminado else "No",
                     "Activo" if p.is_active else "Inactivo"
@@ -171,14 +168,12 @@ class ReporteService:
         )
         with self.uow:
             stmt = select(Producto).options(
-                selectinload(Producto.producto_categorias).joinedload(ProductoCategoria.categoria),
+                selectinload(Producto.categoria),
                 selectinload(Producto.producto_ingredientes).joinedload(ProductoIngrediente.ingrediente)
             ).order_by(Producto.nombre)
             productos = self.uow.session.exec(stmt).all()
             for p in productos:
-                categorias_nombres = [
-                    pc.categoria.nombre for pc in p.producto_categorias if pc.categoria
-                ]
+                categoria_nombre = self.uow.categorias.get_full_path(p.categoria_id) if p.categoria_id else ""
                 ingredientes_nombres = [
                     pi.ingrediente.nombre for pi in p.producto_ingredientes if pi.ingrediente
                 ]
@@ -187,7 +182,7 @@ class ReporteService:
                     p.nombre,
                     float(p.precio_base),
                     p.descripcion or "",
-                    ", ".join(categorias_nombres),
+                    categoria_nombre,
                     ", ".join(ingredientes_nombres),
                     "Sí" if p.es_terminado else "No",
                     "Activo" if p.is_active else "Inactivo"

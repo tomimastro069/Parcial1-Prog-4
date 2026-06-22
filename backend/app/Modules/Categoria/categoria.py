@@ -2,7 +2,7 @@ from sqlmodel import SQLModel, Field, Relationship
 from typing import Optional, List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from app.Modules.Producto.Model.productoCategoria import ProductoCategoria
+    from app.Modules.Producto.Model.producto import Producto
 
 
 class Categoria(SQLModel, table=True):
@@ -15,8 +15,8 @@ class Categoria(SQLModel, table=True):
     
     is_active: bool = Field(default=True)  # borrado lógico
 
-    # Relación N:N con Productos
-    producto_categorias: List["ProductoCategoria"] = Relationship(
+    # Relación 1:N con Productos
+    productos: List["Producto"] = Relationship(
         back_populates="categoria"
     )
 

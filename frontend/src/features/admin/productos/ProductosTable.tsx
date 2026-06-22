@@ -276,16 +276,11 @@ export function ProductosTable() {
                       ${p.precio.toFixed(2)}
                     </td>
                     <td className="px-4 py-3 hidden lg:table-cell">
-                      {p.categorias.length > 0 ? (
+                      {p.categoria ? (
                         <div className="flex flex-wrap gap-1">
-                          {p.categorias.map((c) => (
-                            <span
-                              key={c.id}
-                              className="px-2 py-0.5 bg-blue-50 text-[#2E75B6] text-xs rounded-full"
-                            >
-                              {allCategorias.length > 0 ? getNombreCompletoCategoria(c.id) : c.nombre}
-                            </span>
-                          ))}
+                          <span className="px-2 py-0.5 bg-blue-50 text-[#2E75B6] text-xs rounded-full">
+                            {allCategorias.length > 0 ? getNombreCompletoCategoria(p.categoria.id) : p.categoria.nombre}
+                          </span>
                         </div>
                       ) : (
                         <span className="text-gray-300 text-sm">—</span>

@@ -32,6 +32,12 @@ export interface TokenResponse {
 
 // ─── Categoría ───────────────────────────────────────────────────────────────
 
+export interface CategoriaEnProducto {
+  id: number;
+  nombre: string;
+  full_path?: string;
+}
+
 export interface Categoria {
   id: number;
   nombre: string;
@@ -122,7 +128,7 @@ export interface ProductoRead {
   imagen_url: string | null;
   is_active: boolean;
   es_terminado: boolean;
-  categorias: { id: number; nombre: string }[];
+  categoria?: CategoriaEnProducto | null;
   ingredientes: ProductoIngredienteRead[];
 }
 
@@ -134,7 +140,7 @@ export interface ProductoCreate {
   descripcion?: string | null;
   imagen_url?: string | null;
   es_terminado?: boolean;
-  categorias?: number[];
+  categoria_id?: number | null;
   ingredientes?: ProductoIngredienteInput[];
 }
 
@@ -146,7 +152,7 @@ export interface ProductoUpdate {
   descripcion?: string | null;
   imagen_url?: string | null;
   es_terminado?: boolean;
-  categorias?: number[];
+  categoria_id?: number | null;
   ingredientes?: ProductoIngredienteInput[];
 }
 
@@ -160,7 +166,7 @@ export interface Producto {
   disponible: boolean;
   stock_calculado: number;
   imagen_url?: string | null;
-  categorias?: Categoria[];
+  categoria?: Categoria | null;
 }
 
 export interface ProductoDetail extends Producto {

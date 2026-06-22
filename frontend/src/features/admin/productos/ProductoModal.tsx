@@ -9,7 +9,7 @@ import { getAjuste } from '../../../api/ajustesApi';
 import { IngredienteModal } from '../ingredientes/IngredienteModal';
 import { CategoriaModal } from '../categorias/CategoriaModal';
 import { uploadImagen, deleteImagen } from '../../../api/imagenesApi';
-import type { ProductoRead, ProductoIngredienteInput } from '../../../types';
+import type { ProductoRead, ProductoIngredienteInput, Categoria } from '../../../types';
 
 interface Props {
   isOpen: boolean;
@@ -25,7 +25,7 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
 
   const [modalIngrediente, setModalIngrediente] = useState(false);
   const [modalCategoria, setModalCategoria] = useState(false);
-  const categorias: { id: number; nombre: string }[] = (catData as any)?.items ?? [];
+  const categorias: Categoria[] = (catData as any)?.items ?? [];
   const ingredientes: { id: number; nombre: string; unidad?: string; es_alergeno: boolean; precio_unitario?: number }[] = (ingData as any)?.items ?? [];
 
   // Margen recomendado: se toma del ajuste del dashboard (índice → %). Es solo
@@ -44,7 +44,7 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
   const [precioBase, setPrecioBase] = useState(''); // solo para productos terminados
   const [margen, setMargen] = useState(String(MARGEN_RECOMENDADO)); // % de ganancia por producto
   const [descripcion, setDescripcion] = useState('');
-  const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState<number[]>([]);
+  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState<number | null>(null);
   const [ingredientesSeleccionados, setIngredientesSeleccionados] = useState<ProductoIngredienteInput[]>([]);
   const [esTerminado, setEsTerminado] = useState(false);
   const [imagenUrl, setImagenUrl] = useState<string | null>(null);
@@ -74,7 +74,7 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
       setPrecioBase(editando.es_terminado ? String(editando.costo ?? '') : ''); // el costo base de terminados
       setMargen(String(editando.margen_ganancia ?? MARGEN_RECOMENDADO));
       setDescripcion(editando.descripcion ?? '');
-      setCategoriasSeleccionadas(editando.categorias.map((c) => c.id));
+      setCategoriaSeleccionada(editando.categoria?.id ?? null);
       setIngredientesSeleccionados(
         editando.ingredientes.map((i) => ({ ingrediente_id: i.id, cantidad: i.cantidad }))
       );
@@ -88,7 +88,7 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
       setImagenUrl(null);
       setImagenPublicId(null);
       setDescripcion('');
-      setCategoriasSeleccionadas([]);
+      setCategoriaSeleccionada(null);
       setIngredientesSeleccionados([]);
       setEsTerminado(false);
     }
@@ -113,11 +113,7 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
     return Object.keys(e).length === 0;
   };
 
-  const toggleCategoria = (id: number) => {
-    setCategoriasSeleccionadas((prev) =>
-      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
-    );
-  };
+
 
   const toggleIngrediente = (id: number) => {
     setIngredientesSeleccionados((prev) => {
@@ -171,7 +167,7 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
       margen_ganancia: margen === '' ? null : margenNum,
       descripcion: descripcion.trim() || null,
       es_terminado: esTerminado,
-      categorias: categoriasSeleccionadas,
+      categoria_id: categoriaSeleccionada,
       ingredientes: esTerminado ? [] : ingredientesSeleccionados,
       imagen_url: imagenUrl ?? undefined,
     };
@@ -302,20 +298,19 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
               </label>
 
               {/* Categorías seleccionadas */}
-              {categoriasSeleccionadas.length > 0 && (
+              {categoriaSeleccionada && (
                 <div className="flex flex-wrap gap-1.5 mb-2">
-                  {categoriasSeleccionadas.map((id) => {
-                    const cat = categorias.find((c) => c.id === id);
+                  {(() => {
+                    const cat = categorias.find((c) => c.id === categoriaSeleccionada);
                     if (!cat) return null;
                     return (
                       <span
-                        key={cat.id}
                         className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#2E75B6]/10 text-[#2E75B6] border border-[#2E75B6]/20 transition-all hover:bg-[#2E75B6]/15"
                       >
                         {cat.nombre}
                         <button
                           type="button"
-                          onClick={() => toggleCategoria(cat.id)}
+                          onClick={() => setCategoriaSeleccionada(null)}
                           className="p-0.5 rounded-full hover:bg-[#2E75B6]/20 text-[#2E75B6]/70 hover:text-[#2E75B6] transition-colors cursor-pointer"
                           title="Quitar categoría"
                         >
@@ -325,7 +320,7 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
                         </button>
                       </span>
                     );
-                  })}
+                  })()}
                 </div>
               )}
 
@@ -334,9 +329,9 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
                 <input
                   type="text"
                   placeholder={
-                    categoriasSeleccionadas.length === 0
-                      ? "Buscar y seleccionar categorías..."
-                      : "Buscar más categorías..."
+                    !categoriaSeleccionada
+                      ? "Buscar y seleccionar categoría..."
+                      : "Cambiar categoría..."
                   }
                   value={busquedaCategoria}
                   onChange={(e) => setBusquedaCategoria(e.target.value)}
@@ -353,15 +348,16 @@ export function ProductoModal({ isOpen, onClose, editando }: Props) {
                     {categorias
                       .filter((cat) =>
                         cat.nombre.toLowerCase().includes(busquedaCategoria.toLowerCase()) &&
-                        !categoriasSeleccionadas.includes(cat.id)
+                        categoriaSeleccionada !== cat.id
                       )
                       .map((cat) => (
                         <button
                           key={cat.id}
                           type="button"
                           onClick={() => {
-                            toggleCategoria(cat.id);
+                            setCategoriaSeleccionada(cat.id);
                             setBusquedaCategoria('');
+                            setMostrarDropdown(false);
                           }}
                           className="w-full text-left px-4 py-2.5 text-sm hover:bg-[#2E75B6]/5 hover:text-[#2E75B6] focus:bg-[#2E75B6]/5 focus:outline-none transition-colors border-b last:border-b-0 border-gray-100 font-medium text-gray-700 cursor-pointer"
                         >

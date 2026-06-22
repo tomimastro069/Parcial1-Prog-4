@@ -1,6 +1,5 @@
 from sqlmodel import Session, select
 from app.Modules.Categoria.categoria import Categoria
-from app.Modules.Producto.Model.productoCategoria import ProductoCategoria
 from app.Core.UnitOfWork.BaseRepository import BaseRepository
 
 
@@ -13,9 +12,11 @@ class CategoriaRepository(BaseRepository[Categoria]):
     # proximos metodos a implementar: solo se agregan aca y listo.
     
     def clear_productos_rel(self, categoria_id: int) -> None:
-        statement = select(ProductoCategoria).where(ProductoCategoria.categoria_id == categoria_id)
-        for rel in self.session.exec(statement).all():
-            self.session.delete(rel)
+        from app.Modules.Producto.Model.producto import Producto
+        statement = select(Producto).where(Producto.categoria_id == categoria_id)
+        for p in self.session.exec(statement).all():
+            p.categoria_id = None
+            self.session.add(p)
         self.session.flush()
 
     def get_full_path(self, categoria_id: int) -> str:

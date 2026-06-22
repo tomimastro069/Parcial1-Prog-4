@@ -7,7 +7,6 @@ from app.Modules.Usuarios.usuario import Usuario, UserRole
 from app.Modules.Categoria.categoria import Categoria
 from app.Modules.Ingrediente.ingrediente import Ingrediente
 from app.Modules.Producto.Model.producto import Producto
-from app.Modules.Producto.Model.productoCategoria import ProductoCategoria
 from app.Modules.Producto.Model.productoIngrediente import ProductoIngrediente
 from app.Modules.UnidadMedida.unidadMedida import UnidadMedida
 from app.Modules.Pedidos.Model.estadoPedido import EstadoPedido
@@ -196,6 +195,12 @@ def _agregar_producto(session, nombre, precio, descripcion, imagen_url, es_termi
     if existe:
         return
 
+    cat_id = None
+    if cats_list and len(cats_list) > 0:
+        cat_nombre = cats_list[0]
+        if cat_nombre in cats:
+            cat_id = cats[cat_nombre].id
+
     from decimal import Decimal
     p = Producto(
         nombre=nombre,
@@ -206,14 +211,11 @@ def _agregar_producto(session, nombre, precio, descripcion, imagen_url, es_termi
         disponible=True,
         is_active=True,
         stock_cantidad=50,
+        categoria_id=cat_id
     )
     session.add(p)
     session.commit()
     session.refresh(p)
-
-    for cat_nombre in cats_list:
-        if cat_nombre in cats:
-            session.add(ProductoCategoria(producto_id=p.id, categoria_id=cats[cat_nombre].id))
 
     for ing_nombre, cantidad, es_removible in ings_list:
         if ing_nombre in ings:

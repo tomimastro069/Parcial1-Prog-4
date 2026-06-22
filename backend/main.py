@@ -21,7 +21,6 @@ from seed import seed_admin, seed_users, seed_data
 from app.Modules.Categoria.categoria import Categoria  # noqa: F401
 from app.Modules.Producto.Model.producto import Producto  # noqa: F401
 from app.Modules.Producto.Model.productoIngrediente import ProductoIngrediente  # noqa: F401
-from app.Modules.Producto.Model.productoCategoria import ProductoCategoria  # noqa: F401
 from app.Modules.Ingrediente.ingrediente import Ingrediente  # noqa: F401
 from app.Modules.Usuarios.usuario import Usuario  # noqa: F401
 from app.Modules.Auth.refreshToken import RefreshToken  # noqa: F401

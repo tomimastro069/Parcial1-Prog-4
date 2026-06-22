@@ -5,7 +5,7 @@ from sqlalchemy import Column, JSON
 
 if TYPE_CHECKING:
     from app.Modules.Producto.Model.productoIngrediente import ProductoIngrediente
-    from app.Modules.Producto.Model.productoCategoria import ProductoCategoria
+    from app.Modules.Categoria.Model.categoria import Categoria
     from app.Modules.UnidadMedida.Model.unidadMedida import UnidadMedida
 
 
@@ -16,6 +16,11 @@ class Producto(SQLModel, table=True):
     unidad_venta_id: Optional[int] = Field(
         default=None,
         foreign_key="unidadmedida.id",
+        nullable=True
+    )
+    categoria_id: Optional[int] = Field(
+        default=None,
+        foreign_key="categoria.id",
         nullable=True
     )
 
@@ -82,7 +87,6 @@ class Producto(SQLModel, table=True):
         sa_relationship_kwargs={"cascade": "all, delete-orphan"},
     )
 
-    producto_categorias: List["ProductoCategoria"] = Relationship(
-        back_populates="producto",
-        sa_relationship_kwargs={"cascade": "all, delete-orphan"},
+    categoria: Optional["Categoria"] = Relationship(
+        back_populates="productos"
     )
