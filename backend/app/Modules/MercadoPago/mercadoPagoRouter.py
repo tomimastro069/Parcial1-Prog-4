@@ -6,6 +6,7 @@ from app.Core.UnitOfWork.unit_of_work import UnitOfWork
 from app.Modules.Usuarios.usuario import Usuario
 from app.Modules.MercadoPago.mercadoPagoSchema import PreferenciaRequest, PreferenciaResponse
 from app.Modules.MercadoPago.mercadoPagoService import MercadoPagoService
+from app.Core.Config.Config import settings
 from fastapi import Request
 
 router = APIRouter()
@@ -50,14 +51,29 @@ async def webhook(
     return {"status": "received"}
 
 @router.get("/success")
-def success():
-    # Redirigir al checkout/success o mis pedidos en el frontend
-    return RedirectResponse(url="http://localhost:5173/checkout/success?status=approved")
+def success(
+    service: Annotated[MercadoPagoService, Depends(get_mp_service)],
+    payment_id: str | None = Query(None),
+    collection_id: str | None = Query(None),
+    external_reference: str | None = Query(None),
+    status: str | None = Query(None),
+):
+    mp_payment_id = payment_id or collection_id
+    if mp_payment_id:
+        try:
+            service.procesar_webhook(mp_payment_id)
+        except Exception:
+            pass
+
+    frontend_url = settings.FRONTEND_URL or "http://localhost:5173"
+    return RedirectResponse(url=f"{frontend_url}/checkout/success?status=approved")
 
 @router.get("/failure")
 def failure():
-    return RedirectResponse(url="http://localhost:5173/checkout/failure?status=rejected")
+    frontend_url = settings.FRONTEND_URL or "http://localhost:5173"
+    return RedirectResponse(url=f"{frontend_url}/checkout/failure?status=rejected")
 
 @router.get("/pending")
 def pending():
-    return RedirectResponse(url="http://localhost:5173/checkout/pending?status=pending")
+    frontend_url = settings.FRONTEND_URL or "http://localhost:5173"
+    return RedirectResponse(url=f"{frontend_url}/checkout/pending?status=pending")
