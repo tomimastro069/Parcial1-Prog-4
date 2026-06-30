@@ -61,7 +61,7 @@ const LandingPageVerdadera: React.FC = () => {
 
             <h2 className="font-baskerville font-bold text-[#E8D5B0] leading-[1.05] tracking-[-0.01em]
                            text-[32px] md:text-[40px] xl:text-[54px] 2xl:text-[72px]">
-              Casa<br />del<br />Sabor
+              Food<br />Store<br />
             </h2>
 
             <div className="w-8 h-px bg-[#5A4A2A] my-4 md:my-5 2xl:my-7 2xl:w-14" />
