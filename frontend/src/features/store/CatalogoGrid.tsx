@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, FunnelIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import { ProductoCard } from './ProductoCard';
 import { ProductCardSkeleton } from '../../components/Skeleton';
 import { useProductos } from '../../hooks/useProductos';
@@ -64,21 +64,11 @@ export function CatalogoGrid() {
         {/* Filtro por categoría */}
         {categorias && categorias.length > 0 && (
           <div className="relative flex-shrink-0">
-            <FunnelIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <select
-              value={categoriaId ?? ''}
-              onChange={(e) =>
-                handleCategoriaChange(e.target.value ? Number(e.target.value) : null)
-              }
-              className="pl-9 pr-8 py-2.5 rounded-lg border border-line text-sm focus:border-walnut focus:ring-2 focus:ring-walnut/20 focus:outline-none bg-cream-soft appearance-none cursor-pointer"
-            >
-              <option value="">Todas las categorías</option>
-              {categorias.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.nombre}
-                </option>
-              ))}
-            </select>
+            <CategoriaDropdown
+              categorias={categorias}
+              value={categoriaId}
+              onChange={handleCategoriaChange}
+            />
           </div>
         )}
       </div>
@@ -181,6 +171,66 @@ export function CatalogoGrid() {
           >
             ›
           </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CategoriaDropdown({
+  categorias,
+  value,
+  onChange,
+}: {
+  categorias: { id: number; nombre: string }[];
+  value: number | null;
+  onChange: (id: number | null) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const seleccionada = value ? categorias.find((c) => c.id === value) : null;
+
+  return (
+    <div ref={ref} className="relative">
+      <FunnelIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none z-10" />
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="w-full pl-9 pr-8 py-2.5 rounded-lg border border-line text-sm text-left bg-cream-soft cursor-pointer flex items-center gap-1"
+      >
+        <span className="flex-1 truncate">
+          {seleccionada ? seleccionada.nombre : 'Todas las categorías'}
+        </span>
+        <ChevronDownIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
+      </button>
+      {open && (
+        <div className="absolute z-20 mt-1 w-full bg-cream-soft border border-line rounded-lg shadow-lg max-h-60 overflow-y-auto">
+          <button
+            type="button"
+            onClick={() => { onChange(null); setOpen(false); }}
+            className={`w-full text-left px-3 py-2 text-sm hover:bg-cream-deep transition-colors ${value === null ? 'font-semibold text-walnut' : 'text-gray-700'}`}
+          >
+            Todas las categorías
+          </button>
+          {categorias.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => { onChange(c.id); setOpen(false); }}
+              className={`w-full text-left px-3 py-2 text-sm hover:bg-cream-deep transition-colors ${value === c.id ? 'font-semibold text-walnut' : 'text-gray-700'}`}
+            >
+              {c.nombre}
+            </button>
+          ))}
         </div>
       )}
     </div>
