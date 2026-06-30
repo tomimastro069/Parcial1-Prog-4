@@ -10,10 +10,10 @@ const PAGE_SIZE = 12;
 
 export function CatalogoGrid() {
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   // Leer página de la URL
   const page = parseInt(searchParams.get('page') || '1', 10);
-  
+
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [categoriaId, setCategoriaId] = useState<number | null>(null);
@@ -35,7 +35,7 @@ export function CatalogoGrid() {
     is_active: true,
   });
 
-  const { data: categoriasData } = useCategorias({ is_active: true });
+  const { data: categoriasData } = useCategorias({ is_active: true, size: 100 });
   const categorias: { id: number; nombre: string }[] = (categoriasData as any)?.items ?? [];
 
   const handleCategoriaChange = useCallback((id: number | null) => {
