@@ -150,8 +150,11 @@ class PedidoService:
 
             subtotal_total = Decimal("0.00")
             
-            costo_envio_db = self.uow.ajustes.get_by_clave("costo_envio")
-            costo_envio_val = Decimal(costo_envio_db.valor) if costo_envio_db else Decimal("50.00")
+            if data.direccion_id is not None:
+                costo_envio_db = self.uow.ajustes.get_by_clave("costo_envio")
+                costo_envio_val = Decimal(costo_envio_db.valor) if costo_envio_db else Decimal("50.00")
+            else:
+                costo_envio_val = Decimal("0.00")
 
             p = Pedido(
                 usuario_id=usuario_id,
@@ -166,12 +169,7 @@ class PedidoService:
             )
             self.uow.pedidos.add(p)
 
-            # Obtener índice de ganancia una sola vez
-            ajuste_indice = self.uow.ajustes.get_by_clave("indice_ganancia")
-            try:
-                indice_ganancia = float(ajuste_indice.valor) if ajuste_indice else 1.5
-            except (ValueError, AttributeError):
-                indice_ganancia = 1.5
+            DEFAULT_MARGEN_PCT = 50.0
 
             for det in data.detalles:
                 producto = self.uow.productos.get(det.producto_id)
@@ -181,12 +179,12 @@ class PedidoService:
                         detail=f"El producto con ID {det.producto_id} no es válido o no está disponible."
                     )
 
-                # Calcular precio real igual que ProductoService._calcular_precio
                 pis = self.uow.productos.list_ingredientes_rel(producto.id)
 
+                # Calcular precio con el margen individual del producto
+                # (misma lógica que ProductoService._calcular_precio)
                 if producto.es_terminado:
-                    precio_unitario = Decimal(str(round(float(producto.precio_base) * indice_ganancia, 2)))
-                    # Descontar stock del producto terminado
+                    costo = float(producto.precio_base)
                     if producto.stock_cantidad < det.cantidad:
                         raise HTTPException(
                             status_code=status.HTTP_400_BAD_REQUEST,
@@ -194,14 +192,12 @@ class PedidoService:
                         )
                     producto.stock_cantidad -= det.cantidad
                 else:
-                    costo_total = 0.0
+                    costo = 0.0
                     for pi in pis:
                         ing = self.uow.ingredientes.get(pi.ingrediente_id)
                         if ing:
-                            costo_total += float(ing.precio_unitario) * float(pi.cantidad)
-                    precio_unitario = Decimal(str(round(costo_total * indice_ganancia, 2)))
+                            costo += float(ing.precio_unitario) * float(pi.cantidad)
 
-                    # Validar y descontar stock de ingredientes
                     for pi in pis:
                         ing = self.uow.ingredientes.get(pi.ingrediente_id)
                         if not ing:
@@ -213,6 +209,10 @@ class PedidoService:
                                 detail=f"Stock insuficiente del ingrediente '{ing.nombre}' para '{producto.nombre}'"
                             )
                         ing.stock_actual = round(ing.stock_actual - consumo, 6)
+
+                margen = float(producto.margen_ganancia) if producto.margen_ganancia is not None else DEFAULT_MARGEN_PCT
+                factor = 1 + margen / 100
+                precio_unitario = Decimal(str(round(costo * factor, 2)))
 
                 subtotal_detalle = precio_unitario * det.cantidad
                 subtotal_total += subtotal_detalle
